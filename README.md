@@ -29,3 +29,8 @@ csc.exe /out:MasterCourseGenerator.exe MasterCourseGenerator.cs
 # 3. Launch local server
 .\server.ps1
 ```
+
+---
+
+## ⚠️ Legal & Educational Disclaimer
+This project is an **independent, unofficial, fan-made open-source practice tool and metronome workstation** built for educational and sight-reading practice purposes. It is **not** affiliated with, endorsed by, or sponsored by Steve Krenz, Legacy Learning Systems, or Gibson Brands, Inc. All trademarks and course titles belong to their respective owners. Students should purchase and use the official *Learn & Master Guitar* textbooks and media alongside this practice tool.
