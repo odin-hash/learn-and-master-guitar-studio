@@ -1,4 +1,4 @@
-﻿import { GUITAR_COURSES } from "./exercises.js";
+import { GUITAR_COURSES } from "./exercises.js";
 import { MetronomeAudioEngine } from "./audio.js";
 import { GuitarSpeedDial } from "./dial.js";
 import { FretboardVisualizer } from "./fretboard.js";
@@ -19,7 +19,7 @@ export class GuitarMasterApp {
 
     // Timing state
     this.lookahead = 25.0; // ms
-    this.scheduleAheadTime = 0.1; // seconds
+    this.scheduleAheadTime = 0.20; // seconds (200ms lookahead for rock-solid mobile scheduling)
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
     this.currentBeatIndex = 0;
@@ -996,14 +996,25 @@ export class GuitarMasterApp {
     this.countInBeat = 0;
     this.countInTotalBeats = ts[0] || 4;
 
-    this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+    const baseTime = (this.audio.audioCtx && this.audio.audioCtx.currentTime > 0)
+      ? this.audio.audioCtx.currentTime
+      : 0;
+    this.nextBeatTime = baseTime + 0.05;
+
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
     this.scheduler();
   }
 
   stop() {
     this.isPlaying = false;
     this.isCountingIn = false;
-    clearTimeout(this.timerId);
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
     this.releaseWakeLock();
 
     this.dial.setPlayState(false);
@@ -1025,12 +1036,23 @@ export class GuitarMasterApp {
 
   scheduler() {
     try {
-      while (this.isPlaying && this.nextBeatTime < this.audio.audioCtx.currentTime + this.scheduleAheadTime) {
+      if (!this.audio.audioCtx) return;
+      const curTime = this.audio.audioCtx.currentTime;
+
+      // Mobile timing drift recovery: if timer was throttled by iOS/Android and nextBeatTime fell behind
+      const secondsPerQuarterBeat = 60.0 / this.bpm;
+      if (this.nextBeatTime < curTime - secondsPerQuarterBeat) {
+        this.nextBeatTime = curTime + 0.02;
+      }
+
+      while (this.isPlaying && this.nextBeatTime < curTime + this.scheduleAheadTime) {
         this.scheduleBeat(this.nextBeatTime);
         this.advanceBeat();
       }
     } catch (e) {
       console.warn("Scheduler cycle error:", e);
+      const secondsPerQuarterBeat = 60.0 / this.bpm;
+      this.nextBeatTime += secondsPerQuarterBeat;
     }
     if (this.isPlaying) {
       this.timerId = setTimeout(() => this.scheduler(), this.lookahead);

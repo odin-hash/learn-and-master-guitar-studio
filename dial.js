@@ -1,4 +1,4 @@
-﻿// Luxury Rotary Speed Dial Canvas Controller
+// Luxury Rotary Speed Dial Canvas Controller
 export class GuitarSpeedDial {
   constructor(canvasElement, onBpmChange, onPlayToggle) {
     this.canvas = canvasElement;
@@ -193,7 +193,13 @@ export class GuitarSpeedDial {
   }
 
   _attachEvents() {
-    const handleStart = (clientX, clientY) => {
+    let lastTouchTime = 0;
+
+    const handleStart = (clientX, clientY, isTouch = false) => {
+      if (!isTouch && (Date.now() - lastTouchTime < 600)) {
+        // Ignore simulated mouse events fired right after touch on mobile/tablet
+        return;
+      }
       const rect = this.canvas.getBoundingClientRect();
       const x = clientX - (rect.left + rect.width / 2);
       const y = clientY - (rect.top + rect.height / 2);
@@ -208,7 +214,8 @@ export class GuitarSpeedDial {
       this._updateFromCoords(clientX, clientY);
     };
 
-    const handleMove = (clientX, clientY) => {
+    const handleMove = (clientX, clientY, isTouch = false) => {
+      if (!isTouch && (Date.now() - lastTouchTime < 600)) return;
       if (!this.isDragging) return;
       this._updateFromCoords(clientX, clientY);
     };
@@ -217,23 +224,34 @@ export class GuitarSpeedDial {
       this.isDragging = false;
     };
 
-    this.canvas.addEventListener("mousedown", (e) => handleStart(e.clientX, e.clientY));
-    window.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+    this.canvas.addEventListener("mousedown", (e) => handleStart(e.clientX, e.clientY, false));
+    window.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY, false));
     window.addEventListener("mouseup", handleEnd);
 
     this.canvas.addEventListener("touchstart", (e) => {
-      if (e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length > 0) {
+        lastTouchTime = Date.now();
+        handleStart(e.touches[0].clientX, e.touches[0].clientY, true);
+      }
+      e.preventDefault();
     }, { passive: false });
 
     window.addEventListener("touchmove", (e) => {
       if (!this.isDragging) return;
       if (e.touches.length > 0) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        handleMove(e.touches[0].clientX, e.touches[0].clientY, true);
         e.preventDefault();
       }
     }, { passive: false });
 
-    window.addEventListener("touchend", handleEnd);
+    window.addEventListener("touchend", () => {
+      lastTouchTime = Date.now();
+      handleEnd();
+    });
+    window.addEventListener("touchcancel", () => {
+      lastTouchTime = Date.now();
+      handleEnd();
+    });
 
     this.canvas.addEventListener("wheel", (e) => {
       e.preventDefault();

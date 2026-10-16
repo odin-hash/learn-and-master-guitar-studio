@@ -5924,16 +5924,29 @@ class MetronomeAudioEngine {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       this.audioCtx = new AudioContextClass();
     }
-    if (this.audioCtx.state === "suspended") {
+    if (this.audioCtx.state === "suspended" || this.audioCtx.state === "interrupted") {
       this.audioCtx.resume();
     }
+    this.unlockMobileAudio();
+  }
+
+  // Plays a silent micro-sample to unlock iOS Safari & mobile audio pipelines on user tap
+  unlockMobileAudio() {
+    if (!this.audioCtx) return;
+    try {
+      const buffer = this.audioCtx.createBuffer(1, 1, 22050);
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.audioCtx.destination);
+      source.start(0);
+    } catch (e) {}
   }
 
   playBeat(time, isAccent = false, isRest = false, isCountIn = false) {
     if (!this.audioCtx) this.init();
 
     const ctx = this.audioCtx;
-    const now = time || ctx.currentTime;
+    const now = Math.max(time || 0, ctx.currentTime);
 
     if (isCountIn) {
       this._playChime(now, isAccent ? 1318.5 : 1046.5, 0.08);
@@ -5964,7 +5977,7 @@ class MetronomeAudioEngine {
     if (beatData.type === "rest" || beatData.isSustain || beatData.type === "sustain") return;
     if (!this.audioCtx) this.init();
 
-    const now = time || this.audioCtx.currentTime;
+    const now = Math.max(time || 0, this.audioCtx.currentTime);
     const holdDur = Math.max(0.18, Math.min(3.5, durationSeconds || 0.5));
 
     // Single-string melody note
@@ -5993,6 +6006,9 @@ class MetronomeAudioEngine {
 
   _playPluckedString(time, freq, duration, level) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const filter = ctx.createBiquadFilter();
@@ -6000,20 +6016,20 @@ class MetronomeAudioEngine {
 
     osc1.type = "triangle";
     osc2.type = "sawtooth";
-    osc1.frequency.setValueAtTime(freq, time);
-    osc2.frequency.setValueAtTime(freq * 2, time); // 2nd harmonic warmth
+    osc1.frequency.setValueAtTime(freq, t);
+    osc2.frequency.setValueAtTime(freq * 2, t); // 2nd harmonic warmth
 
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(freq * 4.5, time);
-    filter.frequency.exponentialRampToValueAtTime(freq * 1.2, time + duration * 0.85);
+    filter.frequency.setValueAtTime(freq * 4.5, t);
+    filter.frequency.exponentialRampToValueAtTime(freq * 1.2, t + duration * 0.85);
 
     const peak = this.volume * level;
-    gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.linearRampToValueAtTime(peak, time + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(peak, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
 
     const osc2Gain = ctx.createGain();
-    osc2Gain.gain.setValueAtTime(0.22, time);
+    osc2Gain.gain.setValueAtTime(0.22, t);
 
     osc1.connect(filter);
     osc2.connect(osc2Gain);
@@ -6029,23 +6045,26 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc1.start(time);
-    osc2.start(time);
-    osc1.stop(time + duration);
-    osc2.stop(time + duration);
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + duration);
+    osc2.stop(t + duration);
   }
 
   _playWoodblock(time, freq, gainLevel) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, time + 0.04);
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, t + 0.04);
 
-    gain.gain.setValueAtTime(this.volume * gainLevel, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+    gain.gain.setValueAtTime(this.volume * gainLevel, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -6055,21 +6074,24 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.05);
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   _playMutedThud(time) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(180, time);
-    osc.frequency.exponentialRampToValueAtTime(60, time + 0.04);
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(60, t + 0.04);
 
-    gain.gain.setValueAtTime(this.volume * 0.45, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.04);
+    gain.gain.setValueAtTime(this.volume * 0.45, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -6079,20 +6101,23 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.04);
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   _playBeep(time, freq, gainLevel) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
+    osc.frequency.setValueAtTime(freq, t);
 
-    gain.gain.setValueAtTime(this.volume * gainLevel, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
+    gain.gain.setValueAtTime(this.volume * gainLevel, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -6102,21 +6127,24 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.06);
+    osc.start(t);
+    osc.stop(t + 0.06);
   }
 
   _playDrum(time, isAccent) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(isAccent ? 160 : 100, time);
-    osc.frequency.exponentialRampToValueAtTime(30, time + 0.08);
+    osc.frequency.setValueAtTime(isAccent ? 160 : 100, t);
+    osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
 
-    gain.gain.setValueAtTime(this.volume * (isAccent ? 0.9 : 0.6), time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.08);
+    gain.gain.setValueAtTime(this.volume * (isAccent ? 0.9 : 0.6), t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -6126,20 +6154,23 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.08);
+    osc.start(t);
+    osc.stop(t + 0.08);
   }
 
   _playChime(time, freq, duration) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
+    osc.frequency.setValueAtTime(freq, t);
 
-    gain.gain.setValueAtTime(this.volume * 0.7, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.gain.setValueAtTime(this.volume * 0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -6149,8 +6180,8 @@ class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + duration);
+    osc.start(t);
+    osc.stop(t + duration);
   }
 
   setSoundType(type) {
@@ -6361,7 +6392,13 @@ class GuitarSpeedDial {
   }
 
   _attachEvents() {
-    const handleStart = (clientX, clientY) => {
+    let lastTouchTime = 0;
+
+    const handleStart = (clientX, clientY, isTouch = false) => {
+      if (!isTouch && (Date.now() - lastTouchTime < 600)) {
+        // Ignore simulated mouse events fired right after touch on mobile/tablet
+        return;
+      }
       const rect = this.canvas.getBoundingClientRect();
       const x = clientX - (rect.left + rect.width / 2);
       const y = clientY - (rect.top + rect.height / 2);
@@ -6376,7 +6413,8 @@ class GuitarSpeedDial {
       this._updateFromCoords(clientX, clientY);
     };
 
-    const handleMove = (clientX, clientY) => {
+    const handleMove = (clientX, clientY, isTouch = false) => {
+      if (!isTouch && (Date.now() - lastTouchTime < 600)) return;
       if (!this.isDragging) return;
       this._updateFromCoords(clientX, clientY);
     };
@@ -6385,23 +6423,34 @@ class GuitarSpeedDial {
       this.isDragging = false;
     };
 
-    this.canvas.addEventListener("mousedown", (e) => handleStart(e.clientX, e.clientY));
-    window.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+    this.canvas.addEventListener("mousedown", (e) => handleStart(e.clientX, e.clientY, false));
+    window.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY, false));
     window.addEventListener("mouseup", handleEnd);
 
     this.canvas.addEventListener("touchstart", (e) => {
-      if (e.touches.length > 0) handleStart(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length > 0) {
+        lastTouchTime = Date.now();
+        handleStart(e.touches[0].clientX, e.touches[0].clientY, true);
+      }
+      e.preventDefault();
     }, { passive: false });
 
     window.addEventListener("touchmove", (e) => {
       if (!this.isDragging) return;
       if (e.touches.length > 0) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        handleMove(e.touches[0].clientX, e.touches[0].clientY, true);
         e.preventDefault();
       }
     }, { passive: false });
 
-    window.addEventListener("touchend", handleEnd);
+    window.addEventListener("touchend", () => {
+      lastTouchTime = Date.now();
+      handleEnd();
+    });
+    window.addEventListener("touchcancel", () => {
+      lastTouchTime = Date.now();
+      handleEnd();
+    });
 
     this.canvas.addEventListener("wheel", (e) => {
       e.preventDefault();
@@ -7083,7 +7132,7 @@ class GuitarMasterApp {
 
     // Timing state
     this.lookahead = 25.0; // ms
-    this.scheduleAheadTime = 0.1; // seconds
+    this.scheduleAheadTime = 0.20; // seconds (200ms lookahead for rock-solid mobile scheduling)
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
     this.currentBeatIndex = 0;
@@ -8060,14 +8109,25 @@ class GuitarMasterApp {
     this.countInBeat = 0;
     this.countInTotalBeats = ts[0] || 4;
 
-    this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+    const baseTime = (this.audio.audioCtx && this.audio.audioCtx.currentTime > 0)
+      ? this.audio.audioCtx.currentTime
+      : 0;
+    this.nextBeatTime = baseTime + 0.05;
+
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
     this.scheduler();
   }
 
   stop() {
     this.isPlaying = false;
     this.isCountingIn = false;
-    clearTimeout(this.timerId);
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
     this.releaseWakeLock();
 
     this.dial.setPlayState(false);
@@ -8089,12 +8149,23 @@ class GuitarMasterApp {
 
   scheduler() {
     try {
-      while (this.isPlaying && this.nextBeatTime < this.audio.audioCtx.currentTime + this.scheduleAheadTime) {
+      if (!this.audio.audioCtx) return;
+      const curTime = this.audio.audioCtx.currentTime;
+
+      // Mobile timing drift recovery: if timer was throttled by iOS/Android and nextBeatTime fell behind
+      const secondsPerQuarterBeat = 60.0 / this.bpm;
+      if (this.nextBeatTime < curTime - secondsPerQuarterBeat) {
+        this.nextBeatTime = curTime + 0.02;
+      }
+
+      while (this.isPlaying && this.nextBeatTime < curTime + this.scheduleAheadTime) {
         this.scheduleBeat(this.nextBeatTime);
         this.advanceBeat();
       }
     } catch (e) {
       console.warn("Scheduler cycle error:", e);
+      const secondsPerQuarterBeat = 60.0 / this.bpm;
+      this.nextBeatTime += secondsPerQuarterBeat;
     }
     if (this.isPlaying) {
       this.timerId = setTimeout(() => this.scheduler(), this.lookahead);

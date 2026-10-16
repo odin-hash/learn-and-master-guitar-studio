@@ -1,4 +1,4 @@
-﻿// Web Audio Precision Metronome & Guitar Pitch Synthesis Engine (Lookahead Scheduler)
+// Web Audio Precision Metronome & Guitar Pitch Synthesis Engine (Lookahead Scheduler)
 export class MetronomeAudioEngine {
   constructor() {
     this.audioCtx = null;
@@ -103,16 +103,29 @@ export class MetronomeAudioEngine {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       this.audioCtx = new AudioContextClass();
     }
-    if (this.audioCtx.state === "suspended") {
+    if (this.audioCtx.state === "suspended" || this.audioCtx.state === "interrupted") {
       this.audioCtx.resume();
     }
+    this.unlockMobileAudio();
+  }
+
+  // Plays a silent micro-sample to unlock iOS Safari & mobile audio pipelines on user tap
+  unlockMobileAudio() {
+    if (!this.audioCtx) return;
+    try {
+      const buffer = this.audioCtx.createBuffer(1, 1, 22050);
+      const source = this.audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.audioCtx.destination);
+      source.start(0);
+    } catch (e) {}
   }
 
   playBeat(time, isAccent = false, isRest = false, isCountIn = false) {
     if (!this.audioCtx) this.init();
 
     const ctx = this.audioCtx;
-    const now = time || ctx.currentTime;
+    const now = Math.max(time || 0, ctx.currentTime);
 
     if (isCountIn) {
       this._playChime(now, isAccent ? 1318.5 : 1046.5, 0.08);
@@ -143,7 +156,7 @@ export class MetronomeAudioEngine {
     if (beatData.type === "rest" || beatData.isSustain || beatData.type === "sustain") return;
     if (!this.audioCtx) this.init();
 
-    const now = time || this.audioCtx.currentTime;
+    const now = Math.max(time || 0, this.audioCtx.currentTime);
     const holdDur = Math.max(0.18, Math.min(3.5, durationSeconds || 0.5));
 
     // Single-string melody note
@@ -172,6 +185,9 @@ export class MetronomeAudioEngine {
 
   _playPluckedString(time, freq, duration, level) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const filter = ctx.createBiquadFilter();
@@ -179,20 +195,20 @@ export class MetronomeAudioEngine {
 
     osc1.type = "triangle";
     osc2.type = "sawtooth";
-    osc1.frequency.setValueAtTime(freq, time);
-    osc2.frequency.setValueAtTime(freq * 2, time); // 2nd harmonic warmth
+    osc1.frequency.setValueAtTime(freq, t);
+    osc2.frequency.setValueAtTime(freq * 2, t); // 2nd harmonic warmth
 
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(freq * 4.5, time);
-    filter.frequency.exponentialRampToValueAtTime(freq * 1.2, time + duration * 0.85);
+    filter.frequency.setValueAtTime(freq * 4.5, t);
+    filter.frequency.exponentialRampToValueAtTime(freq * 1.2, t + duration * 0.85);
 
     const peak = this.volume * level;
-    gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.linearRampToValueAtTime(peak, time + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(peak, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
 
     const osc2Gain = ctx.createGain();
-    osc2Gain.gain.setValueAtTime(0.22, time);
+    osc2Gain.gain.setValueAtTime(0.22, t);
 
     osc1.connect(filter);
     osc2.connect(osc2Gain);
@@ -208,23 +224,26 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc1.start(time);
-    osc2.start(time);
-    osc1.stop(time + duration);
-    osc2.stop(time + duration);
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + duration);
+    osc2.stop(t + duration);
   }
 
   _playWoodblock(time, freq, gainLevel) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, time + 0.04);
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, t + 0.04);
 
-    gain.gain.setValueAtTime(this.volume * gainLevel, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+    gain.gain.setValueAtTime(this.volume * gainLevel, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -234,21 +253,24 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.05);
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   _playMutedThud(time) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(180, time);
-    osc.frequency.exponentialRampToValueAtTime(60, time + 0.04);
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(60, t + 0.04);
 
-    gain.gain.setValueAtTime(this.volume * 0.45, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.04);
+    gain.gain.setValueAtTime(this.volume * 0.45, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -258,20 +280,23 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.04);
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   _playBeep(time, freq, gainLevel) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
+    osc.frequency.setValueAtTime(freq, t);
 
-    gain.gain.setValueAtTime(this.volume * gainLevel, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.06);
+    gain.gain.setValueAtTime(this.volume * gainLevel, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -281,21 +306,24 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.06);
+    osc.start(t);
+    osc.stop(t + 0.06);
   }
 
   _playDrum(time, isAccent) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(isAccent ? 160 : 100, time);
-    osc.frequency.exponentialRampToValueAtTime(30, time + 0.08);
+    osc.frequency.setValueAtTime(isAccent ? 160 : 100, t);
+    osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
 
-    gain.gain.setValueAtTime(this.volume * (isAccent ? 0.9 : 0.6), time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.08);
+    gain.gain.setValueAtTime(this.volume * (isAccent ? 0.9 : 0.6), t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -305,20 +333,23 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + 0.08);
+    osc.start(t);
+    osc.stop(t + 0.08);
   }
 
   _playChime(time, freq, duration) {
     const ctx = this.audioCtx;
+    if (!ctx) return;
+    const t = Math.max(time || 0, ctx.currentTime);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, time);
+    osc.frequency.setValueAtTime(freq, t);
 
-    gain.gain.setValueAtTime(this.volume * 0.7, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.gain.setValueAtTime(this.volume * 0.7, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -328,8 +359,8 @@ export class MetronomeAudioEngine {
       gain.disconnect();
     };
 
-    osc.start(time);
-    osc.stop(time + duration);
+    osc.start(t);
+    osc.stop(t + duration);
   }
 
   setSoundType(type) {
