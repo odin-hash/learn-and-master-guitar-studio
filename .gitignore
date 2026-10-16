@@ -1,0 +1,31 @@
+# Dependencies and build outputs
+*.exe
+*.dll
+*.pdb
+*.apk
+
+# Heavy books and raw data
+*.pdf
+*.txt
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Intermediate image / OCR folders
+bonus_session1/
+bonus_session2/
+lesson_session1/
+lesson_pages/
+convo2_pages/
+convo2_samples/
+
+# Extracted temporaries
+app_extracted.js
+style_extracted.css
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

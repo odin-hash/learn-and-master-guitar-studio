@@ -1,0 +1,1681 @@
+﻿/* ==========================================================================
+   LUMA SOUND & GUITAR STUDIO - PURE OBSIDIAN JET BLACK & SUNSET ORANGE THEME
+   Modern, Ultra-Clean, Deep True Black (#000000) with Radiant Orange Accents
+   ========================================================================== */
+
+:root {
+  /* True Deep Obsidian Black Canvas (Zero Blue Tints) */
+  --bg-app: #000000;
+  --bg-panel: #0a0a0c;
+  --bg-card: #0f0f13;
+  --bg-surface: #15151a;
+  --bg-highlight: #1c1c22;
+
+  /* Primary Accent: Electric Sunset Orange */
+  --color-orange: #f97316;
+  --color-orange-light: #fb923c;
+  --color-orange-dark: #ea580c;
+  --color-orange-glow: rgba(249, 115, 22, 0.45);
+  --orange-gradient: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+  --orange-aura: radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, transparent 70%);
+
+  /* Secondary Clean Accent: Pure Ice Silver & Clean Amber */
+  --color-cyan: #e2e8f0;
+  --color-cyan-light: #cbd5e1;
+  --color-cyan-dark: #64748b;
+  --color-cyan-glow: rgba(255, 255, 255, 0.15);
+  --cyan-gradient: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+
+  /* Functional Playback States */
+  --color-play: #f97316; /* Sunset Orange = Play */
+  --color-play-glow: rgba(249, 115, 22, 0.55);
+  --color-rest: #f43f5e; /* Rose Coral = Rest / Damp */
+  --color-rest-glow: rgba(244, 63, 94, 0.55);
+
+  /* Legacy Fallbacks to Sunset Orange */
+  --gold-primary: var(--color-orange);
+  --gold-light: var(--color-orange-light);
+  --gold-dark: var(--color-orange-dark);
+  --gold-glow: var(--color-orange-glow);
+  --gold-gradient: var(--orange-gradient);
+  --border-gold: rgba(249, 115, 22, 0.25);
+  --color-green: var(--color-orange);
+  --color-green-glow: var(--color-orange-glow);
+  --color-red: var(--color-rest);
+  --color-red-glow: var(--color-rest-glow);
+
+  /* Pure Charcoal & Graphite Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-orange: rgba(249, 115, 22, 0.35);
+
+  /* Crisp Pure White Typography */
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #8b8b96;
+  --note-default: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-app);
+  background-image:
+    radial-gradient(circle at 14% 16%, rgba(249, 115, 22, 0.07) 0%, transparent 40%),
+    radial-gradient(circle at 86% 22%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==============================================================
+   MASTER TOP NAVIGATION BAR (SHOWN ONLY ON OVERVIEW PAGE)
+   ============================================================== */
+.master-header {
+  background: rgba(10, 10, 13, 0.92);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.nav-left-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-title {
+  font-size: 17px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffffff 0%, #fed7aa 60%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.2px;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--color-orange-light);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+}
+
+/* Back Button */
+.back-btn-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.back-btn-pill:hover {
+  background: var(--color-orange);
+  color: #ffffff;
+  border-color: var(--color-orange);
+  transform: scale(1.06);
+  box-shadow: 0 0 16px var(--color-orange-glow);
+}
+
+/* View Switcher Segmented Pills */
+.view-mode-tabs {
+  display: flex;
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 28px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.view-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.view-tab-btn.active {
+  background: var(--orange-gradient);
+  color: #ffffff;
+  box-shadow: 0 4px 16px var(--color-orange-glow);
+}
+
+/* ==============================================================
+   VIEW 1: OVERVIEW / LANDING PAGE
+   ============================================================== */
+.landing-home-view {
+  padding: 44px 28px 80px 28px;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 56px; /* Increased gap to push tiles comfortably down */
+}
+
+.hero-welcome-card {
+  background: linear-gradient(135deg, #0e0e12 0%, #08080a 100%);
+  border: 1px solid var(--border-glass);
+  border-radius: 28px;
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+}
+
+.hero-welcome-card::after {
+  content: "";
+  position: absolute;
+  top: -40%; left: -40%; width: 180%; height: 180%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-gold-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid var(--border-orange);
+  color: var(--color-orange-light);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 6px 18px;
+  border-radius: 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.15);
+}
+
+.hero-main-title {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1.2px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  color: #ffffff;
+}
+
+.hero-description {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 780px;
+  margin: 0 auto 34px auto;
+  line-height: 1.65;
+}
+
+.specs-strip {
+  background: #08080a;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 20px 28px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 16px;
+  text-align: center;
+}
+
+.spec-item,
+.specs-strip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spec-val,
+.spec-item-num {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.spec-lbl,
+.spec-item-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* Home Portal Action Cards Grid (Sitting Lower with Generous Space) */
+.portal-grid-home,
+.portal-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 28px;
+  margin-top: 24px; /* Lower positioning per request */
+}
+
+.portal-card,
+.portal-choice-card {
+  background: linear-gradient(145deg, #101014 0%, #09090b 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 34px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 22px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.portal-card:hover,
+.portal-choice-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-orange);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 24px rgba(249, 115, 22, 0.15);
+}
+
+.portal-card-badge-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.portal-card-tag {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-orange-light);
+}
+
+.portal-card-metric {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.portal-card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.portal-card-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.portal-card-action,
+.portal-btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-orange-light);
+  transition: all 0.2s ease;
+}
+
+.portal-card:hover .portal-card-action,
+.portal-choice-card:hover .portal-btn-action {
+  transform: translateX(4px);
+  color: #ffffff;
+}
+
+/* ==============================================================
+   VIEW 2: COURSE BOOK EXPLORER (NO REDUNDANT TABS)
+   ============================================================== */
+.course-book-view {
+  padding: 28px 28px 60px 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.book-selection-banner {
+  background: #0c0c0f;
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.studio-instruction-banner {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-left: 4px solid var(--color-orange);
+  border-radius: 14px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.instruction-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--color-orange);
+}
+
+.instruction-body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.book-tab-group,
+.book-choice-pills {
+  display: flex;
+  background: #060608;
+  border: 1px solid var(--border-subtle);
+  border-radius: 28px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.book-pill-choice,
+.book-choice-pill {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 9px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book-pill-choice:hover,
+.book-choice-pill:hover {
+  color: #ffffff;
+}
+
+.book-pill-choice.selected,
+.book-choice-pill.selected {
+  background: var(--orange-gradient);
+  color: #ffffff;
+  box-shadow: 0 4px 16px var(--color-orange-glow);
+}
+
+.catalog-filter-bar,
+.search-catalog-bar {
+  display: flex;
+  align-items: center;
+  background: #060608;
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  padding: 8px 18px;
+  min-width: 280px;
+  flex-grow: 1;
+  max-width: 480px;
+  transition: all 0.2s ease;
+}
+
+.catalog-filter-bar:focus-within,
+.search-catalog-bar:focus-within {
+  border-color: var(--color-orange);
+  box-shadow: 0 0 16px var(--color-orange-glow);
+}
+
+.luxury-search-input,
+.search-catalog-bar input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+}
+
+.luxury-search-input::placeholder,
+.search-catalog-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Sessions Grid */
+.sessions-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 24px;
+}
+
+.session-book-card {
+  background: #0d0d10;
+  border: 1px solid var(--border-subtle);
+  border-radius: 22px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.session-book-card:hover {
+  border-color: var(--border-orange);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(249, 115, 22, 0.12);
+  transform: translateY(-3px);
+}
+
+.session-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.session-card-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid var(--border-orange);
+  color: var(--color-orange-light);
+  padding: 4px 10px;
+  border-radius: 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.session-card-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.session-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+.session-ex-count-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 16px;
+  white-space: nowrap;
+}
+
+.session-topics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.topic-group-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topic-title-sub {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-orange-light);
+}
+
+.exercise-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.exercise-pill-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.exercise-pill-btn:hover {
+  background: rgba(249, 115, 22, 0.16);
+  border-color: var(--color-orange);
+  color: #ffffff;
+  transform: scale(1.03);
+}
+
+.exercise-pill-btn.has-rest-cue {
+  border-left: 2px solid var(--color-rest);
+}
+
+.session-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+  gap: 12px;
+}
+
+.session-card-quick-tip {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.btn-open-session-first {
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid var(--border-orange);
+  color: var(--color-orange-light);
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-open-session-first:hover {
+  background: var(--orange-gradient);
+  color: #ffffff;
+  box-shadow: 0 0 14px var(--color-orange-glow);
+}
+
+/* ==============================================================
+   VIEW 3: METRONOME & NOTATION STUDIO (FULL VERTICAL SCREEN)
+   ============================================================== */
+.metronome-studio-view {
+  padding: 20px 28px 40px 28px;
+  max-width: 1540px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.studio-header-control-bar {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  padding: 14px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.studio-instruction-banner {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-left: 4px solid var(--color-orange);
+  border-radius: 14px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.instruction-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--color-orange);
+}
+
+.instruction-body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.studio-top-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.studio-title-badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid var(--border-orange);
+  color: var(--color-orange-light);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.studio-exercise-heading {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 3px;
+}
+
+.studio-nav-steppers {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-step-nav,
+.btn-stepper-round {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 700;
+}
+
+.btn-step-nav:hover,
+.btn-stepper-round:hover {
+  background: var(--color-orange);
+  color: #ffffff;
+  border-color: var(--color-orange);
+  box-shadow: 0 0 12px var(--color-orange-glow);
+}
+
+.session-select-pill,
+.luxury-select {
+  background: #060608;
+  border: 1px solid var(--border-glass);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 20px;
+  outline: none;
+  cursor: pointer;
+  max-width: 380px;
+}
+
+/* Studio Main Layout Grid: Left Controls (340px) vs Right Score (1fr) */
+.studio-main-grid,
+.studio-grid-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .studio-main-grid,
+  .studio-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Column: Rotary Speed Dial & Settings */
+.left-control-column,
+.dial-studio-panel {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.speed-dial-container,
+.canvas-dial-holder {
+  width: 270px;
+  height: 270px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#speed-dial-canvas {
+  width: 270px;
+  height: 270px;
+  cursor: grab;
+  touch-action: none;
+}
+
+#speed-dial-canvas:active {
+  cursor: grabbing;
+}
+
+/* Digital Readout & Steppers */
+.bpm-readout-strip,
+.bpm-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bpm-digital-readout,
+.bpm-big-readout {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  color: #ffffff;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.bpm-number {
+  font-size: 42px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.bpm-unit,
+.bpm-label-sub {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-orange-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.time-sig-pill,
+.time-pill-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 14px;
+}
+
+.time-pill-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Beat Dots Sequence Bar */
+.beat-dots-sequence {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  background: #060608;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+}
+
+.beat-dot-item {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: all 0.1s ease;
+}
+
+/* Active Pulse States: Orange for Play, Rose Coral for Rest! */
+.beat-dot-item.active-play {
+  background: var(--color-play, #f97316) !important;
+  transform: scale(1.35);
+  box-shadow: 0 0 16px var(--color-play-glow) !important;
+}
+
+.beat-dot-item.active-rest {
+  background: var(--color-rest, #f43f5e) !important;
+  transform: scale(1.35);
+  box-shadow: 0 0 20px var(--color-rest-glow) !important;
+}
+
+/* Audio Settings */
+.studio-audio-options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+}
+
+.setting-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Right Column: Fretboard & Sheet Music Score */
+.right-notation-column,
+.course-display-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Note Guidance Feedback Card */
+.note-active-card {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.note-glyph-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: rgba(249, 115, 22, 0.14);
+  border: 1px solid var(--border-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-orange);
+}
+
+.note-header-big {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.note-sub-instruction {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.note-right-guidance {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  padding: 6px 14px;
+  border-radius: 14px;
+}
+
+/* Boxes */
+.luxury-section-box {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 22px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+}
+
+.box-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.box-title-text {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.box-meta-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-orange-light);
+}
+
+/* ==============================================================
+   FRETBOARD VISUALIZER (PURE OBSIDIAN BLACK)
+   ============================================================== */
+.fretboard-card {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fretboard-header-row {
+  display: grid;
+  grid-template-columns: 85px repeat(8, 1fr);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.fretboard-header-row .fret-inlay {
+  color: var(--color-orange-light);
+}
+
+.fretboard-neck-board {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: #060608;
+  overflow: hidden;
+  position: relative;
+}
+
+.fret-string-row {
+  display: grid;
+  grid-template-columns: 85px repeat(8, 1fr);
+  height: 38px;
+  align-items: center;
+  position: relative;
+}
+
+.fret-string-row::after {
+  content: "";
+  position: absolute;
+  left: 85px; right: 0;
+  top: 50%;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.string-title {
+  padding-left: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.fret-space {
+  border-left: 1.5px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.nut-space {
+  border-left: 4px solid var(--color-orange);
+}
+
+.finger-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: transparent;
+  transition: all 0.1s ease;
+}
+
+.finger-marker.active-play-dot {
+  background: var(--color-play, #f97316);
+  color: #ffffff;
+  box-shadow: 0 0 16px var(--color-play-glow);
+  transform: scale(1.15);
+}
+
+.mute-damp-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(244, 63, 94, 0.2);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.mute-damp-badge {
+  background: #f43f5e;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 24px var(--color-rest-glow);
+}
+
+/* ==============================================================
+   SHEET MUSIC & TAB SCORE (SEAMLESS FLUSH BEAM CONNECTOR)
+   ============================================================== */
+.sheet-music-card {
+  background: #0a0a0d;
+  border: 1px solid var(--border-glass);
+  border-radius: 22px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.score-system-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.score-system-clef {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 50px;
+  flex-shrink: 0;
+  padding: 4px 0;
+}
+
+.clef-standard-stave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+
+.clef-tab-stave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.tab-word-vert {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--color-orange-light);
+  line-height: 1.1;
+  text-align: center;
+}
+
+.time-sig-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.score-measures-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  flex-grow: 1;
+}
+
+@media (max-width: 900px) {
+  .score-measures-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.score-measure-panel {
+  background: #060608;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.score-measure-panel.is-final-measure {
+  border-right: 3px double var(--color-orange-light);
+}
+
+.measure-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.chord-name-badge {
+  background: rgba(249, 115, 22, 0.15);
+  border: 1px solid var(--border-orange);
+  color: var(--color-orange-light);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.measure-beats-grid {
+  display: grid;
+  gap: 2px;
+  align-items: stretch;
+}
+
+.measure-beat-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+  border-radius: 8px;
+  position: relative;
+  transition: all 0.1s ease;
+}
+
+/* Pair rhythm spacing: slight separation after beamed pair to visually clarify the beat! */
+.measure-beat-column.beam-end {
+  margin-right: 6px;
+}
+
+/* Active Beat Playhead Glow: SUNSET ORANGE for Play, ROSE CORAL for Rest! */
+.measure-beat-column.active-beat-glow {
+  background: rgba(249, 115, 22, 0.2) !important;
+  box-shadow: 0 0 16px var(--color-play-glow) !important;
+  transform: translateY(-2px);
+}
+
+.measure-beat-column.active-rest-glow {
+  background: rgba(244, 63, 94, 0.24) !important;
+  box-shadow: 0 0 18px var(--color-rest-glow) !important;
+  transform: translateY(-2px);
+}
+
+/* Standard Notation Row */
+.std-staff-row {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.std-glyph-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 4px;
+  position: relative;
+  width: 100%;
+}
+
+.note-name-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #d1d5db;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  transition: all 0.1s ease;
+}
+
+/* ==============================================================
+   AUTHENTIC BEAM NOTATION & ACTIVE GLOW CONNECTOR
+   ============================================================== */
+.beamed-note-svg {
+  overflow: visible !important;
+}
+
+.eighth-beamed-start,
+.eighth-beamed-end {
+  overflow: visible;
+}
+
+/* Authentic Musical Beaming Connector: Seamless bar from Stem 1 (x=15.8) to Stem 2 (x=15.8) */
+.measure-beat-column.beam-start .std-glyph-cell {
+  position: relative;
+}
+
+.measure-beat-column.beam-start .std-glyph-cell::after {
+  content: "";
+  position: absolute;
+  top: 4px; /* Aligns flush with y2="5" of the 46px SVG stem */
+  left: calc(50% + 1px);
+  width: calc(100% + 4px);
+  height: 3.5px;
+  background: #ffffff;
+  border-radius: 1px;
+  z-index: 5;
+  pointer-events: none;
+  transition: background 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Active Beamed Note Highlight: Lights up in Sunset Orange! */
+.measure-beat-column.beam-start.beam-active .std-glyph-cell::after,
+.measure-beat-column.beam-start.active-beat-glow .std-glyph-cell::after,
+.measure-beat-column.beam-start:has(+ .measure-beat-column.beam-end.active-beat-glow) .std-glyph-cell::after {
+  background: var(--color-play, #f97316) !important;
+  box-shadow: 0 0 12px var(--color-play-glow) !important;
+}
+
+/* Active Note Highlight (Stems, Noteheads, Text) */
+.active-beat-glow .note-svg ellipse,
+.active-beat-glow .note-svg path,
+.active-beat-glow .note-svg line,
+.active-beat-glow .note-svg circle,
+.active-beat-glow .note-svg rect {
+  stroke: var(--color-play, #f97316) !important;
+  fill: var(--color-play, #f97316) !important;
+}
+
+.active-beat-glow .note-svg ellipse[fill="none"] {
+  fill: none !important;
+  stroke: var(--color-play, #f97316) !important;
+}
+
+.active-beat-glow .note-name-label {
+  color: var(--color-play, #f97316) !important;
+  text-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
+}
+
+.active-rest-glow .rest-svg rect,
+.active-rest-glow .rest-svg path,
+.active-rest-glow .rest-svg circle {
+  fill: var(--color-rest, #f43f5e) !important;
+  stroke: var(--color-rest, #f43f5e) !important;
+}
+
+.active-rest-glow .rest-label {
+  color: var(--color-rest, #f43f5e) !important;
+  text-shadow: 0 0 12px var(--color-rest-glow);
+}
+
+/* TAB Strings Stack */
+.tab-strings-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 64px;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.tab-string-cell {
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tab-string-cell::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+
+.tab-fret-pill {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1px 5px;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+.active-beat-glow .tab-fret-pill {
+  background: var(--color-play, #f97316);
+  box-shadow: 0 0 10px var(--color-play-glow);
+}
+
+.tab-chord-dot {
+  color: var(--color-orange-light);
+  font-size: 9px;
+  z-index: 2;
+}
+
+.tab-pick-row {
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.pick-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.active-beat-glow .pick-label {
+  color: var(--color-play, #f97316);
+}
+
+
+
+/* ==========================================================================
+   BOOK COMPANION UPGRADES: 5-LINE STAFF (1:1 PIXEL ALIGNED), 15 FRETS, TRAINER BAR
+   ========================================================================== */
+
+/* True 5-Line Treble Staff Background (Lines at y = 10, 16, 22, 28, 34) */
+.std-staff-row.five-line-stave {
+  height: 58px;
+  position: relative;
+  align-items: flex-start;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 9.5px,
+    rgba(255, 255, 255, 0.24) 9.5px,
+    rgba(255, 255, 255, 0.24) 10.8px,
+    transparent 10.8px,
+    transparent 15.5px,
+    rgba(255, 255, 255, 0.24) 15.5px,
+    rgba(255, 255, 255, 0.24) 16.8px,
+    transparent 16.8px,
+    transparent 21.5px,
+    rgba(255, 255, 255, 0.24) 21.5px,
+    rgba(255, 255, 255, 0.24) 22.8px,
+    transparent 22.8px,
+    transparent 27.5px,
+    rgba(255, 255, 255, 0.24) 27.5px,
+    rgba(255, 255, 255, 0.24) 28.8px,
+    transparent 28.8px,
+    transparent 33.5px,
+    rgba(255, 255, 255, 0.24) 33.5px,
+    rgba(255, 255, 255, 0.24) 34.8px,
+    transparent 34.8px
+  );
+}
+
+.std-staff-row.five-line-stave .std-glyph-cell {
+  padding-top: 0 !important;
+  height: 58px;
+  justify-content: flex-start;
+}
+
+.std-staff-row.five-line-stave .note-svg,
+.std-staff-row.five-line-stave .rest-svg {
+  height: 46px;
+  width: 28px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.std-staff-row.five-line-stave .note-name-label {
+  margin-top: -2px;
+  font-size: 9.5px;
+  line-height: 1;
+}
+
+.measure-beat-column {
+  cursor: pointer;
+}
+.measure-beat-column:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Sight-Reading Trainer Toggles (Hide Note Names / Hide TAB) */
+.hide-note-names .note-name-label {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+.hide-tab-numbers .tab-fret-pill,
+.hide-tab-numbers .tab-chord-dot {
+  opacity: 0.08 !important;
+  filter: blur(3px);
+  transition: all 0.2s ease;
+}
+.hide-tab-numbers:hover .tab-fret-pill,
+.hide-tab-numbers:hover .tab-chord-dot {
+  opacity: 0.6;
+  filter: none;
+}
+
+/* Styled Hold Ties & Rest Marks */
+.std-hold-tie {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  color: var(--color-orange-light, #fb923c);
+  font-size: 18px;
+  font-weight: 800;
+}
+.tab-rest-mark {
+  color: var(--color-rest, #f43f5e);
+  font-weight: 900;
+  font-size: 13px;
+}
+
+/* Fretboard Muted String X & Background Ghost Chord Dots */
+.finger-marker.muted-string-x {
+  color: var(--color-rest, #f43f5e) !important;
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(244, 63, 94, 0.14) !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+.finger-marker.ghost-chord-dot {
+  background: rgba(249, 115, 22, 0.18) !important;
+  border: 1px dashed rgba(249, 115, 22, 0.55) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  transform: scale(0.92);
+}
+.fretboard-card {
+  overflow-x: auto;
+}
+
+/* 3-Speed Jam-Along Tempo presets */
+.jam-speed-presets {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  margin: 4px 0;
+}
+.speed-preset-btn {
+  background: #060608;
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+  color: var(--text-secondary, #94a3b8);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.speed-preset-btn:hover {
+  border-color: var(--color-orange, #f97316);
+  color: #ffffff;
+}
+.speed-preset-btn.active {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: var(--color-orange, #f97316);
+  color: var(--color-orange-light, #fb923c);
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.25);
+}
+
+/* Studio Trainer Bar */
+.studio-trainer-bar {
+  background: #0d0d10;
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.trainer-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.trainer-group-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-muted, #64748b);
+  margin-right: 2px;
+}
+.trainer-pill-btn {
+  background: #060608;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.07));
+  color: var(--text-secondary, #94a3b8);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.trainer-pill-btn:hover {
+  border-color: var(--color-orange, #f97316);
+  color: #ffffff;
+}
+.trainer-pill-btn.active {
+  background: var(--orange-gradient, linear-gradient(135deg, #f97316, #ea580c));
+  border-color: var(--color-orange, #f97316);
+  color: #ffffff;
+}
+.trainer-done-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.1));
+  color: var(--text-secondary, #94a3b8);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.trainer-done-btn.is-completed,
+.is-completed-pill {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.55) !important;
+  color: #34d399 !important;
+}
+
+/* Session "You're Ready to Move On" Checklist Box */
+.session-checklist-box {
+  background: rgba(249, 115, 22, 0.05);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  color: var(--text-secondary, #94a3b8);
+  margin-top: 14px;
+}
+.checklist-header {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-orange-light, #fb923c);
+  margin-bottom: 5px;
+}
+.checklist-items {
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1.4;
+}
