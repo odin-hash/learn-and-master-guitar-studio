@@ -14399,6 +14399,9 @@ class GuitarMasterApp {
     this.chordMode = "full"; // "full" | "easy4" | "easy3"
     this.selectedSpiderString = 1;
 
+    // Migrate / auto-reset incompatible v1 localStorage before reading progress or state
+    this.ensureStorageVersion();
+
     // Progress tracking
     this.completedExercises = this.loadProgressSet("guitar_completed_exercises");
     this.checkedGoals = this.loadProgressSet("guitar_checked_goals");
@@ -14414,6 +14417,53 @@ class GuitarMasterApp {
 
     // Restore state from URL Hash / LocalStorage
     this.restoreState();
+  }
+
+  ensureStorageVersion() {
+    const TARGET_VERSION = "2.0.0";
+    try {
+      const storedVersion = localStorage.getItem("lmgs_app_version");
+      if (storedVersion !== TARGET_VERSION) {
+        const validIds = new Set((this.allExercises || []).map(e => e.id));
+
+        try {
+          const rawCompleted = localStorage.getItem("guitar_completed_exercises");
+          if (rawCompleted) {
+            const parsed = JSON.parse(rawCompleted);
+            if (Array.isArray(parsed)) {
+              const cleaned = parsed.filter(id => typeof id === "string" && validIds.has(id));
+              localStorage.setItem("guitar_completed_exercises", JSON.stringify(cleaned));
+            } else {
+              localStorage.removeItem("guitar_completed_exercises");
+            }
+          }
+        } catch (e) {
+          localStorage.removeItem("guitar_completed_exercises");
+        }
+
+        try {
+          const rawGoals = localStorage.getItem("guitar_checked_goals");
+          if (rawGoals) {
+            const parsed = JSON.parse(rawGoals);
+            if (!Array.isArray(parsed) || parsed.some(g => typeof g !== "string")) {
+              localStorage.removeItem("guitar_checked_goals");
+            }
+          }
+        } catch (e) {
+          localStorage.removeItem("guitar_checked_goals");
+        }
+
+        // Remove incompatible legacy v1 app state object & obsolete keys
+        const preservedKeys = new Set(["lmgs_app_version", "guitar_completed_exercises", "guitar_checked_goals"]);
+        Object.keys(localStorage).forEach(k => {
+          if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
+            localStorage.removeItem(k);
+          }
+        });
+        localStorage.removeItem("guitar_master_app_state");
+        localStorage.setItem("lmgs_app_version", TARGET_VERSION);
+      }
+    } catch (e) {}
   }
 
   loadProgressSet(key) {
@@ -15174,16 +15224,29 @@ class GuitarMasterApp {
     return cleanBookPage + offset;
   }
 
-  resolveAssetUrl(relativePath) {
-    const clean = String(relativePath || "").replace(/^\/+/, "");
+  resolveAssetUrl(relativePath, locationLike = null) {
+    const clean = String(relativePath || "").replace(/^\.\//, "").replace(/^\/+/, "");
     const explicitBase = (typeof window !== "undefined" && typeof window.__APP_BASE_URL__ === "string" && window.__APP_BASE_URL__)
       ? window.__APP_BASE_URL__
       : null;
-    if (explicitBase) {
+    const loc = locationLike || ((typeof window !== "undefined" && window.location) ? window.location : null);
+
+    if (explicitBase && loc) {
       const normalizedBase = explicitBase.endsWith("/") ? explicitBase : `${explicitBase}/`;
-      return new URL(clean, new URL(normalizedBase, window.location.href)).href;
+      return new URL(clean, new URL(normalizedBase, loc.origin || loc.href)).href;
     }
-    return new URL(`./${clean}`, window.location.href).href;
+    if (loc) {
+      const protocol = loc.protocol || "";
+      const pathname = loc.pathname || "/";
+      if (protocol === "http:" || protocol === "https:") {
+        // Ensure GitHub Pages repo subpaths (/learn-and-master-guitar-studio without trailing /) preserve the repo base
+        const hasFileExt = /\/[^/]+\.[a-z0-9]+$/i.test(pathname);
+        const basePath = (pathname.endsWith("/") || hasFileExt) ? pathname : `${pathname}/`;
+        return new URL(`./${clean}`, `${loc.origin}${basePath}`).href;
+      }
+      return new URL(`./${clean}`, loc.href).href;
+    }
+    return `./${clean}`;
   }
 
   syncPdfToExercise(ex) {
@@ -15192,6 +15255,10 @@ class GuitarMasterApp {
     const bookPage = this.extractPageNumberFromExercise(ex);
     this.pdfBookPage = bookPage;
     this.pdfCurrentPage = this.bookPageToPdfPage(bookPage, this.pdfBookCategory);
+    const pdfHref = `${this.resolveAssetUrl(this.getPdfFilename(this.pdfBookCategory))}#page=${Math.max(1, this.pdfCurrentPage)}&view=FitH`;
+    if (this.pdfOpenNewTab) {
+      this.pdfOpenNewTab.href = pdfHref;
+    }
     if (this.pdfPageInput) {
       this.pdfPageInput.value = this.pdfCurrentPage;
       this.pdfPageInput.title = `PDF page ${this.pdfCurrentPage} (Book p. ${bookPage})`;
@@ -15655,7 +15722,7 @@ class GuitarMasterApp {
   loadExercise(exerciseId, keepBpm = false, uiOpts = {}) {
     if (this.isPlaying) this.stop();
 
-    const found = this.findExerciseById(exerciseId);
+    const found = this.findExerciseById(exerciseId) || this.findExerciseById("lb-s2-str1-ex1") || this.allExercises[0];
     if (!found) return;
 
     const prevTopicId = this.currentTopicId;
@@ -16617,12 +16684,23 @@ class GuitarMasterApp {
       this.loopMode = state.loopMode;
     }
 
+    const validBooks = ["lessonBook", "bonusWorkshop", "freeMode"];
+    if (!validBooks.includes(state.book)) {
+      state.book = "lessonBook";
+    }
+    const validPanes = ["score", "pdf", "split"];
+    if (!validPanes.includes(state.paneMode)) {
+      state.paneMode = "score";
+    }
+    const validModes = ["primer", "studio"];
+    if (!validModes.includes(state.appMode)) {
+      state.appMode = "primer";
+    }
+
     this.setDrawerOpen(typeof state.drawerOpen === "boolean" ? state.drawerOpen : (window.innerWidth > 820));
     this.setBookCategory(state.book || "lessonBook");
 
-    if (state.exId) {
-      this.loadExercise(state.exId, true);
-    }
+    this.loadExercise(state.exId || "lb-s2-str1-ex1", true);
 
     if (state.bpm) {
       this.setBpm(state.bpm);
