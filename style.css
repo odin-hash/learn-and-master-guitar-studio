@@ -2957,11 +2957,11 @@ body[data-app-mode="studio"] .primer-view {
   align-items: center;
   justify-content: center;
   min-width: 164px;
-  min-height: 76px;
+  min-height: 92px;
   background: #FFFFFF;
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
-  padding: 4px;
+  padding: 6px 4px;
 }
 
 .primer-vf-svg {
