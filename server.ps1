@@ -29,6 +29,7 @@ try {
                 ".html" { "text/html; charset=utf-8" }
                 ".js"   { "application/javascript; charset=utf-8" }
                 ".css"  { "text/css; charset=utf-8" }
+                ".pdf"  { "application/pdf" }
                 default { "application/octet-stream" }
             }
             $bytes = [System.IO.File]::ReadAllBytes($filePath)

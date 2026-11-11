@@ -3875,16 +3875,17 @@ export const GUITAR_COURSES = {
     title: 'Guitar Studio Free Metronome',
     timeSignature: [4, 4],
     defaultBpm: 60,
-    description: 'Unrestricted studio metronome. All 4 beats play by default. Click any beat cell to toggle between Play and Rest.',
-    concepts: ['Unrestricted Tempo (30-240 BPM)', 'Click-to-Toggle Rest Beats', 'Green Note / Red Rest Alerts', 'Precision Practice HUD'],
+    isMetronomeOnly: true,
+    description: 'Continuous zero-drift percussive metronome (1200 Hz Beat 1 accent / 800 Hz Beats 2-4). Click any beat dot in the dock to mute/unmute beats.',
+    concepts: ['Continuous 1-2-3-4 Loop', '1200 Hz / 800 Hz Percussive Click', 'Click-to-Mute Beat Dots'],
     tabData: [
       {
         measure: 1,
         beats: [
-          { beat: 1, note: 'Beat 1', symbol: '1/4', type: 'play', string: 6, fret: 0, finger: 0, pick: 'Down', duration: 1, isStart: true, isSustain: false, tip: 'Primary Downbeat' },
-          { beat: 2, note: 'Beat 2', symbol: '1/4', type: 'play', string: 5, fret: 0, finger: 0, pick: 'Up', duration: 1, isStart: true, isSustain: false, tip: 'Upbeat pulse' },
-          { beat: 3, note: 'Beat 3', symbol: '1/4', type: 'play', string: 4, fret: 0, finger: 0, pick: 'Down', duration: 1, isStart: true, isSustain: false, tip: 'Secondary downbeat' },
-          { beat: 4, note: 'Beat 4', symbol: '1/4', type: 'play', string: 3, fret: 0, finger: 0, pick: 'Up', duration: 1, isStart: true, isSustain: false, tip: 'Pickup pulse' }
+          { beat: 1, note: 'Beat 1 (Accent)', symbol: '1/4', type: 'metronome', string: null, fret: null, finger: null, pick: '-', duration: 1, isStart: true, isSustain: false, tip: 'Downbeat Accent (1200 Hz Click)' },
+          { beat: 2, note: 'Beat 2', symbol: '1/4', type: 'metronome', string: null, fret: null, finger: null, pick: '-', duration: 1, isStart: true, isSustain: false, tip: 'Steady Pulse (800 Hz Click)' },
+          { beat: 3, note: 'Beat 3', symbol: '1/4', type: 'metronome', string: null, fret: null, finger: null, pick: '-', duration: 1, isStart: true, isSustain: false, tip: 'Steady Pulse (800 Hz Click)' },
+          { beat: 4, note: 'Beat 4', symbol: '1/4', type: 'metronome', string: null, fret: null, finger: null, pick: '-', duration: 1, isStart: true, isSustain: false, tip: 'Steady Pulse (800 Hz Click)' }
         ]
       }
     ]

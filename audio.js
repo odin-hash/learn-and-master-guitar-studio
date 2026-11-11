@@ -1,14 +1,19 @@
-// Web Audio Precision Metronome & Guitar Pitch Synthesis Engine (Lookahead Scheduler)
+// Web Audio Precision Metronome & Karplus-Strong Acoustic Steel-String Guitar Engine
 export class MetronomeAudioEngine {
   constructor() {
     this.audioCtx = null;
     this.soundType = "woodblock"; // "woodblock", "beep", "drum"
-    this.soundOnRest = "muted-thud"; // "muted-thud", "click", "silent"
-    this.guitarToneEnabled = true; // Synthesizes actual guitar note/chord pitches!
+    this.soundOnRest = "click"; // "click", "muted-thud", "silent"
+    this.guitarToneEnabled = true;
     this.volume = 0.8;
 
     // Open string MIDI notes: 1=E4(64), 2=B3(59), 3=G3(55), 4=D3(50), 5=A2(45), 6=E2(40)
     this.openStringMidi = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
+
+    this._guitarBus = null;
+    this._clickNoiseBuffer = null;
+    this._stringBufferCache = new Map();
+    this._activeVoices = [];
 
     // Chord voicing lookup [string, fret] for realistic strum playback
     this.chordVoicings = {
@@ -106,10 +111,190 @@ export class MetronomeAudioEngine {
     if (this.audioCtx.state === "suspended" || this.audioCtx.state === "interrupted") {
       this.audioCtx.resume();
     }
+    this._ensureGuitarBus();
+    this._ensureClickNoiseBuffer();
     this.unlockMobileAudio();
   }
 
-  // Plays a silent micro-sample to unlock iOS Safari & mobile audio pipelines on user tap
+  // Synthesize & cache a short 22ms decaying white-noise burst for percussive metronome clicks
+  _ensureClickNoiseBuffer() {
+    if (!this.audioCtx) return null;
+    const sr = this.audioCtx.sampleRate;
+    if (this._clickNoiseBuffer && this._clickNoiseBuffer.sampleRate === sr) {
+      return this._clickNoiseBuffer;
+    }
+    const len = Math.max(64, Math.floor(sr * 0.024));
+    const buf = this.audioCtx.createBuffer(1, len, sr);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      const env = Math.exp(-i / (sr * 0.0042));
+      ch[i] = (Math.random() * 2 - 1) * env;
+    }
+    this._clickNoiseBuffer = buf;
+    return buf;
+  }
+
+  _ensureGuitarBus() {
+    if (!this.audioCtx || this._guitarBus) return;
+    const ctx = this.audioCtx;
+
+    // Acoustic Dreadnought Wood-Body Resonance EQ Chain + Soft Limiting Compressor
+    const bodyHelmholtz = ctx.createBiquadFilter();
+    bodyHelmholtz.type = "peaking";
+    bodyHelmholtz.frequency.value = 105;
+    bodyHelmholtz.Q.value = 2.0;
+    bodyHelmholtz.gain.value = 4.2;
+
+    const topDipole = ctx.createBiquadFilter();
+    topDipole.type = "peaking";
+    topDipole.frequency.value = 215;
+    topDipole.Q.value = 1.8;
+    topDipole.gain.value = 2.6;
+
+    const boxCut = ctx.createBiquadFilter();
+    boxCut.type = "peaking";
+    boxCut.frequency.value = 470;
+    boxCut.Q.value = 1.4;
+    boxCut.gain.value = -2.2;
+
+    const stringPresence = ctx.createBiquadFilter();
+    stringPresence.type = "highshelf";
+    stringPresence.frequency.value = 2400;
+    stringPresence.gain.value = 1.6;
+
+    const warmthCap = ctx.createBiquadFilter();
+    warmthCap.type = "lowpass";
+    warmthCap.frequency.value = 5600;
+    warmthCap.Q.value = 0.7;
+
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.knee.value = 12;
+    comp.ratio.value = 3.5;
+    comp.attack.value = 0.004;
+    comp.release.value = 0.14;
+
+    bodyHelmholtz.connect(topDipole);
+    topDipole.connect(boxCut);
+    boxCut.connect(stringPresence);
+    stringPresence.connect(warmthCap);
+    warmthCap.connect(comp);
+    comp.connect(ctx.destination);
+
+    this._guitarBus = bodyHelmholtz;
+  }
+
+  // Synthesize & cache an Extended Karplus-Strong steel-string acoustic guitar pluck buffer
+  _getOrRenderStringBuffer(midi, isWound = false) {
+    const key = `${midi}_${isWound ? "w" : "p"}`;
+    if (this._stringBufferCache.has(key)) {
+      return this._stringBufferCache.get(key);
+    }
+
+    const ctx = this.audioCtx;
+    const sr = ctx.sampleRate;
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+    const bufferDur = 2.8;
+    const totalSamples = Math.floor(sr * bufferDur);
+    const buffer = ctx.createBuffer(1, totalSamples, sr);
+    const out = buffer.getChannelData(0);
+
+    // Fractional delay line length with one-pole loop filter compensation
+    const exactPeriod = sr / freq;
+    const delayLen = Math.max(4, Math.floor(exactPeriod));
+    const frac = exactPeriod - delayLen;
+    const delay = new Float32Array(delayLen + 1);
+
+    // 1. Pick excitation transient: pink-shaped noise + pick-position comb filter (~17% from bridge)
+    const combOffset = Math.max(1, Math.round(delayLen * 0.17));
+    let lpState = 0;
+    const pickLp = isWound ? 0.42 : 0.62;
+    const rawNoise = new Float32Array(delayLen);
+    for (let i = 0; i < delayLen; i++) {
+      const white = Math.random() * 2 - 1;
+      lpState = lpState + pickLp * (white - lpState);
+      rawNoise[i] = lpState;
+    }
+    for (let i = 0; i < delayLen; i++) {
+      const delayedPick = i >= combOffset ? rawNoise[i - combOffset] : rawNoise[delayLen - combOffset + i];
+      delay[i] = rawNoise[i] - 0.58 * delayedPick;
+    }
+
+    // 2. Extended Karplus-Strong feedback waveguide loop
+    const baseDecay = isWound ? 0.9965 : 0.9945;
+    const freqLoss = Math.max(0.986, baseDecay - Math.max(0, (freq - 140) * 0.000012));
+    const blend = isWound ? 0.55 : 0.62; // two-point lowpass weight (controls string brightness)
+
+    let idx = 0;
+    let apState = 0;
+    const apCoeff = (1 - frac) / (1 + frac); // Thiran 1st-order fractional-delay tuning correction
+
+    let peak = 0;
+    for (let n = 0; n < totalSamples; n++) {
+      const cur = delay[idx];
+      const nextIdx = (idx + 1) % delayLen;
+      const nxt = delay[nextIdx];
+
+      // Averaging lowpass filter + decay
+      const filtered = freqLoss * (blend * cur + (1 - blend) * nxt);
+      delay[idx] = filtered;
+
+      // Sub-sample fractional delay all-pass interpolation for dead-on fret intonation
+      const tuned = apCoeff * (cur - apState) + apState;
+      apState = cur;
+
+      // Subtle pick click fade-in during first 1.2ms to prevent digital click
+      const env = n < 52 ? (n / 52) : 1.0;
+      const sample = tuned * env;
+      out[n] = sample;
+
+      const absVal = Math.abs(sample);
+      if (absVal > peak) peak = absVal;
+
+      idx = nextIdx;
+    }
+
+    // Normalize buffer to uniform level
+    if (peak > 0.0001) {
+      const norm = 0.85 / peak;
+      for (let n = 0; n < totalSamples; n++) {
+        out[n] *= norm;
+      }
+    }
+
+    if (this._stringBufferCache.size > 72) {
+      const oldestKey = this._stringBufferCache.keys().next().value;
+      this._stringBufferCache.delete(oldestKey);
+    }
+    this._stringBufferCache.set(key, buffer);
+    return buffer;
+  }
+
+  // Actively damp/mute all ringing strings (e.g. when a Rest hits or playback stops)
+  dampAllStrings(time) {
+    if (!this.audioCtx || this._activeVoices.length === 0) return;
+    const now = Math.max(time || 0, this.audioCtx.currentTime);
+    const keepVoices = [];
+
+    this._activeVoices.forEach(voice => {
+      if (voice.stopAt <= now) return;
+      // Only damp voices that started before or at this rest beat!
+      if (voice.startTime <= now + 0.004) {
+        try {
+          voice.gainNode.gain.cancelScheduledValues(now);
+          voice.gainNode.gain.setValueAtTime(Math.max(0.0001, voice.level), now);
+          voice.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
+          voice.source.stop(now + 0.022);
+          voice.stopAt = now + 0.022;
+        } catch (e) {}
+      } else {
+        keepVoices.push(voice);
+      }
+    });
+
+    this._activeVoices = keepVoices;
+  }
+
   unlockMobileAudio() {
     if (!this.audioCtx) return;
     try {
@@ -128,11 +313,13 @@ export class MetronomeAudioEngine {
     const now = Math.max(time || 0, ctx.currentTime);
 
     if (isCountIn) {
-      this._playChime(now, isAccent ? 1318.5 : 1046.5, 0.08);
+      // Crisp 18ms percussive count-in woodblock click (1200 Hz Beat 1 / 800 Hz Beats 2-4)
+      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.62, 6.5, 0.018);
       return;
     }
 
     if (isRest) {
+      this.dampAllStrings(now);
       if (this.soundOnRest === "silent") {
         return;
       } else if (this.soundOnRest === "muted-thud") {
@@ -141,226 +328,188 @@ export class MetronomeAudioEngine {
       }
     }
 
-    if (this.soundType === "woodblock") {
-      this._playWoodblock(now, isAccent ? 880 : 587, isAccent ? 0.9 : 0.6);
-    } else if (this.soundType === "drum") {
-      this._playDrum(now, isAccent);
+    if (this.soundType === "silent") {
+      return;
+    }
+
+    if (this.soundType === "drum") {
+      // Rim / percussive tick (900 Hz accent / 620 Hz beat)
+      this._playPercussiveClick(now, isAccent ? 900 : 620, isAccent ? 0.92 : 0.56, 4.2, 0.022);
+    } else if (this.soundType === "click" || this.soundType === "beep") {
+      // High crisp digital wood click (1400 Hz / 950 Hz, 16ms)
+      this._playPercussiveClick(now, isAccent ? 1400 : 950, isAccent ? 0.90 : 0.54, 8.0, 0.016);
     } else {
-      this._playBeep(now, isAccent ? 1200 : 800, isAccent ? 0.9 : 0.6);
+      // Default Woodblock: 1200 Hz accent / 800 Hz regular beats (15ms-22ms percussive impulse)
+      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.58, 6.5, 0.020);
     }
   }
 
-  // Synthesize an acoustic guitar note or chord strum so beginners can hear the exact pitch
+  // Play single acoustic guitar note or 20ms-staggered chord strum (strictly decoupled from metronome beats)
   playNoteEvent(time, beatData, chordName, durationSeconds) {
-    if (!this.guitarToneEnabled || !beatData) return;
-    if (beatData.type === "rest" || beatData.isSustain || beatData.type === "sustain") return;
     if (!this.audioCtx) this.init();
-
     const now = Math.max(time || 0, this.audioCtx.currentTime);
-    const holdDur = Math.max(0.18, Math.min(3.5, durationSeconds || 0.5));
+
+    if (!beatData || beatData.type === "rest" || beatData.type === "metronome" || beatData.isMetronomeOnly) {
+      if (beatData && beatData.type === "rest") {
+        this.dampAllStrings(now);
+      }
+      return;
+    }
+    if (!this.guitarToneEnabled || beatData.isSustain || beatData.type === "sustain") return;
+
+    const holdDur = Math.max(0.24, Math.min(2.75, (durationSeconds || 0.5) + 0.14));
 
     // Single-string melody note
     if (typeof beatData.string === "number" && beatData.fret !== null && beatData.fret !== undefined) {
       const midi = (this.openStringMidi[beatData.string] || 64) + beatData.fret;
-      const freq = 440 * Math.pow(2, (midi - 69) / 12);
-      this._playPluckedString(now, freq, holdDur, 0.35);
+      this._playPluckedString(now, midi, holdDur, 0.48, beatData.string >= 4);
       return;
     }
 
-    // Chord strum
-    if (chordName) {
-      const cKey = chordName.trim().toUpperCase();
+    // Chord strum staggered by 20ms (0.020s) per string low-to-high (or reversed on Up strum)
+    const activeChord = beatData.chordChange || chordName;
+    if (activeChord) {
+      const cKey = activeChord.trim().toUpperCase();
       const shape = this.chordVoicings[cKey] || this.chordVoicings["C"];
       if (shape) {
         const isUpstroke = beatData.pick === "Up";
         const ordered = isUpstroke ? [...shape].reverse() : shape;
         ordered.forEach(([s, f], idx) => {
           const midi = (this.openStringMidi[s] || 64) + f;
-          const freq = 440 * Math.pow(2, (midi - 69) / 12);
-          this._playPluckedString(now + idx * 0.012, freq, holdDur, 0.16);
+          const strumOffset = idx * 0.020; // 20ms stagger per string
+          const stringLevel = s >= 5 ? 0.23 : 0.19;
+          this._playPluckedString(now + strumOffset, midi, holdDur, stringLevel, s >= 4);
         });
       }
     }
   }
 
-  _playPluckedString(time, freq, duration, level) {
+  _playPluckedString(time, midi, duration, level, isWound = false) {
     const ctx = this.audioCtx;
     if (!ctx) return;
+    this._ensureGuitarBus();
+
     const t = Math.max(time || 0, ctx.currentTime);
+    const buffer = this._getOrRenderStringBuffer(midi, isWound);
 
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
 
-    osc1.type = "triangle";
-    osc2.type = "sawtooth";
-    osc1.frequency.setValueAtTime(freq, t);
-    osc2.frequency.setValueAtTime(freq * 2, t); // 2nd harmonic warmth
+    const gainNode = ctx.createGain();
+    const peak = Math.max(0.01, this.volume * level);
+    const releaseAt = Math.max(t + 0.08, t + duration - 0.08);
+    const stopAt = t + duration + 0.02;
 
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(freq * 4.5, t);
-    filter.frequency.exponentialRampToValueAtTime(freq * 1.2, t + duration * 0.85);
+    gainNode.gain.setValueAtTime(peak, t);
+    gainNode.gain.setValueAtTime(peak, releaseAt);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, stopAt);
 
-    const peak = this.volume * level;
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.linearRampToValueAtTime(peak, t + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    source.connect(gainNode);
+    gainNode.connect(this._guitarBus || ctx.destination);
 
-    const osc2Gain = ctx.createGain();
-    osc2Gain.gain.setValueAtTime(0.22, t);
+    const voiceRecord = { source, gainNode, startTime: t, stopAt, level: peak };
+    this._activeVoices.push(voiceRecord);
 
-    osc1.connect(filter);
-    osc2.connect(osc2Gain);
-    osc2Gain.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc1.onended = () => {
-      osc1.disconnect();
-      osc2.disconnect();
-      osc2Gain.disconnect();
-      filter.disconnect();
-      gain.disconnect();
+    source.onended = () => {
+      source.disconnect();
+      gainNode.disconnect();
+      this._activeVoices = this._activeVoices.filter(v => v !== voiceRecord);
     };
 
-    osc1.start(t);
-    osc2.start(t);
-    osc1.stop(t + duration);
-    osc2.stop(t + duration);
+    source.start(t);
+    source.stop(stopAt);
   }
 
-  _playWoodblock(time, freq, gainLevel) {
+  // Ultra-tight 15-25ms Web Audio percussive click synthesizer:
+  // exponentially decaying noise burst + high-Q bandpass woodblock impulse
+  _playPercussiveClick(time, centerFreq = 1200, gainLevel = 0.85, qFactor = 6.5, decaySec = 0.020) {
     const ctx = this.audioCtx;
     if (!ctx) return;
     const t = Math.max(time || 0, ctx.currentTime);
+    const clickDur = Math.max(0.015, Math.min(0.025, decaySec));
+    const level = Math.max(0.05, this.volume * gainLevel);
 
+    // 1. Short exponentially decaying noise burst shaped through a high-Q bandpass filter
+    const noiseBuf = this._ensureClickNoiseBuffer();
+    if (noiseBuf) {
+      const noiseSrc = ctx.createBufferSource();
+      noiseSrc.buffer = noiseBuf;
+
+      const bandpass = ctx.createBiquadFilter();
+      bandpass.type = "bandpass";
+      bandpass.frequency.setValueAtTime(centerFreq, t);
+      bandpass.Q.setValueAtTime(qFactor, t);
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(level * 1.1, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + clickDur);
+
+      noiseSrc.connect(bandpass);
+      bandpass.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+
+      noiseSrc.onended = () => {
+        noiseSrc.disconnect();
+        bandpass.disconnect();
+        noiseGain.disconnect();
+      };
+
+      noiseSrc.start(t);
+      noiseSrc.stop(t + clickDur + 0.004);
+    }
+
+    // 2. Short woodblock resonant pitch impulse (1200 Hz accent / 800 Hz beat, zero sustain)
     const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
+    const oscGain = ctx.createGain();
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, t);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, t + 0.04);
+    osc.frequency.setValueAtTime(centerFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(200, centerFreq * 0.88), t + clickDur);
 
-    gain.gain.setValueAtTime(this.volume * gainLevel, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    oscGain.gain.setValueAtTime(0.0005, t);
+    oscGain.gain.linearRampToValueAtTime(level * 0.68, t + 0.0012);
+    oscGain.gain.exponentialRampToValueAtTime(0.0001, t + clickDur);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
 
     osc.onended = () => {
       osc.disconnect();
-      gain.disconnect();
+      oscGain.disconnect();
     };
 
     osc.start(t);
-    osc.stop(t + 0.05);
+    osc.stop(t + clickDur + 0.004);
   }
 
   _playMutedThud(time) {
     const ctx = this.audioCtx;
     if (!ctx) return;
     const t = Math.max(time || 0, ctx.currentTime);
+    const noiseBuf = this._ensureClickNoiseBuffer();
+    if (noiseBuf) {
+      const noiseSrc = ctx.createBufferSource();
+      noiseSrc.buffer = noiseBuf;
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+      const lp = ctx.createBiquadFilter();
+      lp.type = "bandpass";
+      lp.frequency.setValueAtTime(240, t);
+      lp.Q.setValueAtTime(2.8, t);
 
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(180, t);
-    osc.frequency.exponentialRampToValueAtTime(60, t + 0.04);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(Math.max(0.02, this.volume * 0.55), t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
 
-    gain.gain.setValueAtTime(this.volume * 0.45, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.onended = () => {
-      osc.disconnect();
-      gain.disconnect();
-    };
-
-    osc.start(t);
-    osc.stop(t + 0.05);
-  }
-
-  _playBeep(time, freq, gainLevel) {
-    const ctx = this.audioCtx;
-    if (!ctx) return;
-    const t = Math.max(time || 0, ctx.currentTime);
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, t);
-
-    gain.gain.setValueAtTime(this.volume * gainLevel, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.onended = () => {
-      osc.disconnect();
-      gain.disconnect();
-    };
-
-    osc.start(t);
-    osc.stop(t + 0.06);
-  }
-
-  _playDrum(time, isAccent) {
-    const ctx = this.audioCtx;
-    if (!ctx) return;
-    const t = Math.max(time || 0, ctx.currentTime);
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(isAccent ? 160 : 100, t);
-    osc.frequency.exponentialRampToValueAtTime(30, t + 0.08);
-
-    gain.gain.setValueAtTime(this.volume * (isAccent ? 0.9 : 0.6), t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.onended = () => {
-      osc.disconnect();
-      gain.disconnect();
-    };
-
-    osc.start(t);
-    osc.stop(t + 0.08);
-  }
-
-  _playChime(time, freq, duration) {
-    const ctx = this.audioCtx;
-    if (!ctx) return;
-    const t = Math.max(time || 0, ctx.currentTime);
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, t);
-
-    gain.gain.setValueAtTime(this.volume * 0.7, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.onended = () => {
-      osc.disconnect();
-      gain.disconnect();
-    };
-
-    osc.start(t);
-    osc.stop(t + duration);
+      noiseSrc.connect(lp);
+      lp.connect(gain);
+      gain.connect(ctx.destination);
+      noiseSrc.onended = () => {
+        noiseSrc.disconnect();
+        lp.disconnect();
+        gain.disconnect();
+      };
+      noiseSrc.start(t);
+      noiseSrc.stop(t + 0.025);
+    }
   }
 
   setSoundType(type) {
