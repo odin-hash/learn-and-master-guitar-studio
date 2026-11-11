@@ -1,6 +1,5 @@
 ﻿$ErrorActionPreference = "Stop"
-$root = $PSScriptRoot
-if (-not $root) { $root = "C:\Users\govin\.gemini\antigravity\scratch\guitar-master-metronome" }
+$root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { "C:\Users\govin\.gemini\antigravity\scratch\guitar-master-metronome" }
 $artifactFile = "C:\Users\govin\.gemini\antigravity\brain\8def1509-2011-4df8-b8fc-420615ecf64f\guitar_metronome_companion.html"
 
 Write-Host "--- Starting Bundle Compilation ---" -ForegroundColor Cyan
@@ -14,7 +13,6 @@ $requiredFiles = @(
     "audio.js",
     "dial.js",
     "fretboard.js",
-    "tab.js",
     "src\data\primerCatalog.js",
     "src\components\FoundationsPrimer.js",
     "app.js"
@@ -57,11 +55,6 @@ Write-Host "Reading fretboard.js..."
 $fretboardJs = [System.IO.File]::ReadAllText((Join-Path $root "fretboard.js"), [System.Text.Encoding]::UTF8)
 $fretboardJs = $fretboardJs -replace "export\s+class\s+FretboardVisualizer", "class FretboardVisualizer"
 
-Write-Host "Reading tab.js..."
-$tabJs = [System.IO.File]::ReadAllText((Join-Path $root "tab.js"), [System.Text.Encoding]::UTF8)
-$tabJs = $tabJs -replace 'import\s*\{[^}]+\}\s*from\s*["''][^"'']+["''];?', ''
-$tabJs = $tabJs -replace "export\s+class\s+TabStaffVisualizer", "class TabStaffVisualizer"
-
 Write-Host "Reading src/data/primerCatalog.js..."
 $primerCatalogJs = [System.IO.File]::ReadAllText((Join-Path $root "src\data\primerCatalog.js"), [System.Text.Encoding]::UTF8)
 $primerCatalogJs = $primerCatalogJs -replace "export\s+(const|function|class)\s+", '$1 '
@@ -85,6 +78,7 @@ $htmlHeader = @"
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learn &amp; Master Guitar &mdash; Practice Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2318181B'/%3E%3Cpath d='M18.5 7v11.2a4.2 4.2 0 1 1-2.2-3.7V9.4l7-1.9V11l-4.8 1.3z' fill='%23FFFEFC'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
@@ -126,7 +120,6 @@ $css
     </div>
 
     <div class="topbar-right">
-      <button type="button" class="topbar-action-btn topbar-primer-only" id="btn-primer-top-studio">Curriculum Studio &rarr;</button>
       <div class="topbar-studio-only topbar-studio-actions">
         <div class="topbar-steppers">
           <button class="icon-btn" id="btn-prev-exercise" title="Previous Exercise (&larr;)" aria-label="Previous Exercise">
@@ -304,7 +297,7 @@ $css
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
             </label>
-            <a class="micro-pill" id="pdf-open-newtab" href="./Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
+            <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
           </div>
         </div>
         <div class="pdf-frame-wrap">
@@ -435,7 +428,6 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine($audioJs)
 [void]$sb.AppendLine($dialJs)
 [void]$sb.AppendLine($fretboardJs)
-[void]$sb.AppendLine($tabJs)
 [void]$sb.AppendLine($primerCatalogJs)
 [void]$sb.AppendLine($primerJs)
 [void]$sb.AppendLine($appJs)

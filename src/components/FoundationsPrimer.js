@@ -97,7 +97,7 @@ export class FoundationsPrimer {
               `).join("")}
             </div>
             <div class="primer-search-wrap">
-              <input type="text" id="primer-search-input" class="primer-search-input" placeholder="Filter symbols (tie, dotted, rest, sharp...)" autocomplete="off">
+              <input type="text" id="primer-search-input" class="primer-search-input" placeholder="Filter symbols..." autocomplete="off">
             </div>
           </div>
         </header>
@@ -455,9 +455,9 @@ export class FoundationsPrimer {
     targetEl.innerHTML = "";
     const SVG_NS = "http://www.w3.org/2000/svg";
     const isTall = spec.kind === "tab-vs-std" || spec.kind === "open-strings" || spec.kind === "string-circles";
-    const width = 152;
-    const height = isTall ? 110 : 74;
-    const scale = 0.72;
+    const width = 160;
+    const height = isTall ? 124 : 76;
+    const scale = 0.75;
     const lw = Math.round(width / scale);
     const lh = Math.round(height / scale);
 
@@ -470,6 +470,7 @@ export class FoundationsPrimer {
       const svg = targetEl.querySelector("svg");
       if (svg) {
         svg.setAttribute("viewBox", `0 0 ${lw} ${lh}`);
+        svg.style.overflow = "visible";
         svg.classList.add("primer-vf-svg");
       }
 
@@ -513,7 +514,7 @@ export class FoundationsPrimer {
       const kind = spec.kind;
 
       if (kind === "stave-lines-spaces") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const stave = new VF.Stave(8, 22, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes);
@@ -524,21 +525,21 @@ export class FoundationsPrimer {
         drawOverlayText(lw - 6, stave.getYForLine(0) + 3, "5", "primer-vf-linenum");
         drawOverlayText(lw - 6, stave.getYForLine(4) + 3, "1", "primer-vf-linenum");
       } else if (kind === "ledger") {
-        const stave = new VF.Stave(8, 14, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 21, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes);
-        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 28, "Middle C", "primer-vf-annot");
+        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 27, "Middle C", "primer-vf-annot");
       } else if (kind === "treble-clef") {
-        const stave = new VF.Stave(8, 12, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const stave = new VF.Stave(8, 22, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         stave.setContext(ctx).draw();
         const gNote = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "w" });
         gNote.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [gNote]);
-        drawOverlayText(gNote.getAbsoluteX() + 8, stave.getYForLine(0) - 6, "Line 2 = G", "primer-vf-annot-accent");
+        drawOverlayText(gNote.getAbsoluteX() + 8, stave.getYForLine(0) - 9, "Line 2 = G", "primer-vf-annot-accent");
       } else if (kind === "tab-vs-std") {
-        const stave = new VF.Stave(14, 6, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(14, 72, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(14, 22, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(14, 88, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
@@ -559,14 +560,14 @@ export class FoundationsPrimer {
         v2.draw(ctx, tab);
       } else if (kind === "barlines") {
         const halfW = Math.floor((lw - 16) / 2);
-        const s1 = new VF.Stave(8, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
-        const s2 = new VF.Stave(8 + halfW, 14, halfW).setEndBarType(VF.Barline.type.END).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const s1 = new VF.Stave(8, 24, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const s2 = new VF.Stave(8 + halfW, 24, halfW).setEndBarType(VF.Barline.type.END).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
-        drawOverlayText(8 + halfW, 10, "Barline");
-        drawOverlayText(lw - 22, 10, "End");
+        drawOverlayText(8 + halfW, 14, "Barline");
+        drawOverlayText(lw - 22, 14, "End");
       } else if (kind === "repeat") {
-        const s1 = new VF.Stave(10, 14, lw - 20)
+        const s1 = new VF.Stave(10, 22, lw - 20)
           .setBegBarType(VF.Barline.type.REPEAT_BEGIN)
           .setEndBarType(VF.Barline.type.REPEAT_END)
           .setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
@@ -574,35 +575,35 @@ export class FoundationsPrimer {
         const notes = makeNotes(["g/4/h", "g/4/h"]);
         formatAndDraw(s1, notes);
       } else if (kind === "notes") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes, { num_beats: 6, beat_value: 4 });
         drawOverlayText(notes[0].getAbsoluteX() + 7, stave.getYForLine(4) + 22, "4 Beats");
         drawOverlayText(notes[1].getAbsoluteX() + 6, stave.getYForLine(4) + 22, "2 Beats");
       } else if (kind === "quarter-eighth") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["g/4/q", "g/4/8", "g/4/8"]);
         formatAndDraw(stave, notes, { num_beats: 2, beat_value: 4 }, true);
         drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1 Beat");
         drawOverlayText((notes[1].getAbsoluteX() + notes[2].getAbsoluteX()) / 2 + 5, stave.getYForLine(4) + 22, "1/2 + 1/2");
       } else if (kind === "whole-half-rests") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["d/5/wr", "b/4/hr"]);
         formatAndDraw(stave, notes, { num_beats: 6, beat_value: 4 });
         drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Whole (4)", "primer-vf-annot-rest");
         drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Half (2)", "primer-vf-annot-rest");
       } else if (kind === "quarter-eighth-rests") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["b/4/qr", "b/4/8r"]);
         formatAndDraw(stave, notes, { num_beats: 2, beat_value: 4 });
         drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1 Beat", "primer-vf-annot-rest");
         drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1/2 Beat", "primer-vf-annot-rest");
       } else if (kind === "dotted-half") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "h", align_center: true });
         VF.Dot.buildAndAttach([n], { all: true });
@@ -610,7 +611,7 @@ export class FoundationsPrimer {
         formatAndDraw(stave, [n], { num_beats: 3, beat_value: 4 });
         drawOverlayText(lw / 2, stave.getYForLine(4) + 22, "2 + 1 = 3 Beats", "primer-vf-annot-blue");
       } else if (kind === "dotted-quarter") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "q" });
         VF.Dot.buildAndAttach([n1], { all: true });
@@ -619,8 +620,8 @@ export class FoundationsPrimer {
         drawOverlayText(n1.getAbsoluteX() + 8, stave.getYForLine(4) + 22, "1 + 1/2", "primer-vf-annot-blue");
       } else if (kind === "tie-vs-slur") {
         const halfW = Math.floor((lw - 16) / 2);
-        const s1 = new VF.Stave(8, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(8 + halfW, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s1 = new VF.Stave(8, 24, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(8 + halfW, 24, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         const tNotes = makeNotes(["g/4/h", "g/4/h"]);
@@ -631,32 +632,32 @@ export class FoundationsPrimer {
         if (VF.Curve) {
           new VF.Curve(slNotes[0], slNotes[1], { cps: [{ x: 0, y: 12 }, { x: 0, y: 12 }] }).setContext(ctx).draw();
         }
-        drawOverlayText(8 + halfW / 2, 10, "Tie (Hold)", "primer-vf-annot-accent");
-        drawOverlayText(8 + halfW * 1.5, 10, "Slur");
+        drawOverlayText(8 + halfW / 2, 14, "Tie (Hold)", "primer-vf-annot-accent");
+        drawOverlayText(8 + halfW * 1.5, 14, "Slur");
       } else if (kind === "time-sigs") {
-        const s1 = new VF.Stave(6, 12, Math.floor((lw - 12) / 3) + 12).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(s1.getX() + s1.getWidth(), 12, Math.floor((lw - 12) / 3) - 6).addTimeSignature("3/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s3 = new VF.Stave(s2.getX() + s2.getWidth(), 12, Math.floor((lw - 12) / 3) - 6).addTimeSignature("C").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s1 = new VF.Stave(6, 22, Math.floor((lw - 12) / 3) + 12).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(s1.getX() + s1.getWidth(), 22, Math.floor((lw - 12) / 3) - 6).addTimeSignature("3/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s3 = new VF.Stave(s2.getX() + s2.getWidth(), 22, Math.floor((lw - 12) / 3) - 6).addTimeSignature("C").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         s3.setContext(ctx).draw();
       } else if (kind === "key-sigs") {
         const halfW = Math.floor((lw - 14) / 2);
-        const s1 = new VF.Stave(7, 14, halfW).addClef("treble").addKeySignature("G").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(7 + halfW, 14, halfW).addClef("treble").addKeySignature("F").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s1 = new VF.Stave(7, 21, halfW).addClef("treble").addKeySignature("G").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(7 + halfW, 21, halfW).addClef("treble").addKeySignature("F").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
-        drawOverlayText(7 + halfW / 2, s1.getYForLine(4) + 20, "Key of G (F#)");
-        drawOverlayText(7 + halfW * 1.5, s2.getYForLine(4) + 20, "Key of F (Bb)");
+        drawOverlayText(7 + halfW / 2, s1.getYForLine(4) + 27, "Key of G (F#)");
+        drawOverlayText(7 + halfW * 1.5, s2.getYForLine(4) + 27, "Key of F (Bb)");
       } else if (kind === "accidental") {
-        const stave = new VF.Stave(8, 12, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 22, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n = new VF.StaveNote({ clef: "treble", keys: [spec.vexKey], duration: "h", align_center: true });
         n.addModifier(new VF.Accidental(spec.acc), 0);
         n.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [n], { num_beats: 2, beat_value: 4 });
       } else if (kind === "natural-pair") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f#/4"], duration: "h" });
         n1.addModifier(new VF.Accidental("#"), 0);
@@ -664,11 +665,11 @@ export class FoundationsPrimer {
         n2.addModifier(new VF.Accidental("n"), 0);
         n2.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [n1, n2]);
-        drawOverlayText(n2.getAbsoluteX() + 6, stave.getYForLine(4) + 22, "Reset ♮", "primer-vf-annot-accent");
+        drawOverlayText(n2.getAbsoluteX() + 6, stave.getYForLine(4) + 22, "Reset \u266E", "primer-vf-annot-accent");
       } else if (kind === "barline-reset") {
         const halfW = Math.floor((lw - 14) / 2);
-        const s1 = new VF.Stave(7, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(7 + halfW, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s1 = new VF.Stave(7, 20, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(7 + halfW, 20, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f#/4"], duration: "h" }).addModifier(new VF.Accidental("#"), 0);
@@ -677,10 +678,10 @@ export class FoundationsPrimer {
         const n3 = new VF.StaveNote({ clef: "treble", keys: ["f/4"], duration: "w" });
         n3.setStyle({ fillStyle: "#15803D", strokeStyle: "#15803D" });
         formatAndDraw(s2, [n3]);
-        drawOverlayText(n2.getAbsoluteX() + 4, s1.getYForLine(4) + 20, "Still #");
-        drawOverlayText(n3.getAbsoluteX() + 6, s2.getYForLine(4) + 20, "Auto ♮!", "primer-vf-annot-green");
+        drawOverlayText(n2.getAbsoluteX() + 4, s1.getYForLine(4) + 22, "Still #");
+        drawOverlayText(n3.getAbsoluteX() + 6, s2.getYForLine(4) + 22, "Auto \u266E!", "primer-vf-annot-green");
       } else if (kind === "picks") {
-        const stave = new VF.Stave(8, 18, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 24, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["e/5"], duration: "8" });
         const n2 = new VF.StaveNote({ clef: "treble", keys: ["e/5"], duration: "8" });
@@ -691,17 +692,24 @@ export class FoundationsPrimer {
           } catch (e) {}
         }
         formatAndDraw(stave, [n1, n2], { num_beats: 1, beat_value: 4 }, true);
-        drawOverlayText(n1.getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Down (∏)");
+        drawOverlayText(n1.getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Down (\u220F)");
         drawOverlayText(n2.getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Up (V)");
       } else if (kind === "string-circles") {
-        const stave = new VF.Stave(12, 16, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(12, 74, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(12, 28, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(12, 92, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
         stave.setNoteStartX(startX);
         tab.setNoteStartX(startX);
         const notes = makeNotes(["e/5/q", "b/4/q", "g/4/q"]);
+        if (VF.StringNumber && VF.Modifier) {
+          notes.forEach((n, idx) => {
+            const snMod = new VF.StringNumber(String(idx + 1)).setPosition(VF.Modifier.Position.ABOVE);
+            snMod.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
+            n.addModifier(snMod, 0);
+          });
+        }
         const tabs = [
           new VF.TabNote({ positions: [{ str: 1, fret: "0" }], duration: "q" }),
           new VF.TabNote({ positions: [{ str: 2, fret: "0" }], duration: "q" }),
@@ -712,23 +720,8 @@ export class FoundationsPrimer {
         new VF.Formatter().joinVoices([v1, v2]).format([v1, v2], lw - startX - 18);
         v1.draw(ctx, stave);
         v2.draw(ctx, tab);
-        notes.forEach((n, idx) => {
-          const cx = n.getAbsoluteX() + 5;
-          const cy = 11;
-          if (svg) {
-            const c = document.createElementNS(SVG_NS, "circle");
-            c.setAttribute("cx", String(cx));
-            c.setAttribute("cy", String(cy));
-            c.setAttribute("r", "7");
-            c.setAttribute("fill", "#FFFEFC");
-            c.setAttribute("stroke", "#C2410C");
-            c.setAttribute("stroke-width", "1.3");
-            svg.appendChild(c);
-          }
-          drawOverlayText(cx, cy + 3.5, String(idx + 1), "primer-vf-annot-accent");
-        });
       } else if (kind === "finger-numbers") {
-        const stave = new VF.Stave(8, 16, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 22, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f/5"], duration: "q" });
         const n2 = new VF.StaveNote({ clef: "treble", keys: ["f#/5"], duration: "q" }).addModifier(new VF.Accidental("#"), 0);
@@ -740,8 +733,8 @@ export class FoundationsPrimer {
           drawOverlayText(n.getAbsoluteX() + 6, stave.getYForLine(4) + 22, String(i + 1), "primer-vf-annot-accent");
         });
       } else if (kind === "open-strings") {
-        const stave = new VF.Stave(12, 8, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(12, 72, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(12, 24, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(12, 88, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
@@ -758,9 +751,9 @@ export class FoundationsPrimer {
         new VF.Formatter().joinVoices([v1, v2]).format([v1, v2], lw - startX - 18);
         v1.draw(ctx, stave);
         v2.draw(ctx, tab);
-        notes.forEach(n => drawOverlayText(n.getAbsoluteX() + 5, stave.getYForLine(0) - 4, "0", "primer-vf-annot-green"));
+        notes.forEach(n => drawOverlayText(n.getAbsoluteX() + 5, stave.getYForLine(0) - 7, "0", "primer-vf-annot-green"));
       } else if (kind === "muting") {
-        const stave = new VF.Stave(8, 12, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(8, 20, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["e/5/q", "b/4/qr", "e/5/q", "b/4/qr"]);
         formatAndDraw(stave, notes);
@@ -783,8 +776,8 @@ export class FoundationsPrimer {
 
     targetEl.innerHTML = "";
     const width = 260;
-    const height = 104;
-    const scale = 0.86;
+    const height = 112;
+    const scale = 0.82;
     const lw = Math.round(width / scale);
     const lh = Math.round(height / scale);
 
@@ -794,9 +787,12 @@ export class FoundationsPrimer {
       const ctx = renderer.getContext();
       ctx.scale(scale, scale);
       const svg = targetEl.querySelector("svg");
-      if (svg) svg.setAttribute("viewBox", `0 0 ${lw} ${lh}`);
+      if (svg) {
+        svg.setAttribute("viewBox", `0 0 ${lw} ${lh}`);
+        svg.style.overflow = "visible";
+      }
 
-      const stave = new VF.Stave(14, 14, lw - 28).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+      const stave = new VF.Stave(14, 24, lw - 28).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
       stave.setContext(ctx).draw();
 
       let notes = [];

@@ -1,6 +1,5 @@
 $port = 5173
-$folder = $PSScriptRoot
-if (-not $folder) { $folder = "C:\Users\govin\.gemini\antigravity\scratch\guitar-master-metronome" }
+$folder = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { "C:\Users\govin\.gemini\antigravity\scratch\guitar-master-metronome" }
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")

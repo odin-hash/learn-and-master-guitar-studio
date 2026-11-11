@@ -19,15 +19,15 @@ A complete interactive web companion for **Steve Krenz's *Learn & Master Guitar:
 
 ## Build & Run
 ```powershell
-# 1. Compile and generate exercises.js from MasterCourseGenerator.cs
-csc.exe /out:MasterCourseGenerator.exe MasterCourseGenerator.cs
+# 1. Compile and generate exercises.js from scripts/MasterCourseGenerator.cs
+csc.exe /out:MasterCourseGenerator.exe scripts\MasterCourseGenerator.cs
 .\MasterCourseGenerator.exe exercises.js
 
 # 2. Bundle into standalone index.html
-.\bundle.ps1
+.\scripts\bundle.ps1
 
 # 3. Launch local server
-.\server.ps1
+.\scripts\server.ps1
 ```
 
 ---

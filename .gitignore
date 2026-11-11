@@ -4,8 +4,12 @@
 *.pdb
 *.apk
 
-# Heavy books and raw data
+# Heavy books and raw data at repo root (deployed PDFs live inside assets/)
 *.pdf
+!assets/
+!assets/*.pdf
+/*.ps1
+/*.cs
 *.txt
 *.png
 *.jpg

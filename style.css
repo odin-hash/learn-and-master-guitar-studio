@@ -2690,13 +2690,13 @@ body[data-app-mode="studio"] .primer-view {
 }
 
 .primer-page-sheet {
-  max-width: 1020px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 46px 52px 54px;
+  padding: 40px 44px 52px;
   background: var(--bg-book-page, #FFFEFC);
   border: 1px solid var(--book-page-border, #E5E4DF);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  border-radius: 3px;
+  border-radius: 8px;
 }
 
 .primer-hero {
@@ -2815,7 +2815,7 @@ body[data-app-mode="studio"] .primer-view {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .primer-cat-pills {
@@ -2823,11 +2823,16 @@ body[data-app-mode="studio"] .primer-view {
   align-items: center;
   gap: 4px;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.primer-search-wrap {
+  flex-shrink: 0;
 }
 
 .primer-cat-pill {
   height: 28px;
-  padding: 0 10px;
+  padding: 0 9px;
   border-radius: 6px;
   border: 1px solid var(--border-hairline);
   background: var(--bg-canvas);
@@ -2835,6 +2840,7 @@ body[data-app-mode="studio"] .primer-view {
   font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.12s ease;
 }
 
@@ -2851,7 +2857,7 @@ body[data-app-mode="studio"] .primer-view {
 }
 
 .primer-search-input {
-  width: 245px;
+  width: 220px;
   height: 28px;
   padding: 0 10px;
   border-radius: 6px;
@@ -2899,8 +2905,8 @@ body[data-app-mode="studio"] .primer-view {
 }
 
 .primer-table-wrap {
-  border: 1px solid var(--border-hairline, #E4E4E7);
-  border-radius: 6px;
+  border: 1px solid #E5E4DF;
+  border-radius: 8px;
   overflow-x: auto;
   background: #FFFEFC;
 }
@@ -2943,23 +2949,24 @@ body[data-app-mode="studio"] .primer-view {
 }
 
 .primer-col-symbol {
-  width: 168px;
+  width: 180px;
 }
 
 .primer-vf-cell {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 152px;
-  min-height: 70px;
+  min-width: 164px;
+  min-height: 76px;
   background: #FFFFFF;
   border: 1px solid var(--border-hairline);
-  border-radius: 5px;
-  padding: 2px;
+  border-radius: 6px;
+  padding: 4px;
 }
 
 .primer-vf-svg {
   display: block;
+  overflow: visible;
 }
 
 .primer-vf-annot {
@@ -3576,6 +3583,16 @@ body[data-app-mode="studio"] .primer-view {
   .jam-speed-presets,
   .dock-select-wrap .dock-lbl {
     display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .primer-filter-bar {
+    flex-wrap: wrap;
+  }
+  .primer-search-wrap,
+  .primer-search-input {
+    width: 100%;
   }
 }
 

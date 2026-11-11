@@ -5,7 +5,6 @@ import { GuitarSpeedDial } from "./dial.js";
 import { FretboardVisualizer } from "./fretboard.js";
 import { FoundationsPrimer } from "./src/components/FoundationsPrimer.js";
 import { ScoreRenderer } from "./src/components/ScoreRenderer.js";
-import { TabStaffVisualizer } from "./tab.js";
 
 export class GuitarMasterApp {
   constructor() {
@@ -240,7 +239,6 @@ export class GuitarMasterApp {
     this.workspaceBody = document.getElementById("workspace-body");
     this.appModeTabs = document.getElementById("app-mode-tabs");
     this.primerViewEl = document.getElementById("primer-view");
-    this.btnPrimerTopStudio = document.getElementById("btn-primer-top-studio");
     this.btnToggleDrawer = document.getElementById("btn-toggle-drawer");
     this.navCrumbSession = document.getElementById("nav-crumb-session");
     this.studioExerciseTitle = document.getElementById("studio-exercise-title");
@@ -931,21 +929,22 @@ export class GuitarMasterApp {
 
   getPdfFilename(cat) {
     return cat === "bonusWorkshop"
-      ? "Learn-and-Master-Guitar-Bonus-Workshop-Book.pdf"
-      : "Learn-and-Master-Guitar-Lesson-Book.pdf";
+      ? "assets/Learn-and-Master-Guitar-Bonus-Workshop-Book.pdf"
+      : "assets/Learn-and-Master-Guitar-Lesson-Book.pdf";
   }
 
   async loadPdfFrame() {
     if (!this.pdfViewerFrame) return;
     const seq = ++this._pdfLoadSeq;
     const filename = this.getPdfFilename(this.pdfBookCategory);
+    const displayFilename = filename.replace(/^assets\//, "");
     const customUrl = this.customPdfUrls[this.pdfBookCategory];
     const baseSrc = customUrl || this.resolveAssetUrl(filename);
     const page = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
     const fullUrl = `${baseSrc}#page=${page}&view=FitH`;
 
     if (this.pdfOpenNewTab) this.pdfOpenNewTab.href = fullUrl;
-    if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = filename;
+    if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = displayFilename;
 
     if (!customUrl && (window.location.protocol === "http:" || window.location.protocol === "https:")) {
       try {
@@ -2392,12 +2391,6 @@ export class GuitarMasterApp {
         btn.addEventListener("click", () => {
           this.setAppMode(btn.dataset.appMode);
         });
-      });
-    }
-
-    if (this.btnPrimerTopStudio) {
-      this.btnPrimerTopStudio.addEventListener("click", () => {
-        this.setAppMode("studio");
       });
     }
 
