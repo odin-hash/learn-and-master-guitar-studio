@@ -417,6 +417,9 @@ export class ScoreRenderer {
   _getMeasuresPerSystem(containerWidth) {
     if (!this.measures || this.measures.length === 0) return 4;
     const total = this.measures.length;
+    if (total <= 8) {
+      return total;
+    }
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 4);
     let mps = 4;
     if (maxEvents >= 8) {
@@ -472,14 +475,21 @@ export class ScoreRenderer {
     const availW = Math.max(320, this.container.clientWidth || 760);
     this._lastRenderWidth = availW;
 
-    const SCALE = 0.82;
-    const logicalW = Math.floor(availW / SCALE);
-    const mps = this._getMeasuresPerSystem(availW);
-
     const showTreble = this.hasStandardStaff(this.exercise);
     const isMetOnly = Boolean(this.exercise && (this.exercise.isMetronomeOnly || this.exercise.id === "free-metronome"));
     const showTab = !isMetOnly && (!showTreble || this.tabVisibilityMode !== "staff-only");
     const isTabBlurred = showTab && this.tabVisibilityMode === "blur";
+
+    const baseScale = 0.82;
+    const mps = this._getMeasuresPerSystem(availW);
+    const leftGutter = showTreble && showTab ? 18 : 6;
+    const clefExtra = showTreble ? 78 : 54;
+    const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 1);
+    const minPerBar = maxEvents >= 6 ? 152 : (maxEvents >= 4 ? 128 : 112);
+    const minLogicalW = mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0;
+    const logicalW = Math.max(Math.floor(availW / baseScale), minLogicalW);
+    const SCALE = availW / logicalW;
+    this._activeScale = SCALE;
 
     const systems = [];
     for (let i = 0; i < totalMeasures; i += mps) {
@@ -537,6 +547,9 @@ export class ScoreRenderer {
       if (svgEl) {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
+        svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
+        svgEl.removeAttribute("width");
+        svgEl.removeAttribute("height");
       }
 
       const backdropLayer = document.createElementNS(SVG_NS, "g");
@@ -573,8 +586,6 @@ export class ScoreRenderer {
         });
       };
 
-      const leftGutter = showTreble && showTab ? 18 : 6;
-      const clefExtra = showTreble ? 78 : 54;
       const usableW = logicalW - leftGutter - 6;
       const countInRow = sys.items.length;
       const barGridCols = countInRow === 1 && totalMeasures > 1 ? Math.min(2, mps) : countInRow;
@@ -1201,7 +1212,7 @@ export class ScoreRenderer {
       return;
     }
 
-    const SCALE = 0.82;
+    const SCALE = this._activeScale || 0.82;
     const pill = this._coachPillEl;
     const variant = coachMeta.variant || "play";
     pill.className = `vf-coach-pill is-${variant}`;
@@ -1262,7 +1273,17 @@ export class ScoreRenderer {
       entry.textEls.forEach(el => el.classList.add(cls));
 
       if (beatIdx === 0 && entry.sysEl) {
-        entry.sysEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const viewport = this.container ? this.container.closest(".studio-score-viewport") : null;
+        if (viewport) {
+          const vpRect = viewport.getBoundingClientRect();
+          const sysRect = entry.sysEl.getBoundingClientRect();
+          if (sysRect.top < vpRect.top + 8 || sysRect.bottom > vpRect.bottom - 8) {
+            const targetTop = viewport.scrollTop + (sysRect.top - vpRect.top) - 12;
+            viewport.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+          }
+        } else {
+          entry.sysEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       }
     }
 

@@ -306,15 +306,19 @@ export class MetronomeAudioEngine {
     } catch (e) {}
   }
 
-  playBeat(time, isAccent = false, isRest = false, isCountIn = false) {
+  playBeat(time, accentLevel = false, isRest = false, isCountIn = false) {
     if (!this.audioCtx) this.init();
 
     const ctx = this.audioCtx;
     const now = Math.max(time || 0, ctx.currentTime);
+    const level = typeof accentLevel === "string"
+      ? accentLevel
+      : (accentLevel ? "accent" : "normal");
 
     if (isCountIn) {
       // Crisp 18ms percussive count-in woodblock click (1200 Hz Beat 1 / 800 Hz Beats 2-4)
-      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.62, 6.5, 0.018);
+      const isPrimary = level === "accent";
+      this._playPercussiveClick(now, isPrimary ? 1200 : 800, isPrimary ? 0.95 : 0.62, 6.5, 0.018);
       return;
     }
 
@@ -333,14 +337,20 @@ export class MetronomeAudioEngine {
     }
 
     if (this.soundType === "drum") {
-      // Rim / percussive tick (900 Hz accent / 620 Hz beat)
-      this._playPercussiveClick(now, isAccent ? 900 : 620, isAccent ? 0.92 : 0.56, 4.2, 0.022);
+      // Rim / percussive tick (900 Hz primary / 760 Hz secondary / 620 Hz normal / 520 Hz sub)
+      const freq = level === "accent" ? 900 : (level === "secondary" ? 760 : (level === "sub" ? 520 : 620));
+      const gain = level === "accent" ? 0.92 : (level === "secondary" ? 0.74 : (level === "sub" ? 0.34 : 0.56));
+      this._playPercussiveClick(now, freq, gain, 4.2, level === "sub" ? 0.015 : 0.022);
     } else if (this.soundType === "click" || this.soundType === "beep") {
-      // High crisp digital wood click (1400 Hz / 950 Hz, 16ms)
-      this._playPercussiveClick(now, isAccent ? 1400 : 950, isAccent ? 0.90 : 0.54, 8.0, 0.016);
+      // High crisp digital wood click (1400 Hz / 1150 Hz / 950 Hz / 760 Hz sub)
+      const freq = level === "accent" ? 1400 : (level === "secondary" ? 1150 : (level === "sub" ? 760 : 950));
+      const gain = level === "accent" ? 0.90 : (level === "secondary" ? 0.72 : (level === "sub" ? 0.32 : 0.54));
+      this._playPercussiveClick(now, freq, gain, 8.0, level === "sub" ? 0.012 : 0.016);
     } else {
-      // Default Woodblock: 1200 Hz accent / 800 Hz regular beats (15ms-22ms percussive impulse)
-      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.58, 6.5, 0.020);
+      // Default Woodblock: 1200 Hz primary accent / 1000 Hz secondary / 800 Hz normal / 660 Hz sub
+      const freq = level === "accent" ? 1200 : (level === "secondary" ? 1000 : (level === "sub" ? 660 : 800));
+      const gain = level === "accent" ? 0.95 : (level === "secondary" ? 0.76 : (level === "sub" ? 0.34 : 0.58));
+      this._playPercussiveClick(now, freq, gain, 6.5, level === "sub" ? 0.014 : 0.020);
     }
   }
 

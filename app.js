@@ -31,6 +31,7 @@ export class GuitarMasterApp {
     this.scheduleAheadTime = 0.20; // seconds (200ms lookahead for rock-solid mobile scheduling)
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
     this.nextBeatTime = 0.0;
@@ -53,6 +54,11 @@ export class GuitarMasterApp {
     this.currentTopicExercises = [];
     this.chordMode = "full"; // "full" | "easy4" | "easy3"
     this.selectedSpiderString = 1;
+    this.freeMetTimeSignature = "4/4";
+    this.freeMetSubdivision = 1; // 1 = Quarter, 2 = Eighth, 3 = Triplets
+    this.freeMetBeatModes = ["accent", "normal", "normal", "normal"];
+    this._tapTimes = [];
+    this._tapFlashTimer = null;
 
     // Migrate / auto-reset incompatible v1 localStorage before reading progress or state
     this.ensureStorageVersion();
@@ -270,6 +276,19 @@ export class GuitarMasterApp {
 
     this.btnToggleFretboard = document.getElementById("btn-toggle-fretboard");
     this.fretboardWrapper = document.getElementById("fretboard-wrapper");
+    this.studioScoreViewport = document.getElementById("studio-score-viewport");
+    this.freeMetronomeStage = document.getElementById("free-metronome-stage");
+    this.freeMetBpmVal = document.getElementById("free-met-bpm-val");
+    this.freeMetBpmMinus5 = document.getElementById("free-met-bpm-minus5");
+    this.freeMetBpmMinus = document.getElementById("free-met-bpm-minus");
+    this.freeMetBpmPlus = document.getElementById("free-met-bpm-plus");
+    this.freeMetBpmPlus5 = document.getElementById("free-met-bpm-plus5");
+    this.freeMetBpmSlider = document.getElementById("free-met-bpm-slider");
+    this.freeMetTapBtn = document.getElementById("free-met-tap-btn");
+    this.freeMetTimesigGroup = document.getElementById("free-met-timesig-group");
+    this.freeMetSubdivGroup = document.getElementById("free-met-subdiv-group");
+    this.freeMetDotsRow = document.getElementById("free-met-dots-row");
+    this.freeMetStatusCue = document.getElementById("free-met-status-cue");
 
     // Printed Book Page & Tutor Scaffolding Elements
     this.bookPageSession = document.getElementById("book-page-session");
@@ -791,7 +810,11 @@ export class GuitarMasterApp {
       });
     }
 
-    if (mode === "studio") {
+    if (mode === "primer" && this.foundationsPrimer) {
+      requestAnimationFrame(() => {
+        this.foundationsPrimer.refreshSymbolsIfNeeded();
+      });
+    } else if (mode === "studio") {
       requestAnimationFrame(() => {
         this.activeTopicRenderers.forEach(entry => {
           if (entry.renderer) entry.renderer.render();
@@ -805,8 +828,12 @@ export class GuitarMasterApp {
   setPaneMode(mode) {
     if (!["score", "pdf", "split"].includes(mode)) mode = "score";
     this.paneMode = mode;
+    const isFreeMet = Boolean(
+      this.currentExercise &&
+      (this.currentExercise.bookCategory === "freeMetronome" || this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)
+    );
     if (this.workspaceBody) {
-      this.workspaceBody.dataset.paneMode = mode;
+      this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : mode;
     }
     if (this.workspaceViewTabs) {
       this.workspaceViewTabs.querySelectorAll(".seg-btn").forEach(btn => {
@@ -815,7 +842,7 @@ export class GuitarMasterApp {
         btn.setAttribute("aria-selected", isActive ? "true" : "false");
       });
     }
-    if (mode === "pdf" || mode === "split") {
+    if (!isFreeMet && (mode === "pdf" || mode === "split")) {
       this.loadPdfFrame();
     }
     this.saveState();
@@ -1458,6 +1485,11 @@ export class GuitarMasterApp {
       this.expandedSessions.add(`${found.bookCategory}_${found.sessionNumber}`);
     }
 
+    const isFreeMet = found.bookCategory === "freeMetronome" || found.id === "free-metronome" || Boolean(found.isMetronomeOnly);
+    if (isFreeMet) {
+      this.applyFreeTimeSignatureToExercise(this.currentExercise);
+    }
+
     if (!keepBpm) {
       this.setBpm(this.currentExercise.defaultBpm || 60);
     }
@@ -1465,10 +1497,15 @@ export class GuitarMasterApp {
     const ts = this.currentExercise.timeSignature || [4, 4];
     if (this.timePillBadge) {
       this.timePillBadge.textContent = `${ts[0]}/${ts[1]}`;
+      this.timePillBadge.classList.toggle("is-clickable", isFreeMet);
+      this.timePillBadge.title = isFreeMet
+        ? "Click to cycle Time Signature (2/4, 3/4, 4/4, 5/4, 6/8)"
+        : `Time Signature: ${ts[0]}/${ts[1]}`;
     }
 
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
 
@@ -1487,20 +1524,44 @@ export class GuitarMasterApp {
       chordGroup.style.display = hasChords ? "inline-flex" : "none";
     }
 
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.freeMetronome = isFreeMet ? "true" : "false";
+    }
+    if (this.workspaceBody) {
+      this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
+    }
+
     this.updateDoneButtonUI();
     this.updateSpeedPresetsUI();
     this.updateLoopModeUI();
     this.renderBeatDots();
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
 
-    const needsTopicRebuild = (
-      prevTopicId !== found.topicId ||
-      this.activeTopicRenderers.size === 0 ||
-      !this.activeTopicRenderers.has(found.id)
-    );
-    if (needsTopicRebuild) {
-      this.renderTopicExercisesFor(found);
+    if (isFreeMet) {
+      this.currentTopicId = found.topicId;
+      this.currentTopicExercises = [this.currentExercise];
+      this.activeTopicRenderers.clear();
+      if (this.topicExercisesStack) {
+        this.topicExercisesStack.innerHTML = "";
+      }
+      if (this.freeMetBpmVal) {
+        this.freeMetBpmVal.textContent = this.bpm;
+      }
+      if (this.freeMetBpmSlider) {
+        this.freeMetBpmSlider.value = this.bpm;
+      }
     } else {
-      this.updateTopicSelectionUI(found.id);
+      const needsTopicRebuild = (
+        prevTopicId !== found.topicId ||
+        this.activeTopicRenderers.size === 0 ||
+        !this.activeTopicRenderers.has(found.id)
+      );
+      if (needsTopicRebuild) {
+        this.renderTopicExercisesFor(found);
+      } else {
+        this.updateTopicSelectionUI(found.id);
+      }
     }
 
     this.syncTutorToolbarUI();
@@ -1509,20 +1570,33 @@ export class GuitarMasterApp {
 
     const firstBeat = this.currentExercise.tabData[0].beats[0];
     this.updateCard(firstBeat, false, 1, this.currentExercise.tabData[0].chordName);
-    if (this.currentExercise.id !== "free-metronome" && !this.currentExercise.isMetronomeOnly) {
+    if (!isFreeMet) {
       this.fretboard.update(firstBeat, false, this.currentExercise.tabData[0].chordName);
     }
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    this.syncPdfToExercise(found);
+    if (!isFreeMet) {
+      this.syncPdfToExercise(found);
+    }
     this.saveState();
 
-    if (uiOpts && uiOpts.scrollTopicTop && this.bookPageTitle) {
-      this.bookPageTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (uiOpts && uiOpts.scrollTopicTop) {
+      if (this.studioScoreViewport) {
+        this.studioScoreViewport.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (this.bookPageTitle) {
+        this.bookPageTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } else if (!uiOpts.noScroll && topicCount > 1) {
       const selCard = document.getElementById(`topic-ex-${found.id}`);
-      if (selCard) {
+      if (selCard && this.studioScoreViewport) {
+        const vpRect = this.studioScoreViewport.getBoundingClientRect();
+        const cardRect = selCard.getBoundingClientRect();
+        if (cardRect.top < vpRect.top + 8 || cardRect.bottom > vpRect.bottom - 8) {
+          const targetTop = this.studioScoreViewport.scrollTop + (cardRect.top - vpRect.top) - 14;
+          this.studioScoreViewport.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+        }
+      } else if (selCard) {
         selCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     }
@@ -1537,17 +1611,24 @@ export class GuitarMasterApp {
   renderBeatDots() {
     const ts = this.currentExercise.timeSignature || [4, 4];
     const numBeats = ts[0] || 4;
+    const isFreeMet = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
     let html = "";
     for (let i = 0; i < numBeats; i++) {
-      html += `<div class="beat-dot-item" data-index="${i}" title="Beat ${i + 1} - Click to toggle Play/Rest"></div>`;
+      const mode = isFreeMet ? (this.freeMetBeatModes[i] || (i === 0 ? "accent" : "normal")) : "normal";
+      const restCls = mode === "muted" ? " configured-as-rest" : "";
+      html += `<div class="beat-dot-item${restCls}" data-index="${i}" title="Beat ${i + 1} - Click to toggle Mute"></div>`;
     }
     this.beatDotsSequence.innerHTML = html;
 
-    // Attach click to toggle rest/mute on any beat
+    // Attach click to toggle rest/mute (or cycle Accent/Normal/Muted in Free Metronome)
     const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
     dots.forEach(dot => {
       dot.addEventListener("click", () => {
         const beatIdx = parseInt(dot.dataset.index, 10);
+        if (this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)) {
+          this.cycleFreeBeatMode(beatIdx);
+          return;
+        }
         dot.classList.toggle("configured-as-rest");
         const isRestNow = dot.classList.contains("configured-as-rest");
 
@@ -1574,10 +1655,266 @@ export class GuitarMasterApp {
     });
   }
 
+  getFreeMetTimeSignatureConfig(tsStr) {
+    const presets = {
+      "2/4": { ts: [2, 4], modes: ["accent", "normal"] },
+      "3/4": { ts: [3, 4], modes: ["accent", "normal", "normal"] },
+      "4/4": { ts: [4, 4], modes: ["accent", "normal", "normal", "normal"] },
+      "5/4": { ts: [5, 4], modes: ["accent", "normal", "normal", "normal", "normal"] },
+      "6/8": { ts: [6, 8], modes: ["accent", "normal", "normal", "secondary", "normal", "normal"] }
+    };
+    return presets[tsStr] || presets["4/4"];
+  }
+
+  applyFreeTimeSignatureToExercise(targetEx) {
+    const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+    const numBeats = cfg.ts[0];
+    const beats = [];
+    for (let i = 0; i < numBeats; i++) {
+      const m = this.freeMetBeatModes[i] || cfg.modes[i] || (i === 0 ? "accent" : "normal");
+      this.freeMetBeatModes[i] = m;
+      beats.push({
+        beat: i + 1,
+        note: m === "muted" ? "REST" : `Beat ${i + 1}`,
+        symbol: cfg.ts[1] === 8 ? "1/8" : "1/4",
+        type: m === "muted" ? "rest" : "metronome"
+      });
+    }
+    this.freeMetBeatModes.length = numBeats;
+
+    const applyTo = (ex) => {
+      if (!ex) return;
+      ex.timeSignature = [...cfg.ts];
+      ex.tabData = [{ measure: 1, beats: beats.map(b => ({ ...b })) }];
+    };
+
+    applyTo(targetEx);
+    if (GUITAR_COURSES.freeMetronome) {
+      applyTo(GUITAR_COURSES.freeMetronome);
+    }
+    const storedEx = this.findExerciseById("free-metronome");
+    if (storedEx && storedEx !== targetEx) {
+      applyTo(storedEx);
+    }
+  }
+
+  setFreeTimeSignature(tsStr) {
+    const validTs = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+    const normalized = validTs.includes(tsStr) ? tsStr : "4/4";
+    const cfg = this.getFreeMetTimeSignatureConfig(normalized);
+
+    this.freeMetTimeSignature = normalized;
+    this.freeMetBeatModes = [...cfg.modes];
+    this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
+    this.currentMeasureBeatPos = 0.0;
+
+    if (this.isPlaying && this.audio && this.audio.audioCtx) {
+      this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+      this.queue = [];
+    }
+
+    const isFreeMet = Boolean(
+      this.currentExercise &&
+      (this.currentExercise.bookCategory === "freeMetronome" ||
+        this.currentExercise.id === "free-metronome" ||
+        this.currentExercise.isMetronomeOnly)
+    );
+
+    this.applyFreeTimeSignatureToExercise(isFreeMet ? this.currentExercise : null);
+
+    if (isFreeMet) {
+      if (this.timePillBadge) {
+        this.timePillBadge.textContent = normalized;
+      }
+      this.renderBeatDots();
+      if (this.freeMetStatusCue && !this.isPlaying) {
+        const extraHint = normalized === "6/8" ? " · Beats 1 & 4 accented" : "";
+        this.freeMetStatusCue.textContent = `Time Signature set to ${normalized} (${cfg.ts[0]} beats/bar${extraHint})`;
+      }
+    }
+
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
+    this.saveState();
+  }
+
+  setFreeSubdivision(subdiv) {
+    const n = parseInt(subdiv, 10);
+    this.freeMetSubdivision = [1, 2, 3].includes(n) ? n : 1;
+    this.currentSubBeatIndex = 0;
+
+    if (this.isPlaying && this.audio && this.audio.audioCtx) {
+      this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+      this.queue = [];
+    }
+
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
+
+    if (this.freeMetStatusCue && !this.isPlaying) {
+      const label = this.freeMetSubdivision === 1
+        ? "Quarter Pulse"
+        : (this.freeMetSubdivision === 2 ? "Eighth Notes (1 & 2 &)" : "Triplets (3 per beat)");
+      this.freeMetStatusCue.textContent = `Subdivision: ${label}`;
+    }
+
+    this.saveState();
+  }
+
+  syncFreeMetronomeToolbarUI() {
+    if (this.freeMetBpmVal) {
+      this.freeMetBpmVal.textContent = this.bpm;
+    }
+    if (this.freeMetBpmSlider) {
+      this.freeMetBpmSlider.value = this.bpm;
+    }
+    if (this.freeMetTimesigGroup) {
+      this.freeMetTimesigGroup.querySelectorAll("[data-ts]").forEach(btn => {
+        const isSel = btn.dataset.ts === this.freeMetTimeSignature;
+        btn.classList.toggle("active", isSel);
+        btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+      });
+    }
+    if (this.freeMetSubdivGroup) {
+      const targetSub = String(this.freeMetSubdivision || 1);
+      this.freeMetSubdivGroup.querySelectorAll("[data-subdiv]").forEach(btn => {
+        const isSel = btn.dataset.subdiv === targetSub;
+        btn.classList.toggle("active", isSel);
+        btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+      });
+    }
+  }
+
+  handleTapTempo() {
+    const now = performance.now();
+    if (this._tapTimes.length > 0 && now - this._tapTimes[this._tapTimes.length - 1] > 2500) {
+      this._tapTimes = [];
+    }
+    this._tapTimes.push(now);
+    if (this._tapTimes.length > 6) {
+      this._tapTimes.shift();
+    }
+
+    if (this.freeMetTapBtn) {
+      this.freeMetTapBtn.classList.add("is-tapped");
+      clearTimeout(this._tapFlashTimer);
+      this._tapFlashTimer = setTimeout(() => {
+        if (this.freeMetTapBtn) this.freeMetTapBtn.classList.remove("is-tapped");
+      }, 110);
+    }
+
+    if (this._tapTimes.length >= 2) {
+      let sum = 0;
+      for (let i = 1; i < this._tapTimes.length; i++) {
+        sum += this._tapTimes[i] - this._tapTimes[i - 1];
+      }
+      const avgMs = sum / (this._tapTimes.length - 1);
+      if (avgMs > 0) {
+        const detectedBpm = Math.round(60000 / avgMs);
+        this.setBpm(detectedBpm);
+        if (this.freeMetStatusCue && !this.isPlaying) {
+          this.freeMetStatusCue.textContent = `Tap Tempo detected: ${this.bpm} BPM`;
+        }
+      }
+    } else if (this.freeMetStatusCue && !this.isPlaying) {
+      this.freeMetStatusCue.textContent = "Keep tapping steadily to set BPM...";
+    }
+  }
+
+  renderFreeMetronomeDots() {
+    if (!this.freeMetDotsRow) return;
+    const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+    const ts = (this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly))
+      ? (this.currentExercise.timeSignature || cfg.ts)
+      : cfg.ts;
+    const numBeats = ts[0] || 4;
+    const subdiv = this.freeMetSubdivision || 1;
+
+    while (this.freeMetBeatModes.length < numBeats) {
+      const idx = this.freeMetBeatModes.length;
+      this.freeMetBeatModes.push(cfg.modes[idx] || (idx === 0 ? "accent" : "normal"));
+    }
+
+    this.freeMetDotsRow.classList.toggle("has-subdiv", subdiv > 1);
+
+    let html = "";
+    for (let i = 0; i < numBeats; i++) {
+      const mode = this.freeMetBeatModes[i] || (i === 0 ? "accent" : "normal");
+      const modeLabel = mode === "secondary" ? "Secondary Accent" : (mode.charAt(0).toUpperCase() + mode.slice(1));
+      html += `
+        <div class="free-met-dot-col" data-beat-col="${i}">
+          <button type="button" class="free-met-dot mode-${mode}" data-free-beat="${i}" title="Beat ${i + 1} (${modeLabel}) — Click to cycle Accent / Normal / Muted" aria-label="Beat ${i + 1}: ${modeLabel}"></button>
+          <span class="free-met-dot-num">${i + 1}</span>
+        </div>
+      `;
+      if (subdiv > 1) {
+        for (let s = 1; s < subdiv; s++) {
+          const subLbl = subdiv === 2 ? "&amp;" : "&middot;";
+          html += `
+            <div class="free-met-subdot-col" data-sub-parent="${i}" data-sub-idx="${s}">
+              <span class="free-met-subdot" data-sub-parent="${i}" data-sub-idx="${s}" aria-hidden="true"></span>
+              <span class="free-met-subdot-lbl">${subLbl}</span>
+            </div>
+          `;
+        }
+      }
+    }
+    this.freeMetDotsRow.innerHTML = html;
+
+    this.freeMetDotsRow.querySelectorAll(".free-met-dot").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const beatIdx = parseInt(btn.dataset.freeBeat, 10);
+        this.cycleFreeBeatMode(beatIdx);
+      });
+    });
+  }
+
+  cycleFreeBeatMode(beatIdx) {
+    const order = ["accent", "normal", "muted"];
+    const cur = this.freeMetBeatModes[beatIdx] || (beatIdx === 0 ? "accent" : "normal");
+    const next = cur === "secondary"
+      ? "normal"
+      : order[(order.indexOf(cur) + 1) % order.length];
+    this.freeMetBeatModes[beatIdx] = next;
+
+    // Sync beat mode into tabData & bottom dock beat dot
+    if (this.currentExercise && this.currentExercise.tabData && this.currentExercise.tabData[0]) {
+      const beatObj = this.currentExercise.tabData[0].beats[beatIdx];
+      if (beatObj) {
+        beatObj.type = next === "muted" ? "rest" : "metronome";
+        beatObj.note = next === "muted" ? "REST" : `Beat ${beatIdx + 1}`;
+      }
+    }
+
+    if (this.freeMetDotsRow) {
+      const dotBtn = this.freeMetDotsRow.querySelector(`.free-met-dot[data-free-beat="${beatIdx}"]`);
+      if (dotBtn) {
+        dotBtn.classList.remove("mode-accent", "mode-secondary", "mode-normal", "mode-muted");
+        dotBtn.classList.add(`mode-${next}`);
+        const modeLabel = next.charAt(0).toUpperCase() + next.slice(1);
+        dotBtn.setAttribute("aria-label", `Beat ${beatIdx + 1}: ${modeLabel}`);
+        dotBtn.title = `Beat ${beatIdx + 1} (${modeLabel}) — Click to cycle Accent / Normal / Muted`;
+      }
+    }
+    if (this.beatDotsSequence) {
+      const dockDot = this.beatDotsSequence.querySelector(`.beat-dot-item[data-index="${beatIdx}"]`);
+      if (dockDot) {
+        dockDot.classList.toggle("configured-as-rest", next === "muted");
+      }
+    }
+    if (this.freeMetStatusCue && !this.isPlaying) {
+      const desc = next === "accent" ? "1200 Hz Accent" : (next === "muted" ? "Muted (Silent Drill)" : "800 Hz Normal Pulse");
+      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1} set to ${desc}`;
+    }
+  }
+
   setBpm(newBpm) {
     this.bpm = Math.max(30, Math.min(240, Math.round(newBpm)));
     if (this.bpmDisplay) this.bpmDisplay.textContent = this.bpm;
     if (this.bookTempoBpm) this.bookTempoBpm.textContent = this.bpm;
+    if (this.freeMetBpmVal) this.freeMetBpmVal.textContent = this.bpm;
+    if (this.freeMetBpmSlider) this.freeMetBpmSlider.value = this.bpm;
     if (this.bpmNumberInput && document.activeElement !== this.bpmNumberInput) {
       this.bpmNumberInput.value = this.bpm;
     }
@@ -1707,6 +2044,7 @@ export class GuitarMasterApp {
       ? this.loopMeasureIndex
       : 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
     this.queue = [];
@@ -1751,10 +2089,19 @@ export class GuitarMasterApp {
     this.dial.setRestState(false);
     this.updateMetronomeButtonUI();
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
 
     const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
     dots.forEach(d => d.classList.remove("active-play", "active-rest"));
+
+    if (this.freeMetDotsRow) {
+      this.freeMetDotsRow.querySelectorAll(".free-met-dot, .free-met-subdot").forEach(d => d.classList.remove("is-active"));
+      this.freeMetDotsRow.querySelectorAll(".free-met-dot-col, .free-met-subdot-col").forEach(c => c.classList.remove("is-active-col"));
+    }
+    if (this.freeMetStatusCue) {
+      this.freeMetStatusCue.innerHTML = "Click any beat dot to cycle Accent &middot; Normal &middot; Muted";
+    }
 
     this.fretboard.reset();
     this.tabStaff.reset();
@@ -1778,14 +2125,22 @@ export class GuitarMasterApp {
       } else {
         const curTime = ctx.currentTime;
         const secondsPerQuarterBeat = 60.0 / this.bpm;
+        const isFreeExLoop = Boolean(
+          this.isMetronomeOnlyActive &&
+          this.currentExercise &&
+          (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)
+        );
+        const catchupStepSec = isFreeExLoop
+          ? secondsPerQuarterBeat / (this.freeMetSubdivision || 1)
+          : secondsPerQuarterBeat;
 
         if (this._needsTimeAnchor) {
           this.nextBeatTime = curTime + 0.05;
           this._needsTimeAnchor = false;
-        } else if (this.nextBeatTime < curTime - secondsPerQuarterBeat * 2) {
-          // Phase-locked drift recovery on wake/background throttle (snaps by integer beats)
-          const missedBeats = Math.ceil((curTime - this.nextBeatTime) / secondsPerQuarterBeat);
-          this.nextBeatTime += missedBeats * secondsPerQuarterBeat;
+        } else if (this.nextBeatTime < curTime - catchupStepSec * 2) {
+          // Phase-locked drift recovery on wake/background throttle (snaps by integer steps)
+          const missedBeats = Math.ceil((curTime - this.nextBeatTime) / catchupStepSec);
+          this.nextBeatTime += missedBeats * catchupStepSec;
         }
 
         while (this.isPlaying && !this.stopAtEndTime && this.nextBeatTime < curTime + this.scheduleAheadTime) {
@@ -1806,20 +2161,34 @@ export class GuitarMasterApp {
   scheduleBeat(time) {
     const secondsPerQuarterBeat = 60.0 / this.bpm;
 
-    // Dedicated Decoupled Percussive Metronome Loop (1 - 2 - 3 - 4 continuous)
+    // Dedicated Decoupled Percussive Metronome Loop (supports custom N-beat meters & subdivisions)
     if (this.isMetronomeOnlyActive) {
       const ts = (this.currentExercise && this.currentExercise.timeSignature) || [4, 4];
       const numBeats = ts[0] || 4;
       const b = this.currentBeatInMeasure % numBeats;
       const isFreeEx = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
+      const subdiv = isFreeEx ? (this.freeMetSubdivision || 1) : 1;
+      const subBeat = this.currentSubBeatIndex % subdiv;
+
       const freeBeat = isFreeEx && this.currentExercise.tabData && this.currentExercise.tabData[0]
         ? this.currentExercise.tabData[0].beats[b]
         : null;
-      const isBeatMuted = Boolean(freeBeat && freeBeat.type === "rest");
-      const isAccent = (b === 0);
+      const beatMode = isFreeEx
+        ? (this.freeMetBeatModes[b] || (b === 0 ? "accent" : "normal"))
+        : (b === 0 ? "accent" : "normal");
+      const isBeatMuted = (beatMode === "muted") || Boolean(freeBeat && freeBeat.type === "rest");
+      const isAccent = (beatMode === "accent");
+      const isSecondary = (beatMode === "secondary");
 
       // Strictly play ONLY Web Audio percussive click — never touch guitar string synth
-      this.audio.playBeat(time, isAccent, isBeatMuted, false);
+      // Muted beats skip playBeat completely so silence holds even when soundOnRest === "click"
+      if (!isBeatMuted) {
+        if (subBeat === 0) {
+          this.audio.playBeat(time, beatMode, false, false);
+        } else {
+          this.audio.playBeat(time, "sub", false, false);
+        }
+      }
 
       this.queue.push({
         isMetronomeOnlyBeat: true,
@@ -1827,13 +2196,18 @@ export class GuitarMasterApp {
         mIdx: 0,
         bIdx: b,
         primaryBeat: b,
-        isDownbeat: true,
+        subBeat,
+        subdiv,
+        beatMode: isBeatMuted ? "muted" : beatMode,
+        isAccent,
+        isSecondary,
+        isDownbeat: subBeat === 0,
         beatData: freeBeat || {
           beat: b + 1,
-          note: isAccent ? "Beat 1 (Accent)" : `Beat ${b + 1}`,
+          note: isAccent ? `Beat ${b + 1} (Accent)` : (isSecondary ? `Beat ${b + 1} (Secondary)` : `Beat ${b + 1}`),
           symbol: "1/4",
           type: isBeatMuted ? "rest" : "metronome",
-          tip: isAccent ? "Downbeat Accent (1200 Hz Click)" : "Steady Pulse (800 Hz Click)"
+          tip: isAccent ? "Downbeat Accent (1200 Hz Click)" : (isSecondary ? "Secondary Accent (1000 Hz Click)" : "Steady Pulse (800 Hz Click)")
         },
         chordName: null,
         isRest: isBeatMuted,
@@ -1974,8 +2348,16 @@ export class GuitarMasterApp {
     if (this.isMetronomeOnlyActive) {
       const ts = (this.currentExercise && this.currentExercise.timeSignature) || [4, 4];
       const numBeats = ts[0] || 4;
-      this.currentBeatInMeasure = (this.currentBeatInMeasure + 1) % numBeats;
-      this.nextBeatTime += secondsPerQuarterBeat;
+      const isFreeEx = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
+      const subdiv = isFreeEx ? (this.freeMetSubdivision || 1) : 1;
+      const stepSeconds = secondsPerQuarterBeat / subdiv;
+
+      this.currentSubBeatIndex++;
+      if (this.currentSubBeatIndex >= subdiv) {
+        this.currentSubBeatIndex = 0;
+        this.currentBeatInMeasure = (this.currentBeatInMeasure + 1) % numBeats;
+      }
+      this.nextBeatTime += stepSeconds;
       return;
     }
 
@@ -2055,7 +2437,7 @@ export class GuitarMasterApp {
     }
 
     if (ev.isMetronomeOnlyBeat) {
-      const { mIdx, bIdx, primaryBeat, isFreeExPage, beatData, isRest } = ev;
+      const { primaryBeat, subBeat = 0, subdiv = 1, isFreeExPage, isRest, isAccent, isSecondary, beatMode } = ev;
       const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
       dots.forEach((d, idx) => {
         if (idx === primaryBeat) {
@@ -2066,18 +2448,66 @@ export class GuitarMasterApp {
         }
       });
 
-      this.noteActiveCard.className = `telemetry-inline ${isRest ? "mode-rest" : "mode-play"}`;
-      this.noteGlyphLarge.innerHTML = this.getGlyphSvg("1/4", 1, isRest);
-      this.noteHeaderBig.textContent = isRest
-        ? `Beat ${primaryBeat + 1}: Muted`
-        : (primaryBeat === 0 ? "Beat 1: Downbeat Accent" : `Beat ${primaryBeat + 1}: Pulse`);
-      this.noteSubInstruction.textContent = isRest
-        ? "Click beat dot to unmute"
-        : (primaryBeat === 0 ? "1200 Hz Percussive Click" : "800 Hz Percussive Click");
-      this.noteRightGuidance.textContent = isRest ? "MUTED" : (primaryBeat === 0 ? "1200 Hz" : "800 Hz");
+      if (this.freeMetDotsRow && isFreeExPage) {
+        this.freeMetDotsRow.querySelectorAll(".free-met-dot-col").forEach((col, idx) => {
+          const isCurMain = idx === primaryBeat && subBeat === 0;
+          col.classList.toggle("is-active-col", isCurMain);
+          const dotBtn = col.querySelector(".free-met-dot");
+          if (dotBtn) {
+            dotBtn.classList.toggle("is-active", isCurMain);
+          }
+        });
+        this.freeMetDotsRow.querySelectorAll(".free-met-subdot-col").forEach(col => {
+          const isCurSub = subBeat > 0 &&
+            Number(col.dataset.subParent) === primaryBeat &&
+            Number(col.dataset.subIdx) === subBeat;
+          col.classList.toggle("is-active-col", isCurSub);
+          const subDot = col.querySelector(".free-met-subdot");
+          if (subDot) {
+            subDot.classList.toggle("is-active", isCurSub);
+          }
+        });
+      }
 
-      if (isFreeExPage) {
-        this.tabStaff.highlightBeat(mIdx, bIdx, isRest, null);
+      const subLabel = subdiv === 2 ? "&" : `Triplet ${subBeat + 1}/3`;
+      if (this.freeMetStatusCue && isFreeExPage) {
+        if (isRest || beatMode === "muted") {
+          this.freeMetStatusCue.textContent = subBeat > 0
+            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted (Silent Timing Drill)`
+            : `Beat ${primaryBeat + 1} · Muted (Silent Timing Drill)`;
+        } else if (subBeat > 0) {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} ${subLabel} · 660 Hz Subdivision`;
+        } else if (isAccent || beatMode === "accent") {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1200 Hz Accent`;
+        } else if (isSecondary || beatMode === "secondary") {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1000 Hz Secondary Accent`;
+        } else {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 800 Hz Pulse`;
+        }
+      }
+
+      this.noteActiveCard.className = `telemetry-inline ${isRest ? "mode-rest" : "mode-play"}`;
+      this.noteGlyphLarge.innerHTML = this.getGlyphSvg(subBeat > 0 ? "1/8" : "1/4", 1, isRest);
+      if (isRest) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Muted`;
+        this.noteSubInstruction.textContent = "Click beat dot to unmute";
+        this.noteRightGuidance.textContent = "MUTED";
+      } else if (subBeat > 0) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1} ${subLabel}`;
+        this.noteSubInstruction.textContent = "660 Hz Subdivision Click";
+        this.noteRightGuidance.textContent = "660 Hz";
+      } else if (isAccent) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Accent`;
+        this.noteSubInstruction.textContent = "1200 Hz Percussive Click";
+        this.noteRightGuidance.textContent = "1200 Hz";
+      } else if (isSecondary) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Secondary`;
+        this.noteSubInstruction.textContent = "1000 Hz Secondary Click";
+        this.noteRightGuidance.textContent = "1000 Hz";
+      } else {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Pulse`;
+        this.noteSubInstruction.textContent = "800 Hz Percussive Click";
+        this.noteRightGuidance.textContent = "800 Hz";
       }
       return;
     }
@@ -2236,7 +2666,9 @@ export class GuitarMasterApp {
       noteNameMode: this.noteNameMode,
       tabVisibilityMode: this.tabVisibilityMode,
       showRhythmGuide: this.showRhythmGuide,
-      showCoachBanner: this.showCoachBanner
+      showCoachBanner: this.showCoachBanner,
+      freeMetTs: this.freeMetTimeSignature,
+      freeMetSubdiv: this.freeMetSubdivision
     };
 
     try {
@@ -2339,10 +2771,11 @@ export class GuitarMasterApp {
       this.loopMode = state.loopMode;
     }
 
-    const validBooks = ["lessonBook", "bonusWorkshop", "freeMode"];
+    const validBooks = ["lessonBook", "bonusWorkshop", "freeMetronome", "freeMode"];
     if (!validBooks.includes(state.book)) {
       state.book = "lessonBook";
     }
+    if (state.book === "freeMode") state.book = "freeMetronome";
     const validPanes = ["score", "pdf", "split"];
     if (!validPanes.includes(state.paneMode)) {
       state.paneMode = "score";
@@ -2350,6 +2783,17 @@ export class GuitarMasterApp {
     const validModes = ["primer", "studio"];
     if (!validModes.includes(state.appMode)) {
       state.appMode = "primer";
+    }
+
+    const validTs = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+    if (state.freeMetTs && validTs.includes(state.freeMetTs)) {
+      this.freeMetTimeSignature = state.freeMetTs;
+      const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+      this.freeMetBeatModes = [...cfg.modes];
+    }
+    const validSubdiv = [1, 2, 3];
+    if (state.freeMetSubdiv && validSubdiv.includes(Number(state.freeMetSubdiv))) {
+      this.freeMetSubdivision = Number(state.freeMetSubdiv);
     }
 
     this.setDrawerOpen(typeof state.drawerOpen === "boolean" ? state.drawerOpen : (window.innerWidth > 820));
@@ -2531,6 +2975,52 @@ export class GuitarMasterApp {
     }
     if (this.btnBpmPlus) {
       this.btnBpmPlus.addEventListener("click", () => this.setBpm(this.bpm + 1));
+    }
+    if (this.freeMetBpmMinus5) {
+      this.freeMetBpmMinus5.addEventListener("click", () => this.setBpm(this.bpm - 5));
+    }
+    if (this.freeMetBpmMinus) {
+      this.freeMetBpmMinus.addEventListener("click", () => this.setBpm(this.bpm - 1));
+    }
+    if (this.freeMetBpmPlus) {
+      this.freeMetBpmPlus.addEventListener("click", () => this.setBpm(this.bpm + 1));
+    }
+    if (this.freeMetBpmPlus5) {
+      this.freeMetBpmPlus5.addEventListener("click", () => this.setBpm(this.bpm + 5));
+    }
+    if (this.freeMetBpmSlider) {
+      this.freeMetBpmSlider.addEventListener("input", () => {
+        const val = parseInt(this.freeMetBpmSlider.value, 10);
+        if (!isNaN(val)) this.setBpm(val);
+      });
+    }
+    if (this.freeMetTapBtn) {
+      this.freeMetTapBtn.addEventListener("click", () => this.handleTapTempo());
+    }
+    if (this.freeMetTimesigGroup) {
+      this.freeMetTimesigGroup.querySelectorAll("[data-ts]").forEach(btn => {
+        btn.addEventListener("click", () => this.setFreeTimeSignature(btn.dataset.ts));
+      });
+    }
+    if (this.freeMetSubdivGroup) {
+      this.freeMetSubdivGroup.querySelectorAll("[data-subdiv]").forEach(btn => {
+        btn.addEventListener("click", () => this.setFreeSubdivision(btn.dataset.subdiv));
+      });
+    }
+    if (this.timePillBadge) {
+      this.timePillBadge.addEventListener("click", () => {
+        const isFreeMet = Boolean(
+          this.currentExercise &&
+          (this.currentExercise.bookCategory === "freeMetronome" ||
+            this.currentExercise.id === "free-metronome" ||
+            this.currentExercise.isMetronomeOnly)
+        );
+        if (!isFreeMet) return;
+        const order = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+        const idx = order.indexOf(this.freeMetTimeSignature);
+        const nextTs = order[(idx + 1) % order.length];
+        this.setFreeTimeSignature(nextTs);
+      });
     }
     if (this.bpmNumberInput) {
       this.bpmNumberInput.addEventListener("change", () => {

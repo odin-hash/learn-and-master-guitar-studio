@@ -173,110 +173,166 @@ $css
       <!-- INTERACTIVE SCORE PANE -->
       <section class="canvas-pane canvas-score-pane" id="score-pane">
 
-        <!-- Collapsible Instructions & Session Goals Panel -->
-        <div class="guide-drawer" id="studio-guide-panel" hidden>
-          <div class="guide-header">
-            <span class="guide-title">Playing Notes &middot; <span id="studio-exercise-topic-badge">Session</span></span>
-            <button class="guide-close-btn" id="btn-close-guide" aria-label="Close Notes">&times;</button>
-          </div>
-          <p class="guide-body" id="studio-instruction-text">Select any exercise to view playing instructions and technique tips.</p>
-          <div class="guide-checklist" id="active-session-checklist"></div>
-        </div>
-
-        <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
-        <div class="canvas-subbar">
-          <div class="telemetry-inline mode-play" id="note-active-card">
-            <div class="telemetry-glyph" id="note-glyph-large"></div>
-            <div class="telemetry-text">
-              <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
-              <span class="telemetry-sep">&middot;</span>
-              <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
+        <!-- PINNED TOP DECK: Telemetry, Tutor Assists & Interactive Fretboard -->
+        <div class="studio-pinned-deck" id="studio-pinned-deck">
+          <!-- Collapsible Instructions & Session Goals Panel -->
+          <div class="guide-drawer" id="studio-guide-panel" hidden>
+            <div class="guide-header">
+              <span class="guide-title">Playing Notes &middot; <span id="studio-exercise-topic-badge">Session</span></span>
+              <button class="guide-close-btn" id="btn-close-guide" aria-label="Close Notes">&times;</button>
             </div>
-            <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+            <p class="guide-body" id="studio-instruction-text">Select any exercise to view playing instructions and technique tips.</p>
+            <div class="guide-checklist" id="active-session-checklist"></div>
           </div>
 
-          <div class="notation-toggles" id="studio-trainer-bar">
-            <div class="toggle-group" id="chord-mode-group" style="display:none;">
-              <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
-              <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
-              <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
-            </div>
-            <div class="toggle-group" id="string-selector-group" style="display:none;">
-              <span class="toggle-lbl">String</span>
-              <button class="micro-pill active" data-str="1">1</button>
-              <button class="micro-pill" data-str="2">2</button>
-              <button class="micro-pill" data-str="3">3</button>
-              <button class="micro-pill" data-str="4">4</button>
-              <button class="micro-pill" data-str="5">5</button>
-              <button class="micro-pill" data-str="6">6</button>
-            </div>
-            <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
-          </div>
-        </div>
-
-        <!-- Fretboard Visualizer -->
-        <div class="fretboard-stage" id="fretboard-wrapper">
-          <div id="fretboard-container"></div>
-        </div>
-
-        <!-- Printed Book Page Container ("Sheet-on-Desk") -->
-        <article class="book-page-sheet" id="book-page-sheet">
-          <header class="book-page-header">
-            <div class="book-page-top-meta">
-              <div class="book-page-session" id="book-page-session">LEARN &amp; MASTER GUITAR &middot; SESSION 2</div>
-              <span class="book-verified-pill is-verified" id="book-verification-badge">PDF Transcribed &middot; p. 9</span>
-            </div>
-            <div class="book-page-title-row">
-              <h1 class="book-page-title" id="book-page-title">First String Exercises</h1>
-              <span class="book-topic-count-pill" id="book-topic-count-pill" hidden>1 Exercise</span>
-            </div>
-            <p class="book-page-desc" id="book-page-desc">Select any exercise to view playing instructions and technique tips.</p>
-
-            <!-- TUTOR SCAFFOLDING HEADER CONTROLS -->
-            <div class="tutor-scaffolding-bar" id="tutor-scaffolding-bar" role="region" aria-label="Tutor Scaffolding Assists">
-              <div class="tutor-assist-group">
-                <span class="tutor-assist-label">Note Names</span>
-                <div class="tutor-seg-group" id="tutor-note-mode-group" role="group" aria-label="Note Name Display">
-                  <button type="button" class="tutor-seg-btn" data-note-mode="off">Off</button>
-                  <button type="button" class="tutor-seg-btn active" data-note-mode="above">Above Note</button>
-                  <button type="button" class="tutor-seg-btn" data-note-mode="inside">Inside Notehead</button>
-                </div>
+          <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
+          <div class="canvas-subbar">
+            <div class="telemetry-inline mode-play" id="note-active-card">
+              <div class="telemetry-glyph" id="note-glyph-large"></div>
+              <div class="telemetry-text">
+                <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
+                <span class="telemetry-sep">&middot;</span>
+                <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
               </div>
+              <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+            </div>
 
-              <div class="tutor-assist-group">
-                <span class="tutor-assist-label">Tab Visibility</span>
-                <div class="tutor-seg-group" id="tutor-tab-mode-group" role="group" aria-label="Tab Visibility Mode">
-                  <button type="button" class="tutor-seg-btn active" data-tab-mode="both">Show Both</button>
-                  <button type="button" class="tutor-seg-btn" data-tab-mode="staff-only">Staff Only</button>
-                  <button type="button" class="tutor-seg-btn" data-tab-mode="blur">Blur Tab</button>
-                </div>
+            <div class="notation-toggles" id="studio-trainer-bar">
+              <div class="toggle-group" id="chord-mode-group" style="display:none;">
+                <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
               </div>
+              <div class="toggle-group" id="string-selector-group" style="display:none;">
+                <span class="toggle-lbl">String</span>
+                <button class="micro-pill active" data-str="1">1</button>
+                <button class="micro-pill" data-str="2">2</button>
+                <button class="micro-pill" data-str="3">3</button>
+                <button class="micro-pill" data-str="4">4</button>
+                <button class="micro-pill" data-str="5">5</button>
+                <button class="micro-pill" data-str="6">6</button>
+              </div>
+              <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
+            </div>
+          </div>
 
-              <div class="tutor-assist-group tutor-assist-bools">
-                <button type="button" class="tutor-toggle-pill active" id="btn-tutor-rhythm-guide" aria-pressed="true" title="Toggle beat numbers, Hold continuation arrows, +1/2 beat and Rest / Mute cues">
-                  <span class="tutor-pill-dot"></span>
-                  <span>Rhythm Guide: <strong id="tutor-rhythm-state">ON</strong></span>
-                </button>
-                <button type="button" class="tutor-toggle-pill active" id="btn-tutor-coach-banner" aria-pressed="true" title="Toggle real-time Live Action Coach pill above the active measure during playback">
-                  <span class="tutor-pill-dot"></span>
-                  <span>Live Coach: <strong id="tutor-coach-state">ON</strong></span>
-                </button>
+          <!-- TUTOR SCAFFOLDING HEADER CONTROLS (Pinned) -->
+          <div class="tutor-scaffolding-bar" id="tutor-scaffolding-bar" role="region" aria-label="Tutor Scaffolding Assists">
+            <div class="tutor-assist-group">
+              <span class="tutor-assist-label">Note Names</span>
+              <div class="tutor-seg-group" id="tutor-note-mode-group" role="group" aria-label="Note Name Display">
+                <button type="button" class="tutor-seg-btn" data-note-mode="off">Off</button>
+                <button type="button" class="tutor-seg-btn active" data-note-mode="above">Above Note</button>
+                <button type="button" class="tutor-seg-btn" data-note-mode="inside">Inside Notehead</button>
               </div>
             </div>
-          </header>
 
-          <div class="book-tempo-row" id="book-tempo-marking">
-            <span class="tempo-glyph-slot" id="book-tempo-glyph" aria-hidden="true"></span>
-            <span class="tempo-eq">=</span>
-            <span class="tempo-bpm-val" id="book-tempo-bpm">60</span>
-          </div>
+            <div class="tutor-assist-group">
+              <span class="tutor-assist-label">Tab Visibility</span>
+              <div class="tutor-seg-group" id="tutor-tab-mode-group" role="group" aria-label="Tab Visibility Mode">
+                <button type="button" class="tutor-seg-btn active" data-tab-mode="both">Show Both</button>
+                <button type="button" class="tutor-seg-btn" data-tab-mode="staff-only">Staff Only</button>
+                <button type="button" class="tutor-seg-btn" data-tab-mode="blur">Blur Tab</button>
+              </div>
+            </div>
 
-          <div class="notation-stage">
-            <div id="topic-exercises-stack" class="topic-exercises-stack">
-              <div id="tab-container"></div>
+            <div class="tutor-assist-group tutor-assist-bools">
+              <button type="button" class="tutor-toggle-pill active" id="btn-tutor-rhythm-guide" aria-pressed="true" title="Toggle beat numbers, Hold continuation arrows, +1/2 beat and Rest / Mute cues">
+                <span class="tutor-pill-dot"></span>
+                <span>Rhythm Guide: <strong id="tutor-rhythm-state">ON</strong></span>
+              </button>
+              <button type="button" class="tutor-toggle-pill active" id="btn-tutor-coach-banner" aria-pressed="true" title="Toggle real-time Live Action Coach pill above the active measure during playback">
+                <span class="tutor-pill-dot"></span>
+                <span>Live Coach: <strong id="tutor-coach-state">ON</strong></span>
+              </button>
             </div>
           </div>
-        </article>
+
+          <!-- Interactive Fretboard Visualizer (Pinned) -->
+          <div class="fretboard-stage" id="fretboard-wrapper">
+            <div id="fretboard-container"></div>
+          </div>
+        </div>
+
+        <!-- SCROLLABLE SCORE VIEWPORT -->
+        <div class="studio-score-viewport" id="studio-score-viewport">
+          <!-- Printed Book Page Container ("Sheet-on-Desk") -->
+          <article class="book-page-sheet" id="book-page-sheet">
+            <header class="book-page-header">
+              <div class="book-page-top-meta">
+                <div class="book-page-session" id="book-page-session">LEARN &amp; MASTER GUITAR &middot; SESSION 2</div>
+                <span class="book-verified-pill is-verified" id="book-verification-badge">PDF Transcribed &middot; p. 9</span>
+              </div>
+              <div class="book-page-title-row">
+                <h1 class="book-page-title" id="book-page-title">First String Exercises</h1>
+                <span class="book-topic-count-pill" id="book-topic-count-pill" hidden>1 Exercise</span>
+              </div>
+              <p class="book-page-desc" id="book-page-desc">Select any exercise to view playing instructions and technique tips.</p>
+            </header>
+
+            <div class="book-tempo-row" id="book-tempo-marking">
+              <span class="tempo-glyph-slot" id="book-tempo-glyph" aria-hidden="true"></span>
+              <span class="tempo-eq">=</span>
+              <span class="tempo-bpm-val" id="book-tempo-bpm">60</span>
+            </div>
+
+            <div class="notation-stage">
+              <div id="topic-exercises-stack" class="topic-exercises-stack">
+                <div id="tab-container"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- ZEN FREE METRONOME STAGE (Visible only in Free Metronome mode) -->
+        <section class="free-metronome-stage" id="free-metronome-stage" aria-label="Free Practice Metronome">
+          <div class="free-met-header-block">
+            <div class="free-met-kicker">FREE PRACTICE METRONOME</div>
+
+            <div class="free-met-tempo-row">
+              <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-minus5" aria-label="Decrease Tempo by 5">&minus;5</button>
+              <button type="button" class="free-met-step-btn" id="free-met-bpm-minus" aria-label="Decrease Tempo by 1">&minus;1</button>
+              <div class="free-met-tempo-readout">
+                <span class="free-met-bpm-val" id="free-met-bpm-val">60</span>
+                <span class="free-met-bpm-unit">BPM</span>
+              </div>
+              <button type="button" class="free-met-step-btn" id="free-met-bpm-plus" aria-label="Increase Tempo by 1">+1</button>
+              <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-plus5" aria-label="Increase Tempo by 5">+5</button>
+            </div>
+
+            <div class="free-met-slider-row">
+              <input type="range" class="free-met-bpm-slider" id="free-met-bpm-slider" min="30" max="240" value="60" aria-label="Tempo Slider">
+              <button type="button" class="free-met-tap-btn" id="free-met-tap-btn" title="Tap repeatedly to set tempo">Tap Tempo</button>
+            </div>
+          </div>
+
+          <!-- TIME SIGNATURE & SUBDIVISION PILL BAR -->
+          <div class="free-met-meter-bar">
+            <div class="free-met-pill-group" role="group" aria-label="Time Signature">
+              <span class="free-met-pill-lbl">Meter</span>
+              <div class="segmented-control" id="free-met-timesig-group">
+                <button type="button" class="seg-btn" data-ts="2/4">2/4</button>
+                <button type="button" class="seg-btn" data-ts="3/4">3/4</button>
+                <button type="button" class="seg-btn active" data-ts="4/4">4/4</button>
+                <button type="button" class="seg-btn" data-ts="5/4">5/4</button>
+                <button type="button" class="seg-btn" data-ts="6/8">6/8</button>
+              </div>
+            </div>
+
+            <div class="free-met-pill-group" role="group" aria-label="Subdivision">
+              <span class="free-met-pill-lbl">Subdivision</span>
+              <div class="segmented-control" id="free-met-subdiv-group">
+                <button type="button" class="seg-btn active" data-subdiv="1">&#9833; Quarter</button>
+                <button type="button" class="seg-btn" data-subdiv="2">&#9835; Eighth (1 &amp; 2 &amp;)</button>
+                <button type="button" class="seg-btn" data-subdiv="3">3 Triplets</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="free-met-dots-row" id="free-met-dots-row" role="group" aria-label="Interactive Visual Beat Indicators"></div>
+
+          <div class="free-met-status-cue" id="free-met-status-cue">Click any beat dot to cycle Accent &middot; Normal &middot; Muted</div>
+        </section>
 
       </section>
 
@@ -361,7 +417,7 @@ $css
         <button class="speed-preset-btn" id="btn-speed-fast" data-speed="fast">Goal: 84</button>
       </div>
 
-      <span class="time-pill-badge" id="time-pill-badge" title="Time Signature">4/4</span>
+      <button type="button" class="time-pill-badge" id="time-pill-badge" title="Time Signature (Click in Free Metronome to cycle meter)">4/4</button>
     </div>
 
     <div class="transport-right">

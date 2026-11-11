@@ -624,11 +624,35 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
 }
 
-/* Score Pane Interior */
+/* Score Pane Interior: Fixed Pinned Fretboard Deck + Scrollable Score Viewport */
 .canvas-score-pane {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  gap: 0;
+}
+
+.studio-pinned-deck {
+  flex-shrink: 0;
+  z-index: 20;
+  background: var(--bg-canvas, #FAF9F5);
+  border-bottom: 1px solid var(--border-hairline, #E4E4E7);
+  padding: 10px 24px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 36vh;
   overflow-y: auto;
-  padding: 16px 28px 28px;
-  gap: 14px;
+}
+
+.studio-score-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 14px 24px 36px;
 }
 
 /* Collapsible Editorial Guide / Notes Panel */
@@ -714,14 +738,41 @@ button.acc-topic-btn.is-active-topic {
   accent-color: var(--text-primary);
 }
 
-/* Inline Canvas Subbar & Fretboard Alignment with Book Page */
+/* Inline Pinned Deck & Book Page Sheet Alignment (Responsive Full Width) */
 .guide-drawer,
 .canvas-subbar,
+.studio-pinned-deck .tutor-scaffolding-bar,
 .fretboard-stage {
-  max-width: 880px;
-  width: 100%;
+  max-width: 1320px;
+  width: min(96%, 1320px);
   margin-left: auto;
   margin-right: auto;
+}
+
+.studio-pinned-deck .tutor-scaffolding-bar {
+  margin-top: 0;
+  padding: 5px 10px;
+  gap: 6px 8px;
+}
+
+.studio-pinned-deck .tutor-assist-group {
+  gap: 5px;
+}
+
+.studio-pinned-deck .tutor-assist-label {
+  font-size: 10.5px;
+}
+
+.studio-pinned-deck .tutor-seg-btn {
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+.studio-pinned-deck .tutor-toggle-pill {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+  gap: 5px;
 }
 
 .canvas-subbar {
@@ -931,7 +982,7 @@ button.acc-topic-btn.is-active-topic {
 .fret-string-row {
   display: grid;
   align-items: center;
-  height: 22px;
+  height: 20px;
   position: relative;
 }
 
@@ -1048,14 +1099,14 @@ button.acc-topic-btn.is-active-topic {
    ========================================================================== */
 
 .book-page-sheet {
-  max-width: 880px;
-  width: 100%;
-  margin: 24px auto;
-  padding: 48px 56px;
+  width: min(96%, 1320px);
+  max-width: 1320px;
+  margin: 10px auto 24px;
+  padding: 36px 44px;
   background: var(--bg-book-page, #FFFEFC);
   border: 1px solid var(--book-page-border, #E5E4DF);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  border-radius: 3px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
@@ -2604,6 +2655,16 @@ button.acc-topic-btn.is-active-topic {
   white-space: nowrap;
 }
 
+.time-pill-badge.is-clickable {
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.time-pill-badge.is-clickable:hover {
+  border-color: #18181B;
+  background: #FFFEFC;
+}
+
 /* Audio Selects & Toggles */
 .dock-select-wrap {
   display: inline-flex;
@@ -2686,6 +2747,312 @@ body[data-app-mode="primer"] .transport-dock {
 body[data-app-mode="studio"] .topbar-primer-only,
 body[data-app-mode="studio"] .primer-view {
   display: none !important;
+}
+
+/* Free Practice Metronome Mode: Zen 4-Dot Stage without Fretboard, Tutor Bar, or Staff Notation */
+body[data-free-metronome="true"] #workspace-view-tabs,
+body[data-free-metronome="true"] #btn-mark-done,
+body[data-free-metronome="true"] #btn-toggle-guide,
+body[data-free-metronome="true"] #studio-pinned-deck,
+body[data-free-metronome="true"] #studio-score-viewport,
+body[data-free-metronome="true"] .topbar-steppers {
+  display: none !important;
+}
+
+.free-metronome-stage {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+  height: 100%;
+  background: #FAF9F5;
+  padding: 28px 24px;
+  user-select: none;
+  overflow-y: auto;
+}
+
+body[data-free-metronome="true"] .free-metronome-stage {
+  display: flex;
+}
+
+.free-met-header-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.free-met-kicker {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #71717A;
+}
+
+.free-met-tempo-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.free-met-step-btn {
+  height: 32px;
+  min-width: 34px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid #E4E4E7;
+  background: #FFFEFC;
+  color: #18181B;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.08s ease;
+}
+
+.free-met-step-btn.is-jump {
+  color: #52525B;
+  background: var(--bg-sidebar, #F3F2EE);
+}
+
+.free-met-step-btn:hover {
+  border-color: #18181B;
+  background: #FFFFFF;
+  color: #18181B;
+}
+
+.free-met-step-btn:active {
+  transform: scale(0.94);
+}
+
+.free-met-tempo-readout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 12px;
+}
+
+.free-met-bpm-val {
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1;
+  color: #18181B;
+  letter-spacing: -0.02em;
+  min-width: 82px;
+  text-align: center;
+}
+
+.free-met-bpm-unit {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #71717A;
+}
+
+.free-met-slider-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: min(380px, 90vw);
+}
+
+.free-met-bpm-slider {
+  flex: 1;
+  height: 4px;
+  accent-color: #18181B;
+  cursor: pointer;
+}
+
+.free-met-tap-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #E4E4E7;
+  background: #FFFEFC;
+  color: #18181B;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.1s ease;
+}
+
+.free-met-tap-btn:hover {
+  border-color: #18181B;
+  background: #FFFFFF;
+}
+
+.free-met-tap-btn:active,
+.free-met-tap-btn.is-tapped {
+  background: #18181B;
+  border-color: #18181B;
+  color: #FFFFFF;
+}
+
+.free-met-meter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.free-met-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.free-met-pill-lbl {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #71717A;
+  text-transform: uppercase;
+}
+
+.free-met-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  min-height: 68px;
+  flex-wrap: wrap;
+}
+
+.free-met-dots-row.has-subdiv {
+  gap: 18px;
+}
+
+.free-met-dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.free-met-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #D4D4D8;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.08s ease-out;
+}
+
+.free-met-dot:hover {
+  border-color: #71717A;
+  transform: scale(1.08);
+}
+
+.free-met-dot.mode-accent {
+  border-color: rgba(194, 65, 12, 0.65);
+}
+
+.free-met-dot.mode-secondary {
+  border-color: rgba(63, 63, 70, 0.6);
+}
+
+.free-met-dot.mode-muted {
+  border: 1.5px dashed #A1A1AA;
+  opacity: 0.72;
+}
+
+.free-met-dot.is-active.mode-accent {
+  background: #C2410C;
+  border-color: #C2410C;
+  transform: scale(1.28);
+  box-shadow: 0 0 0 8px rgba(194, 65, 12, 0.12);
+}
+
+.free-met-dot.is-active.mode-secondary {
+  background: #3F3F46;
+  border-color: #3F3F46;
+  transform: scale(1.22);
+  box-shadow: 0 0 0 7px rgba(63, 63, 70, 0.10);
+}
+
+.free-met-dot.is-active.mode-normal {
+  background: #18181B;
+  border-color: #18181B;
+  transform: scale(1.18);
+  box-shadow: 0 0 0 6px rgba(24, 24, 27, 0.08);
+}
+
+.free-met-dot.is-active.mode-muted {
+  background: #F4F4F5;
+  border: 1.5px dashed #DC2626;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.free-met-dot-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #71717A;
+  transition: color 0.08s ease;
+}
+
+.free-met-dot-col.is-active-col .free-met-dot-num {
+  color: #18181B;
+  font-weight: 700;
+}
+
+.free-met-subdot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.free-met-subdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #D4D4D8;
+  transition: all 0.06s ease-out;
+}
+
+.free-met-subdot.is-active {
+  background: #52525B;
+  border-color: #52525B;
+  transform: scale(1.32);
+  box-shadow: 0 0 0 4px rgba(82, 82, 91, 0.12);
+}
+
+.free-met-subdot-lbl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #A1A1AA;
+}
+
+.free-met-subdot-col.is-active-col .free-met-subdot-lbl {
+  color: #3F3F46;
+  font-weight: 600;
+}
+
+.free-met-status-cue {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: #71717A;
+  min-height: 18px;
+  text-align: center;
 }
 
 /* ==========================================================================
@@ -2960,24 +3327,35 @@ body[data-app-mode="studio"] .primer-view {
 }
 
 .primer-col-symbol {
-  width: 180px;
+  width: 196px;
 }
 
-.primer-vf-cell {
-  display: inline-flex;
+.primer-vf-cell,
+.symbol-preview-box {
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 164px;
-  min-height: 92px;
+  width: 100%;
+  min-width: 180px;
+  height: auto;
+  min-height: 88px;
   background: #FFFFFF;
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
-  padding: 6px 4px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.primer-vf-cell.is-tall,
+.symbol-preview-box.is-tall {
+  min-height: 148px;
 }
 
 .primer-vf-svg {
   display: block;
-  overflow: visible;
+  max-width: 100%;
+  height: auto;
 }
 
 .primer-vf-annot {
@@ -3620,6 +3998,8 @@ body[data-app-mode="studio"] .primer-view {
     flex-direction: column;
   }
   .workspace-body[data-pane-mode="split"] .canvas-score-pane {
+    height: auto;
+    min-height: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-hairline);
   }
@@ -3630,13 +4010,19 @@ body[data-app-mode="studio"] .primer-view {
     display: none;
   }
 
-  .canvas-score-pane {
-    padding: 12px 14px 20px;
+  .studio-pinned-deck {
+    padding: 8px 12px;
+    max-height: 40vh;
+  }
+
+  .studio-score-viewport {
+    padding: 10px 12px 24px;
   }
 
   .book-page-sheet {
-    padding: 24px 18px;
-    margin: 10px auto;
+    width: 100%;
+    padding: 20px 16px;
+    margin: 6px auto 16px;
   }
 
   .book-page-title {
@@ -3743,110 +4129,166 @@ body[data-app-mode="studio"] .primer-view {
       <!-- INTERACTIVE SCORE PANE -->
       <section class="canvas-pane canvas-score-pane" id="score-pane">
 
-        <!-- Collapsible Instructions & Session Goals Panel -->
-        <div class="guide-drawer" id="studio-guide-panel" hidden>
-          <div class="guide-header">
-            <span class="guide-title">Playing Notes &middot; <span id="studio-exercise-topic-badge">Session</span></span>
-            <button class="guide-close-btn" id="btn-close-guide" aria-label="Close Notes">&times;</button>
-          </div>
-          <p class="guide-body" id="studio-instruction-text">Select any exercise to view playing instructions and technique tips.</p>
-          <div class="guide-checklist" id="active-session-checklist"></div>
-        </div>
-
-        <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
-        <div class="canvas-subbar">
-          <div class="telemetry-inline mode-play" id="note-active-card">
-            <div class="telemetry-glyph" id="note-glyph-large"></div>
-            <div class="telemetry-text">
-              <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
-              <span class="telemetry-sep">&middot;</span>
-              <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
+        <!-- PINNED TOP DECK: Telemetry, Tutor Assists & Interactive Fretboard -->
+        <div class="studio-pinned-deck" id="studio-pinned-deck">
+          <!-- Collapsible Instructions & Session Goals Panel -->
+          <div class="guide-drawer" id="studio-guide-panel" hidden>
+            <div class="guide-header">
+              <span class="guide-title">Playing Notes &middot; <span id="studio-exercise-topic-badge">Session</span></span>
+              <button class="guide-close-btn" id="btn-close-guide" aria-label="Close Notes">&times;</button>
             </div>
-            <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+            <p class="guide-body" id="studio-instruction-text">Select any exercise to view playing instructions and technique tips.</p>
+            <div class="guide-checklist" id="active-session-checklist"></div>
           </div>
 
-          <div class="notation-toggles" id="studio-trainer-bar">
-            <div class="toggle-group" id="chord-mode-group" style="display:none;">
-              <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
-              <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
-              <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
-            </div>
-            <div class="toggle-group" id="string-selector-group" style="display:none;">
-              <span class="toggle-lbl">String</span>
-              <button class="micro-pill active" data-str="1">1</button>
-              <button class="micro-pill" data-str="2">2</button>
-              <button class="micro-pill" data-str="3">3</button>
-              <button class="micro-pill" data-str="4">4</button>
-              <button class="micro-pill" data-str="5">5</button>
-              <button class="micro-pill" data-str="6">6</button>
-            </div>
-            <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
-          </div>
-        </div>
-
-        <!-- Fretboard Visualizer -->
-        <div class="fretboard-stage" id="fretboard-wrapper">
-          <div id="fretboard-container"></div>
-        </div>
-
-        <!-- Printed Book Page Container ("Sheet-on-Desk") -->
-        <article class="book-page-sheet" id="book-page-sheet">
-          <header class="book-page-header">
-            <div class="book-page-top-meta">
-              <div class="book-page-session" id="book-page-session">LEARN &amp; MASTER GUITAR &middot; SESSION 2</div>
-              <span class="book-verified-pill is-verified" id="book-verification-badge">PDF Transcribed &middot; p. 9</span>
-            </div>
-            <div class="book-page-title-row">
-              <h1 class="book-page-title" id="book-page-title">First String Exercises</h1>
-              <span class="book-topic-count-pill" id="book-topic-count-pill" hidden>1 Exercise</span>
-            </div>
-            <p class="book-page-desc" id="book-page-desc">Select any exercise to view playing instructions and technique tips.</p>
-
-            <!-- TUTOR SCAFFOLDING HEADER CONTROLS -->
-            <div class="tutor-scaffolding-bar" id="tutor-scaffolding-bar" role="region" aria-label="Tutor Scaffolding Assists">
-              <div class="tutor-assist-group">
-                <span class="tutor-assist-label">Note Names</span>
-                <div class="tutor-seg-group" id="tutor-note-mode-group" role="group" aria-label="Note Name Display">
-                  <button type="button" class="tutor-seg-btn" data-note-mode="off">Off</button>
-                  <button type="button" class="tutor-seg-btn active" data-note-mode="above">Above Note</button>
-                  <button type="button" class="tutor-seg-btn" data-note-mode="inside">Inside Notehead</button>
-                </div>
+          <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
+          <div class="canvas-subbar">
+            <div class="telemetry-inline mode-play" id="note-active-card">
+              <div class="telemetry-glyph" id="note-glyph-large"></div>
+              <div class="telemetry-text">
+                <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
+                <span class="telemetry-sep">&middot;</span>
+                <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
               </div>
+              <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+            </div>
 
-              <div class="tutor-assist-group">
-                <span class="tutor-assist-label">Tab Visibility</span>
-                <div class="tutor-seg-group" id="tutor-tab-mode-group" role="group" aria-label="Tab Visibility Mode">
-                  <button type="button" class="tutor-seg-btn active" data-tab-mode="both">Show Both</button>
-                  <button type="button" class="tutor-seg-btn" data-tab-mode="staff-only">Staff Only</button>
-                  <button type="button" class="tutor-seg-btn" data-tab-mode="blur">Blur Tab</button>
-                </div>
+            <div class="notation-toggles" id="studio-trainer-bar">
+              <div class="toggle-group" id="chord-mode-group" style="display:none;">
+                <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
               </div>
+              <div class="toggle-group" id="string-selector-group" style="display:none;">
+                <span class="toggle-lbl">String</span>
+                <button class="micro-pill active" data-str="1">1</button>
+                <button class="micro-pill" data-str="2">2</button>
+                <button class="micro-pill" data-str="3">3</button>
+                <button class="micro-pill" data-str="4">4</button>
+                <button class="micro-pill" data-str="5">5</button>
+                <button class="micro-pill" data-str="6">6</button>
+              </div>
+              <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
+            </div>
+          </div>
 
-              <div class="tutor-assist-group tutor-assist-bools">
-                <button type="button" class="tutor-toggle-pill active" id="btn-tutor-rhythm-guide" aria-pressed="true" title="Toggle beat numbers, Hold continuation arrows, +1/2 beat and Rest / Mute cues">
-                  <span class="tutor-pill-dot"></span>
-                  <span>Rhythm Guide: <strong id="tutor-rhythm-state">ON</strong></span>
-                </button>
-                <button type="button" class="tutor-toggle-pill active" id="btn-tutor-coach-banner" aria-pressed="true" title="Toggle real-time Live Action Coach pill above the active measure during playback">
-                  <span class="tutor-pill-dot"></span>
-                  <span>Live Coach: <strong id="tutor-coach-state">ON</strong></span>
-                </button>
+          <!-- TUTOR SCAFFOLDING HEADER CONTROLS (Pinned) -->
+          <div class="tutor-scaffolding-bar" id="tutor-scaffolding-bar" role="region" aria-label="Tutor Scaffolding Assists">
+            <div class="tutor-assist-group">
+              <span class="tutor-assist-label">Note Names</span>
+              <div class="tutor-seg-group" id="tutor-note-mode-group" role="group" aria-label="Note Name Display">
+                <button type="button" class="tutor-seg-btn" data-note-mode="off">Off</button>
+                <button type="button" class="tutor-seg-btn active" data-note-mode="above">Above Note</button>
+                <button type="button" class="tutor-seg-btn" data-note-mode="inside">Inside Notehead</button>
               </div>
             </div>
-          </header>
 
-          <div class="book-tempo-row" id="book-tempo-marking">
-            <span class="tempo-glyph-slot" id="book-tempo-glyph" aria-hidden="true"></span>
-            <span class="tempo-eq">=</span>
-            <span class="tempo-bpm-val" id="book-tempo-bpm">60</span>
-          </div>
+            <div class="tutor-assist-group">
+              <span class="tutor-assist-label">Tab Visibility</span>
+              <div class="tutor-seg-group" id="tutor-tab-mode-group" role="group" aria-label="Tab Visibility Mode">
+                <button type="button" class="tutor-seg-btn active" data-tab-mode="both">Show Both</button>
+                <button type="button" class="tutor-seg-btn" data-tab-mode="staff-only">Staff Only</button>
+                <button type="button" class="tutor-seg-btn" data-tab-mode="blur">Blur Tab</button>
+              </div>
+            </div>
 
-          <div class="notation-stage">
-            <div id="topic-exercises-stack" class="topic-exercises-stack">
-              <div id="tab-container"></div>
+            <div class="tutor-assist-group tutor-assist-bools">
+              <button type="button" class="tutor-toggle-pill active" id="btn-tutor-rhythm-guide" aria-pressed="true" title="Toggle beat numbers, Hold continuation arrows, +1/2 beat and Rest / Mute cues">
+                <span class="tutor-pill-dot"></span>
+                <span>Rhythm Guide: <strong id="tutor-rhythm-state">ON</strong></span>
+              </button>
+              <button type="button" class="tutor-toggle-pill active" id="btn-tutor-coach-banner" aria-pressed="true" title="Toggle real-time Live Action Coach pill above the active measure during playback">
+                <span class="tutor-pill-dot"></span>
+                <span>Live Coach: <strong id="tutor-coach-state">ON</strong></span>
+              </button>
             </div>
           </div>
-        </article>
+
+          <!-- Interactive Fretboard Visualizer (Pinned) -->
+          <div class="fretboard-stage" id="fretboard-wrapper">
+            <div id="fretboard-container"></div>
+          </div>
+        </div>
+
+        <!-- SCROLLABLE SCORE VIEWPORT -->
+        <div class="studio-score-viewport" id="studio-score-viewport">
+          <!-- Printed Book Page Container ("Sheet-on-Desk") -->
+          <article class="book-page-sheet" id="book-page-sheet">
+            <header class="book-page-header">
+              <div class="book-page-top-meta">
+                <div class="book-page-session" id="book-page-session">LEARN &amp; MASTER GUITAR &middot; SESSION 2</div>
+                <span class="book-verified-pill is-verified" id="book-verification-badge">PDF Transcribed &middot; p. 9</span>
+              </div>
+              <div class="book-page-title-row">
+                <h1 class="book-page-title" id="book-page-title">First String Exercises</h1>
+                <span class="book-topic-count-pill" id="book-topic-count-pill" hidden>1 Exercise</span>
+              </div>
+              <p class="book-page-desc" id="book-page-desc">Select any exercise to view playing instructions and technique tips.</p>
+            </header>
+
+            <div class="book-tempo-row" id="book-tempo-marking">
+              <span class="tempo-glyph-slot" id="book-tempo-glyph" aria-hidden="true"></span>
+              <span class="tempo-eq">=</span>
+              <span class="tempo-bpm-val" id="book-tempo-bpm">60</span>
+            </div>
+
+            <div class="notation-stage">
+              <div id="topic-exercises-stack" class="topic-exercises-stack">
+                <div id="tab-container"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- ZEN FREE METRONOME STAGE (Visible only in Free Metronome mode) -->
+        <section class="free-metronome-stage" id="free-metronome-stage" aria-label="Free Practice Metronome">
+          <div class="free-met-header-block">
+            <div class="free-met-kicker">FREE PRACTICE METRONOME</div>
+
+            <div class="free-met-tempo-row">
+              <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-minus5" aria-label="Decrease Tempo by 5">&minus;5</button>
+              <button type="button" class="free-met-step-btn" id="free-met-bpm-minus" aria-label="Decrease Tempo by 1">&minus;1</button>
+              <div class="free-met-tempo-readout">
+                <span class="free-met-bpm-val" id="free-met-bpm-val">60</span>
+                <span class="free-met-bpm-unit">BPM</span>
+              </div>
+              <button type="button" class="free-met-step-btn" id="free-met-bpm-plus" aria-label="Increase Tempo by 1">+1</button>
+              <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-plus5" aria-label="Increase Tempo by 5">+5</button>
+            </div>
+
+            <div class="free-met-slider-row">
+              <input type="range" class="free-met-bpm-slider" id="free-met-bpm-slider" min="30" max="240" value="60" aria-label="Tempo Slider">
+              <button type="button" class="free-met-tap-btn" id="free-met-tap-btn" title="Tap repeatedly to set tempo">Tap Tempo</button>
+            </div>
+          </div>
+
+          <!-- TIME SIGNATURE & SUBDIVISION PILL BAR -->
+          <div class="free-met-meter-bar">
+            <div class="free-met-pill-group" role="group" aria-label="Time Signature">
+              <span class="free-met-pill-lbl">Meter</span>
+              <div class="segmented-control" id="free-met-timesig-group">
+                <button type="button" class="seg-btn" data-ts="2/4">2/4</button>
+                <button type="button" class="seg-btn" data-ts="3/4">3/4</button>
+                <button type="button" class="seg-btn active" data-ts="4/4">4/4</button>
+                <button type="button" class="seg-btn" data-ts="5/4">5/4</button>
+                <button type="button" class="seg-btn" data-ts="6/8">6/8</button>
+              </div>
+            </div>
+
+            <div class="free-met-pill-group" role="group" aria-label="Subdivision">
+              <span class="free-met-pill-lbl">Subdivision</span>
+              <div class="segmented-control" id="free-met-subdiv-group">
+                <button type="button" class="seg-btn active" data-subdiv="1">&#9833; Quarter</button>
+                <button type="button" class="seg-btn" data-subdiv="2">&#9835; Eighth (1 &amp; 2 &amp;)</button>
+                <button type="button" class="seg-btn" data-subdiv="3">3 Triplets</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="free-met-dots-row" id="free-met-dots-row" role="group" aria-label="Interactive Visual Beat Indicators"></div>
+
+          <div class="free-met-status-cue" id="free-met-status-cue">Click any beat dot to cycle Accent &middot; Normal &middot; Muted</div>
+        </section>
 
       </section>
 
@@ -3931,7 +4373,7 @@ body[data-app-mode="studio"] .primer-view {
         <button class="speed-preset-btn" id="btn-speed-fast" data-speed="fast">Goal: 84</button>
       </div>
 
-      <span class="time-pill-badge" id="time-pill-badge" title="Time Signature">4/4</span>
+      <button type="button" class="time-pill-badge" id="time-pill-badge" title="Time Signature (Click in Free Metronome to cycle meter)">4/4</button>
     </div>
 
     <div class="transport-right">
@@ -9878,6 +10320,9 @@ class ScoreRenderer {
   _getMeasuresPerSystem(containerWidth) {
     if (!this.measures || this.measures.length === 0) return 4;
     const total = this.measures.length;
+    if (total <= 8) {
+      return total;
+    }
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 4);
     let mps = 4;
     if (maxEvents >= 8) {
@@ -9933,14 +10378,21 @@ class ScoreRenderer {
     const availW = Math.max(320, this.container.clientWidth || 760);
     this._lastRenderWidth = availW;
 
-    const SCALE = 0.82;
-    const logicalW = Math.floor(availW / SCALE);
-    const mps = this._getMeasuresPerSystem(availW);
-
     const showTreble = this.hasStandardStaff(this.exercise);
     const isMetOnly = Boolean(this.exercise && (this.exercise.isMetronomeOnly || this.exercise.id === "free-metronome"));
     const showTab = !isMetOnly && (!showTreble || this.tabVisibilityMode !== "staff-only");
     const isTabBlurred = showTab && this.tabVisibilityMode === "blur";
+
+    const baseScale = 0.82;
+    const mps = this._getMeasuresPerSystem(availW);
+    const leftGutter = showTreble && showTab ? 18 : 6;
+    const clefExtra = showTreble ? 78 : 54;
+    const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 1);
+    const minPerBar = maxEvents >= 6 ? 152 : (maxEvents >= 4 ? 128 : 112);
+    const minLogicalW = mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0;
+    const logicalW = Math.max(Math.floor(availW / baseScale), minLogicalW);
+    const SCALE = availW / logicalW;
+    this._activeScale = SCALE;
 
     const systems = [];
     for (let i = 0; i < totalMeasures; i += mps) {
@@ -9998,6 +10450,9 @@ class ScoreRenderer {
       if (svgEl) {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
+        svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
+        svgEl.removeAttribute("width");
+        svgEl.removeAttribute("height");
       }
 
       const backdropLayer = document.createElementNS(SVG_NS, "g");
@@ -10034,8 +10489,6 @@ class ScoreRenderer {
         });
       };
 
-      const leftGutter = showTreble && showTab ? 18 : 6;
-      const clefExtra = showTreble ? 78 : 54;
       const usableW = logicalW - leftGutter - 6;
       const countInRow = sys.items.length;
       const barGridCols = countInRow === 1 && totalMeasures > 1 ? Math.min(2, mps) : countInRow;
@@ -10662,7 +11115,7 @@ class ScoreRenderer {
       return;
     }
 
-    const SCALE = 0.82;
+    const SCALE = this._activeScale || 0.82;
     const pill = this._coachPillEl;
     const variant = coachMeta.variant || "play";
     pill.className = `vf-coach-pill is-${variant}`;
@@ -10723,7 +11176,17 @@ class ScoreRenderer {
       entry.textEls.forEach(el => el.classList.add(cls));
 
       if (beatIdx === 0 && entry.sysEl) {
-        entry.sysEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const viewport = this.container ? this.container.closest(".studio-score-viewport") : null;
+        if (viewport) {
+          const vpRect = viewport.getBoundingClientRect();
+          const sysRect = entry.sysEl.getBoundingClientRect();
+          if (sysRect.top < vpRect.top + 8 || sysRect.bottom > vpRect.bottom - 8) {
+            const targetTop = viewport.scrollTop + (sysRect.top - vpRect.top) - 12;
+            viewport.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+          }
+        } else {
+          entry.sysEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       }
     }
 
@@ -11061,15 +11524,19 @@ class MetronomeAudioEngine {
     } catch (e) {}
   }
 
-  playBeat(time, isAccent = false, isRest = false, isCountIn = false) {
+  playBeat(time, accentLevel = false, isRest = false, isCountIn = false) {
     if (!this.audioCtx) this.init();
 
     const ctx = this.audioCtx;
     const now = Math.max(time || 0, ctx.currentTime);
+    const level = typeof accentLevel === "string"
+      ? accentLevel
+      : (accentLevel ? "accent" : "normal");
 
     if (isCountIn) {
       // Crisp 18ms percussive count-in woodblock click (1200 Hz Beat 1 / 800 Hz Beats 2-4)
-      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.62, 6.5, 0.018);
+      const isPrimary = level === "accent";
+      this._playPercussiveClick(now, isPrimary ? 1200 : 800, isPrimary ? 0.95 : 0.62, 6.5, 0.018);
       return;
     }
 
@@ -11088,14 +11555,20 @@ class MetronomeAudioEngine {
     }
 
     if (this.soundType === "drum") {
-      // Rim / percussive tick (900 Hz accent / 620 Hz beat)
-      this._playPercussiveClick(now, isAccent ? 900 : 620, isAccent ? 0.92 : 0.56, 4.2, 0.022);
+      // Rim / percussive tick (900 Hz primary / 760 Hz secondary / 620 Hz normal / 520 Hz sub)
+      const freq = level === "accent" ? 900 : (level === "secondary" ? 760 : (level === "sub" ? 520 : 620));
+      const gain = level === "accent" ? 0.92 : (level === "secondary" ? 0.74 : (level === "sub" ? 0.34 : 0.56));
+      this._playPercussiveClick(now, freq, gain, 4.2, level === "sub" ? 0.015 : 0.022);
     } else if (this.soundType === "click" || this.soundType === "beep") {
-      // High crisp digital wood click (1400 Hz / 950 Hz, 16ms)
-      this._playPercussiveClick(now, isAccent ? 1400 : 950, isAccent ? 0.90 : 0.54, 8.0, 0.016);
+      // High crisp digital wood click (1400 Hz / 1150 Hz / 950 Hz / 760 Hz sub)
+      const freq = level === "accent" ? 1400 : (level === "secondary" ? 1150 : (level === "sub" ? 760 : 950));
+      const gain = level === "accent" ? 0.90 : (level === "secondary" ? 0.72 : (level === "sub" ? 0.32 : 0.54));
+      this._playPercussiveClick(now, freq, gain, 8.0, level === "sub" ? 0.012 : 0.016);
     } else {
-      // Default Woodblock: 1200 Hz accent / 800 Hz regular beats (15ms-22ms percussive impulse)
-      this._playPercussiveClick(now, isAccent ? 1200 : 800, isAccent ? 0.95 : 0.58, 6.5, 0.020);
+      // Default Woodblock: 1200 Hz primary accent / 1000 Hz secondary / 800 Hz normal / 660 Hz sub
+      const freq = level === "accent" ? 1200 : (level === "secondary" ? 1000 : (level === "sub" ? 660 : 800));
+      const gain = level === "accent" ? 0.95 : (level === "secondary" ? 0.76 : (level === "sub" ? 0.34 : 0.58));
+      this._playPercussiveClick(now, freq, gain, 6.5, level === "sub" ? 0.014 : 0.020);
     }
   }
 
@@ -13275,10 +13748,12 @@ class FoundationsPrimer {
 
       const rowsHtml = catItems.map((item) => {
         itemsToEngrave.push(item);
+        const kind = item.symbolSpec && item.symbolSpec.kind;
+        const isTallCell = kind === "tab-vs-std" || kind === "open-strings" || kind === "string-circles";
         return `
           <tr class="primer-row" data-primer-id="${item.id}" tabindex="0" role="button" aria-label="Open interactive demo for ${this.escapeHtml(item.name)}">
             <td class="primer-col-symbol">
-              <div class="primer-vf-cell" id="primer-sym-${item.id}"></div>
+              <div class="primer-vf-cell symbol-preview-box ${isTallCell ? "is-tall" : ""}" id="primer-sym-${item.id}"></div>
             </td>
             <td class="primer-col-name">
               <div class="primer-item-name">${this.escapeHtml(item.name)}</div>
@@ -13355,6 +13830,15 @@ class FoundationsPrimer {
     });
   }
 
+  refreshSymbolsIfNeeded() {
+    if (!this.root) return;
+    const svgs = this.root.querySelectorAll(".primer-vf-svg");
+    const needsRefit = Array.from(svgs).some(svg => svg.dataset.bboxFitted !== "1");
+    if (needsRefit) {
+      this.renderCategories();
+    }
+  }
+
   /**
    * Renders an authentic VexFlow 4 symbol vignette for any row in the Primer Matrix.
    */
@@ -13370,8 +13854,11 @@ class FoundationsPrimer {
     targetEl.innerHTML = "";
     const SVG_NS = "http://www.w3.org/2000/svg";
     const isTall = spec.kind === "tab-vs-std" || spec.kind === "open-strings" || spec.kind === "string-circles";
-    const width = 160;
-    const height = isTall ? 148 : 94;
+    targetEl.classList.add("symbol-preview-box");
+    targetEl.classList.toggle("is-tall", isTall);
+
+    const width = 180;
+    const height = isTall ? 145 : 84;
     const scale = 0.75;
     const lw = Math.round(width / scale);
     const lh = Math.round(height / scale);
@@ -13385,7 +13872,7 @@ class FoundationsPrimer {
       const svg = targetEl.querySelector("svg");
       if (svg) {
         svg.setAttribute("viewBox", `0 0 ${lw} ${lh}`);
-        svg.style.overflow = "visible";
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
         svg.classList.add("primer-vf-svg");
       }
 
@@ -13429,32 +13916,32 @@ class FoundationsPrimer {
       const kind = spec.kind;
 
       if (kind === "stave-lines-spaces") {
-        const stave = new VF.Stave(8, 28, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const stave = new VF.Stave(10, 20, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes);
         notes.forEach((n, idx) => {
           const x = n.getAbsoluteX() + 5;
-          drawOverlayText(x, stave.getYForLine(0) - 9, spec.labels[idx]);
+          drawOverlayText(x, stave.getYForLine(0) - 8, spec.labels[idx]);
         });
-        drawOverlayText(lw - 6, stave.getYForLine(0) + 3, "5", "primer-vf-linenum");
-        drawOverlayText(lw - 6, stave.getYForLine(4) + 3, "1", "primer-vf-linenum");
+        drawOverlayText(lw - 5, stave.getYForLine(0) + 3, "5", "primer-vf-linenum");
+        drawOverlayText(lw - 5, stave.getYForLine(4) + 3, "1", "primer-vf-linenum");
       } else if (kind === "ledger") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 18, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes);
-        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 36, "Middle C", "primer-vf-annot");
+        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 34, "Middle C", "primer-vf-annot");
       } else if (kind === "treble-clef") {
-        const stave = new VF.Stave(8, 29, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const stave = new VF.Stave(10, 22, lw - 20).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         stave.setContext(ctx).draw();
         const gNote = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "w" });
         gNote.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [gNote]);
-        drawOverlayText(gNote.getAbsoluteX() + 8, stave.getYForLine(0) - 10, "Line 2 = G", "primer-vf-annot-accent");
+        drawOverlayText(gNote.getAbsoluteX() + 8, stave.getYForLine(0) - 8, "Line 2 = G", "primer-vf-annot-accent");
       } else if (kind === "tab-vs-std") {
-        const stave = new VF.Stave(14, 24, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(14, 110, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(14, 14, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(14, 96, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
@@ -13474,15 +13961,15 @@ class FoundationsPrimer {
         v1.draw(ctx, stave);
         v2.draw(ctx, tab);
       } else if (kind === "barlines") {
-        const halfW = Math.floor((lw - 16) / 2);
-        const s1 = new VF.Stave(8, 30, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
-        const s2 = new VF.Stave(8 + halfW, 30, halfW).setEndBarType(VF.Barline.type.END).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const halfW = Math.floor((lw - 20) / 2);
+        const s1 = new VF.Stave(10, 20, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
+        const s2 = new VF.Stave(10 + halfW, 20, halfW).setEndBarType(VF.Barline.type.END).setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
-        drawOverlayText(8 + halfW, 18, "Barline");
-        drawOverlayText(lw - 22, 18, "End");
+        drawOverlayText(10 + halfW, 12, "Barline");
+        drawOverlayText(lw - 22, 12, "End");
       } else if (kind === "repeat") {
-        const s1 = new VF.Stave(10, 28, lw - 20)
+        const s1 = new VF.Stave(10, 18, lw - 20)
           .setBegBarType(VF.Barline.type.REPEAT_BEGIN)
           .setEndBarType(VF.Barline.type.REPEAT_END)
           .setStyle({ strokeStyle: "#27272A", lineWidth: 1.1 });
@@ -13490,53 +13977,53 @@ class FoundationsPrimer {
         const notes = makeNotes(["g/4/h", "g/4/h"]);
         formatAndDraw(s1, notes);
       } else if (kind === "notes") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(spec.notes);
         formatAndDraw(stave, notes, { num_beats: 6, beat_value: 4 });
-        drawOverlayText(notes[0].getAbsoluteX() + 7, stave.getYForLine(4) + 24, "4 Beats");
-        drawOverlayText(notes[1].getAbsoluteX() + 6, stave.getYForLine(4) + 24, "2 Beats");
+        drawOverlayText(notes[0].getAbsoluteX() + 7, stave.getYForLine(4) + 22, "4 Beats");
+        drawOverlayText(notes[1].getAbsoluteX() + 6, stave.getYForLine(4) + 22, "2 Beats");
       } else if (kind === "quarter-eighth") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["g/4/q", "g/4/8", "g/4/8"]);
         formatAndDraw(stave, notes, { num_beats: 2, beat_value: 4 }, true);
-        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "1 Beat");
-        drawOverlayText((notes[1].getAbsoluteX() + notes[2].getAbsoluteX()) / 2 + 5, stave.getYForLine(4) + 24, "1/2 + 1/2");
+        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1 Beat");
+        drawOverlayText((notes[1].getAbsoluteX() + notes[2].getAbsoluteX()) / 2 + 5, stave.getYForLine(4) + 22, "1/2 + 1/2");
       } else if (kind === "whole-half-rests") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["d/5/wr", "b/4/hr"]);
         formatAndDraw(stave, notes, { num_beats: 6, beat_value: 4 });
-        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Whole (4)", "primer-vf-annot-rest");
-        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Half (2)", "primer-vf-annot-rest");
+        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Whole (4)", "primer-vf-annot-rest");
+        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Half (2)", "primer-vf-annot-rest");
       } else if (kind === "quarter-eighth-rests") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["b/4/qr", "b/4/8r"]);
         formatAndDraw(stave, notes, { num_beats: 2, beat_value: 4 });
-        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "1 Beat", "primer-vf-annot-rest");
-        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "1/2 Beat", "primer-vf-annot-rest");
+        drawOverlayText(notes[0].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1 Beat", "primer-vf-annot-rest");
+        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "1/2 Beat", "primer-vf-annot-rest");
       } else if (kind === "dotted-half") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "h", align_center: true });
         VF.Dot.buildAndAttach([n], { all: true });
         n.setStyle({ fillStyle: "#18181B", strokeStyle: "#18181B" });
         formatAndDraw(stave, [n], { num_beats: 3, beat_value: 4 });
-        drawOverlayText(lw / 2, stave.getYForLine(4) + 24, "2 + 1 = 3 Beats", "primer-vf-annot-blue");
+        drawOverlayText(lw / 2, stave.getYForLine(4) + 22, "2 + 1 = 3 Beats", "primer-vf-annot-blue");
       } else if (kind === "dotted-quarter") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["g/4"], duration: "q" });
         VF.Dot.buildAndAttach([n1], { all: true });
         const n2 = new VF.StaveNote({ clef: "treble", keys: ["a/4"], duration: "8" });
         formatAndDraw(stave, [n1, n2], { num_beats: 2, beat_value: 4 });
-        drawOverlayText(n1.getAbsoluteX() + 8, stave.getYForLine(4) + 24, "1 + 1/2", "primer-vf-annot-blue");
+        drawOverlayText(n1.getAbsoluteX() + 8, stave.getYForLine(4) + 22, "1 + 1/2", "primer-vf-annot-blue");
       } else if (kind === "tie-vs-slur") {
-        const halfW = Math.floor((lw - 16) / 2);
-        const s1 = new VF.Stave(8, 30, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(8 + halfW, 30, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const halfW = Math.floor((lw - 20) / 2);
+        const s1 = new VF.Stave(10, 20, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(10 + halfW, 20, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         const tNotes = makeNotes(["g/4/h", "g/4/h"]);
@@ -13547,32 +14034,32 @@ class FoundationsPrimer {
         if (VF.Curve) {
           new VF.Curve(slNotes[0], slNotes[1], { cps: [{ x: 0, y: 12 }, { x: 0, y: 12 }] }).setContext(ctx).draw();
         }
-        drawOverlayText(8 + halfW / 2, 18, "Tie (Hold)", "primer-vf-annot-accent");
-        drawOverlayText(8 + halfW * 1.5, 18, "Slur");
+        drawOverlayText(10 + halfW / 2, 12, "Tie (Hold)", "primer-vf-annot-accent");
+        drawOverlayText(10 + halfW * 1.5, 12, "Slur");
       } else if (kind === "time-sigs") {
-        const s1 = new VF.Stave(6, 28, Math.floor((lw - 12) / 3) + 12).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(s1.getX() + s1.getWidth(), 28, Math.floor((lw - 12) / 3) - 6).addTimeSignature("3/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s3 = new VF.Stave(s2.getX() + s2.getWidth(), 28, Math.floor((lw - 12) / 3) - 6).addTimeSignature("C").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s1 = new VF.Stave(8, 20, Math.floor((lw - 16) / 3) + 12).addClef("treble").addTimeSignature("4/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(s1.getX() + s1.getWidth(), 20, Math.floor((lw - 16) / 3) - 6).addTimeSignature("3/4").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s3 = new VF.Stave(s2.getX() + s2.getWidth(), 20, Math.floor((lw - 16) / 3) - 6).addTimeSignature("C").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         s3.setContext(ctx).draw();
       } else if (kind === "key-sigs") {
-        const halfW = Math.floor((lw - 14) / 2);
-        const s1 = new VF.Stave(7, 26, halfW).addClef("treble").addKeySignature("G").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(7 + halfW, 26, halfW).addClef("treble").addKeySignature("F").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const halfW = Math.floor((lw - 16) / 2);
+        const s1 = new VF.Stave(8, 20, halfW).addClef("treble").addKeySignature("G").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(8 + halfW, 20, halfW).addClef("treble").addKeySignature("F").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
-        drawOverlayText(7 + halfW / 2, s1.getYForLine(4) + 34, "Key of G (F#)");
-        drawOverlayText(7 + halfW * 1.5, s2.getYForLine(4) + 34, "Key of F (Bb)");
+        drawOverlayText(8 + halfW / 2, s1.getYForLine(4) + 32, "Key of G (F#)");
+        drawOverlayText(8 + halfW * 1.5, s2.getYForLine(4) + 32, "Key of F (Bb)");
       } else if (kind === "accidental") {
-        const stave = new VF.Stave(8, 28, lw - 16).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 20, lw - 20).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n = new VF.StaveNote({ clef: "treble", keys: [spec.vexKey], duration: "h", align_center: true });
         n.addModifier(new VF.Accidental(spec.acc), 0);
         n.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [n], { num_beats: 2, beat_value: 4 });
       } else if (kind === "natural-pair") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f#/4"], duration: "h" });
         n1.addModifier(new VF.Accidental("#"), 0);
@@ -13580,11 +14067,11 @@ class FoundationsPrimer {
         n2.addModifier(new VF.Accidental("n"), 0);
         n2.setStyle({ fillStyle: "#C2410C", strokeStyle: "#C2410C" });
         formatAndDraw(stave, [n1, n2]);
-        drawOverlayText(n2.getAbsoluteX() + 6, stave.getYForLine(4) + 24, "Reset \u266E", "primer-vf-annot-accent");
+        drawOverlayText(n2.getAbsoluteX() + 6, stave.getYForLine(4) + 22, "Reset \u266E", "primer-vf-annot-accent");
       } else if (kind === "barline-reset") {
-        const halfW = Math.floor((lw - 14) / 2);
-        const s1 = new VF.Stave(7, 26, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const s2 = new VF.Stave(7 + halfW, 26, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const halfW = Math.floor((lw - 16) / 2);
+        const s1 = new VF.Stave(8, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const s2 = new VF.Stave(8 + halfW, 14, halfW).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         s1.setContext(ctx).draw();
         s2.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f#/4"], duration: "h" }).addModifier(new VF.Accidental("#"), 0);
@@ -13593,10 +14080,10 @@ class FoundationsPrimer {
         const n3 = new VF.StaveNote({ clef: "treble", keys: ["f/4"], duration: "w" });
         n3.setStyle({ fillStyle: "#15803D", strokeStyle: "#15803D" });
         formatAndDraw(s2, [n3]);
-        drawOverlayText(n2.getAbsoluteX() + 4, s1.getYForLine(4) + 24, "Still #");
-        drawOverlayText(n3.getAbsoluteX() + 6, s2.getYForLine(4) + 24, "Auto \u266E!", "primer-vf-annot-green");
+        drawOverlayText(n2.getAbsoluteX() + 4, s1.getYForLine(4) + 22, "Still #");
+        drawOverlayText(n3.getAbsoluteX() + 6, s2.getYForLine(4) + 22, "Auto \u266E!", "primer-vf-annot-green");
       } else if (kind === "picks") {
-        const stave = new VF.Stave(8, 30, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 22, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["e/5"], duration: "8" });
         const n2 = new VF.StaveNote({ clef: "treble", keys: ["e/5"], duration: "8" });
@@ -13607,11 +14094,11 @@ class FoundationsPrimer {
           } catch (e) {}
         }
         formatAndDraw(stave, [n1, n2], { num_beats: 1, beat_value: 4 }, true);
-        drawOverlayText(n1.getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Down (\u220F)");
-        drawOverlayText(n2.getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Up (V)");
+        drawOverlayText(n1.getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Down (\u220F)");
+        drawOverlayText(n2.getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Up (V)");
       } else if (kind === "string-circles") {
-        const stave = new VF.Stave(12, 32, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(12, 114, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(14, 24, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(14, 102, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
@@ -13636,7 +14123,7 @@ class FoundationsPrimer {
         v1.draw(ctx, stave);
         v2.draw(ctx, tab);
       } else if (kind === "finger-numbers") {
-        const stave = new VF.Stave(8, 22, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 18, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const n1 = new VF.StaveNote({ clef: "treble", keys: ["f/5"], duration: "q" });
         const n2 = new VF.StaveNote({ clef: "treble", keys: ["f#/5"], duration: "q" }).addModifier(new VF.Accidental("#"), 0);
@@ -13648,8 +14135,8 @@ class FoundationsPrimer {
           drawOverlayText(n.getAbsoluteX() + 6, stave.getYForLine(4) + 22, String(i + 1), "primer-vf-annot-accent");
         });
       } else if (kind === "open-strings") {
-        const stave = new VF.Stave(12, 26, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
-        const tab = new VF.TabStave(12, 112, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
+        const stave = new VF.Stave(14, 18, lw - 24).addClef("treble").setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const tab = new VF.TabStave(14, 98, lw - 24).addClef("tab").setStyle({ strokeStyle: "#3F3F46", lineWidth: 0.95 });
         stave.setContext(ctx).draw();
         tab.setContext(ctx).draw();
         const startX = Math.max(stave.getNoteStartX(), tab.getNoteStartX()) + 6;
@@ -13668,12 +14155,35 @@ class FoundationsPrimer {
         v2.draw(ctx, tab);
         notes.forEach(n => drawOverlayText(n.getAbsoluteX() + 5, stave.getYForLine(0) - 8, "0", "primer-vf-annot-green"));
       } else if (kind === "muting") {
-        const stave = new VF.Stave(8, 26, lw - 16).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
+        const stave = new VF.Stave(10, 14, lw - 20).setStyle({ strokeStyle: "#27272A", lineWidth: 1.0 });
         stave.setContext(ctx).draw();
         const notes = makeNotes(["e/5/q", "b/4/qr", "e/5/q", "b/4/qr"]);
         formatAndDraw(stave, notes);
-        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Mute", "primer-vf-annot-rest");
-        drawOverlayText(notes[3].getAbsoluteX() + 5, stave.getYForLine(4) + 24, "Mute", "primer-vf-annot-rest");
+        drawOverlayText(notes[1].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Mute", "primer-vf-annot-rest");
+        drawOverlayText(notes[3].getAbsoluteX() + 5, stave.getYForLine(4) + 22, "Mute", "primer-vf-annot-rest");
+      }
+
+      // Compute exact ink bounding box and center cleanly inside padded preview box
+      if (svg) {
+        try {
+          const bb = svg.getBBox();
+          if (bb && bb.width > 8 && bb.height > 8) {
+            const padX = 10;
+            const padY = 8;
+            const vbW = bb.width + padX * 2;
+            const vbH = bb.height + padY * 2;
+            svg.setAttribute(
+              "viewBox",
+              `${(bb.x - padX).toFixed(1)} ${(bb.y - padY).toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`
+            );
+            const maxDrawW = 160;
+            const maxDrawH = isTall ? 128 : 68;
+            const fitScale = Math.min(maxDrawW / vbW, maxDrawH / vbH, 0.85);
+            svg.setAttribute("width", String(Math.round(vbW * fitScale)));
+            svg.setAttribute("height", String(Math.round(vbH * fitScale)));
+            svg.dataset.bboxFitted = "1";
+          }
+        } catch (bbErr) {}
       }
     } catch (err) {
       targetEl.innerHTML = `<span class="primer-sym-fallback">${this.escapeHtml(spec.kind)}</span>`;
@@ -14300,6 +14810,7 @@ class GuitarMasterApp {
     this.scheduleAheadTime = 0.20; // seconds (200ms lookahead for rock-solid mobile scheduling)
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
     this.nextBeatTime = 0.0;
@@ -14322,6 +14833,11 @@ class GuitarMasterApp {
     this.currentTopicExercises = [];
     this.chordMode = "full"; // "full" | "easy4" | "easy3"
     this.selectedSpiderString = 1;
+    this.freeMetTimeSignature = "4/4";
+    this.freeMetSubdivision = 1; // 1 = Quarter, 2 = Eighth, 3 = Triplets
+    this.freeMetBeatModes = ["accent", "normal", "normal", "normal"];
+    this._tapTimes = [];
+    this._tapFlashTimer = null;
 
     // Migrate / auto-reset incompatible v1 localStorage before reading progress or state
     this.ensureStorageVersion();
@@ -14539,6 +15055,19 @@ class GuitarMasterApp {
 
     this.btnToggleFretboard = document.getElementById("btn-toggle-fretboard");
     this.fretboardWrapper = document.getElementById("fretboard-wrapper");
+    this.studioScoreViewport = document.getElementById("studio-score-viewport");
+    this.freeMetronomeStage = document.getElementById("free-metronome-stage");
+    this.freeMetBpmVal = document.getElementById("free-met-bpm-val");
+    this.freeMetBpmMinus5 = document.getElementById("free-met-bpm-minus5");
+    this.freeMetBpmMinus = document.getElementById("free-met-bpm-minus");
+    this.freeMetBpmPlus = document.getElementById("free-met-bpm-plus");
+    this.freeMetBpmPlus5 = document.getElementById("free-met-bpm-plus5");
+    this.freeMetBpmSlider = document.getElementById("free-met-bpm-slider");
+    this.freeMetTapBtn = document.getElementById("free-met-tap-btn");
+    this.freeMetTimesigGroup = document.getElementById("free-met-timesig-group");
+    this.freeMetSubdivGroup = document.getElementById("free-met-subdiv-group");
+    this.freeMetDotsRow = document.getElementById("free-met-dots-row");
+    this.freeMetStatusCue = document.getElementById("free-met-status-cue");
 
     // Printed Book Page & Tutor Scaffolding Elements
     this.bookPageSession = document.getElementById("book-page-session");
@@ -15060,7 +15589,11 @@ class GuitarMasterApp {
       });
     }
 
-    if (mode === "studio") {
+    if (mode === "primer" && this.foundationsPrimer) {
+      requestAnimationFrame(() => {
+        this.foundationsPrimer.refreshSymbolsIfNeeded();
+      });
+    } else if (mode === "studio") {
       requestAnimationFrame(() => {
         this.activeTopicRenderers.forEach(entry => {
           if (entry.renderer) entry.renderer.render();
@@ -15074,8 +15607,12 @@ class GuitarMasterApp {
   setPaneMode(mode) {
     if (!["score", "pdf", "split"].includes(mode)) mode = "score";
     this.paneMode = mode;
+    const isFreeMet = Boolean(
+      this.currentExercise &&
+      (this.currentExercise.bookCategory === "freeMetronome" || this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)
+    );
     if (this.workspaceBody) {
-      this.workspaceBody.dataset.paneMode = mode;
+      this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : mode;
     }
     if (this.workspaceViewTabs) {
       this.workspaceViewTabs.querySelectorAll(".seg-btn").forEach(btn => {
@@ -15084,7 +15621,7 @@ class GuitarMasterApp {
         btn.setAttribute("aria-selected", isActive ? "true" : "false");
       });
     }
-    if (mode === "pdf" || mode === "split") {
+    if (!isFreeMet && (mode === "pdf" || mode === "split")) {
       this.loadPdfFrame();
     }
     this.saveState();
@@ -15727,6 +16264,11 @@ class GuitarMasterApp {
       this.expandedSessions.add(`${found.bookCategory}_${found.sessionNumber}`);
     }
 
+    const isFreeMet = found.bookCategory === "freeMetronome" || found.id === "free-metronome" || Boolean(found.isMetronomeOnly);
+    if (isFreeMet) {
+      this.applyFreeTimeSignatureToExercise(this.currentExercise);
+    }
+
     if (!keepBpm) {
       this.setBpm(this.currentExercise.defaultBpm || 60);
     }
@@ -15734,10 +16276,15 @@ class GuitarMasterApp {
     const ts = this.currentExercise.timeSignature || [4, 4];
     if (this.timePillBadge) {
       this.timePillBadge.textContent = `${ts[0]}/${ts[1]}`;
+      this.timePillBadge.classList.toggle("is-clickable", isFreeMet);
+      this.timePillBadge.title = isFreeMet
+        ? "Click to cycle Time Signature (2/4, 3/4, 4/4, 5/4, 6/8)"
+        : `Time Signature: ${ts[0]}/${ts[1]}`;
     }
 
     this.currentMeasureIndex = 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
 
@@ -15756,20 +16303,44 @@ class GuitarMasterApp {
       chordGroup.style.display = hasChords ? "inline-flex" : "none";
     }
 
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.freeMetronome = isFreeMet ? "true" : "false";
+    }
+    if (this.workspaceBody) {
+      this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
+    }
+
     this.updateDoneButtonUI();
     this.updateSpeedPresetsUI();
     this.updateLoopModeUI();
     this.renderBeatDots();
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
 
-    const needsTopicRebuild = (
-      prevTopicId !== found.topicId ||
-      this.activeTopicRenderers.size === 0 ||
-      !this.activeTopicRenderers.has(found.id)
-    );
-    if (needsTopicRebuild) {
-      this.renderTopicExercisesFor(found);
+    if (isFreeMet) {
+      this.currentTopicId = found.topicId;
+      this.currentTopicExercises = [this.currentExercise];
+      this.activeTopicRenderers.clear();
+      if (this.topicExercisesStack) {
+        this.topicExercisesStack.innerHTML = "";
+      }
+      if (this.freeMetBpmVal) {
+        this.freeMetBpmVal.textContent = this.bpm;
+      }
+      if (this.freeMetBpmSlider) {
+        this.freeMetBpmSlider.value = this.bpm;
+      }
     } else {
-      this.updateTopicSelectionUI(found.id);
+      const needsTopicRebuild = (
+        prevTopicId !== found.topicId ||
+        this.activeTopicRenderers.size === 0 ||
+        !this.activeTopicRenderers.has(found.id)
+      );
+      if (needsTopicRebuild) {
+        this.renderTopicExercisesFor(found);
+      } else {
+        this.updateTopicSelectionUI(found.id);
+      }
     }
 
     this.syncTutorToolbarUI();
@@ -15778,20 +16349,33 @@ class GuitarMasterApp {
 
     const firstBeat = this.currentExercise.tabData[0].beats[0];
     this.updateCard(firstBeat, false, 1, this.currentExercise.tabData[0].chordName);
-    if (this.currentExercise.id !== "free-metronome" && !this.currentExercise.isMetronomeOnly) {
+    if (!isFreeMet) {
       this.fretboard.update(firstBeat, false, this.currentExercise.tabData[0].chordName);
     }
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    this.syncPdfToExercise(found);
+    if (!isFreeMet) {
+      this.syncPdfToExercise(found);
+    }
     this.saveState();
 
-    if (uiOpts && uiOpts.scrollTopicTop && this.bookPageTitle) {
-      this.bookPageTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (uiOpts && uiOpts.scrollTopicTop) {
+      if (this.studioScoreViewport) {
+        this.studioScoreViewport.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (this.bookPageTitle) {
+        this.bookPageTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } else if (!uiOpts.noScroll && topicCount > 1) {
       const selCard = document.getElementById(`topic-ex-${found.id}`);
-      if (selCard) {
+      if (selCard && this.studioScoreViewport) {
+        const vpRect = this.studioScoreViewport.getBoundingClientRect();
+        const cardRect = selCard.getBoundingClientRect();
+        if (cardRect.top < vpRect.top + 8 || cardRect.bottom > vpRect.bottom - 8) {
+          const targetTop = this.studioScoreViewport.scrollTop + (cardRect.top - vpRect.top) - 14;
+          this.studioScoreViewport.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+        }
+      } else if (selCard) {
         selCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     }
@@ -15806,17 +16390,24 @@ class GuitarMasterApp {
   renderBeatDots() {
     const ts = this.currentExercise.timeSignature || [4, 4];
     const numBeats = ts[0] || 4;
+    const isFreeMet = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
     let html = "";
     for (let i = 0; i < numBeats; i++) {
-      html += `<div class="beat-dot-item" data-index="${i}" title="Beat ${i + 1} - Click to toggle Play/Rest"></div>`;
+      const mode = isFreeMet ? (this.freeMetBeatModes[i] || (i === 0 ? "accent" : "normal")) : "normal";
+      const restCls = mode === "muted" ? " configured-as-rest" : "";
+      html += `<div class="beat-dot-item${restCls}" data-index="${i}" title="Beat ${i + 1} - Click to toggle Mute"></div>`;
     }
     this.beatDotsSequence.innerHTML = html;
 
-    // Attach click to toggle rest/mute on any beat
+    // Attach click to toggle rest/mute (or cycle Accent/Normal/Muted in Free Metronome)
     const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
     dots.forEach(dot => {
       dot.addEventListener("click", () => {
         const beatIdx = parseInt(dot.dataset.index, 10);
+        if (this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)) {
+          this.cycleFreeBeatMode(beatIdx);
+          return;
+        }
         dot.classList.toggle("configured-as-rest");
         const isRestNow = dot.classList.contains("configured-as-rest");
 
@@ -15843,10 +16434,266 @@ class GuitarMasterApp {
     });
   }
 
+  getFreeMetTimeSignatureConfig(tsStr) {
+    const presets = {
+      "2/4": { ts: [2, 4], modes: ["accent", "normal"] },
+      "3/4": { ts: [3, 4], modes: ["accent", "normal", "normal"] },
+      "4/4": { ts: [4, 4], modes: ["accent", "normal", "normal", "normal"] },
+      "5/4": { ts: [5, 4], modes: ["accent", "normal", "normal", "normal", "normal"] },
+      "6/8": { ts: [6, 8], modes: ["accent", "normal", "normal", "secondary", "normal", "normal"] }
+    };
+    return presets[tsStr] || presets["4/4"];
+  }
+
+  applyFreeTimeSignatureToExercise(targetEx) {
+    const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+    const numBeats = cfg.ts[0];
+    const beats = [];
+    for (let i = 0; i < numBeats; i++) {
+      const m = this.freeMetBeatModes[i] || cfg.modes[i] || (i === 0 ? "accent" : "normal");
+      this.freeMetBeatModes[i] = m;
+      beats.push({
+        beat: i + 1,
+        note: m === "muted" ? "REST" : `Beat ${i + 1}`,
+        symbol: cfg.ts[1] === 8 ? "1/8" : "1/4",
+        type: m === "muted" ? "rest" : "metronome"
+      });
+    }
+    this.freeMetBeatModes.length = numBeats;
+
+    const applyTo = (ex) => {
+      if (!ex) return;
+      ex.timeSignature = [...cfg.ts];
+      ex.tabData = [{ measure: 1, beats: beats.map(b => ({ ...b })) }];
+    };
+
+    applyTo(targetEx);
+    if (GUITAR_COURSES.freeMetronome) {
+      applyTo(GUITAR_COURSES.freeMetronome);
+    }
+    const storedEx = this.findExerciseById("free-metronome");
+    if (storedEx && storedEx !== targetEx) {
+      applyTo(storedEx);
+    }
+  }
+
+  setFreeTimeSignature(tsStr) {
+    const validTs = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+    const normalized = validTs.includes(tsStr) ? tsStr : "4/4";
+    const cfg = this.getFreeMetTimeSignatureConfig(normalized);
+
+    this.freeMetTimeSignature = normalized;
+    this.freeMetBeatModes = [...cfg.modes];
+    this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
+    this.currentMeasureBeatPos = 0.0;
+
+    if (this.isPlaying && this.audio && this.audio.audioCtx) {
+      this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+      this.queue = [];
+    }
+
+    const isFreeMet = Boolean(
+      this.currentExercise &&
+      (this.currentExercise.bookCategory === "freeMetronome" ||
+        this.currentExercise.id === "free-metronome" ||
+        this.currentExercise.isMetronomeOnly)
+    );
+
+    this.applyFreeTimeSignatureToExercise(isFreeMet ? this.currentExercise : null);
+
+    if (isFreeMet) {
+      if (this.timePillBadge) {
+        this.timePillBadge.textContent = normalized;
+      }
+      this.renderBeatDots();
+      if (this.freeMetStatusCue && !this.isPlaying) {
+        const extraHint = normalized === "6/8" ? " · Beats 1 & 4 accented" : "";
+        this.freeMetStatusCue.textContent = `Time Signature set to ${normalized} (${cfg.ts[0]} beats/bar${extraHint})`;
+      }
+    }
+
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
+    this.saveState();
+  }
+
+  setFreeSubdivision(subdiv) {
+    const n = parseInt(subdiv, 10);
+    this.freeMetSubdivision = [1, 2, 3].includes(n) ? n : 1;
+    this.currentSubBeatIndex = 0;
+
+    if (this.isPlaying && this.audio && this.audio.audioCtx) {
+      this.nextBeatTime = this.audio.audioCtx.currentTime + 0.05;
+      this.queue = [];
+    }
+
+    this.renderFreeMetronomeDots();
+    this.syncFreeMetronomeToolbarUI();
+
+    if (this.freeMetStatusCue && !this.isPlaying) {
+      const label = this.freeMetSubdivision === 1
+        ? "Quarter Pulse"
+        : (this.freeMetSubdivision === 2 ? "Eighth Notes (1 & 2 &)" : "Triplets (3 per beat)");
+      this.freeMetStatusCue.textContent = `Subdivision: ${label}`;
+    }
+
+    this.saveState();
+  }
+
+  syncFreeMetronomeToolbarUI() {
+    if (this.freeMetBpmVal) {
+      this.freeMetBpmVal.textContent = this.bpm;
+    }
+    if (this.freeMetBpmSlider) {
+      this.freeMetBpmSlider.value = this.bpm;
+    }
+    if (this.freeMetTimesigGroup) {
+      this.freeMetTimesigGroup.querySelectorAll("[data-ts]").forEach(btn => {
+        const isSel = btn.dataset.ts === this.freeMetTimeSignature;
+        btn.classList.toggle("active", isSel);
+        btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+      });
+    }
+    if (this.freeMetSubdivGroup) {
+      const targetSub = String(this.freeMetSubdivision || 1);
+      this.freeMetSubdivGroup.querySelectorAll("[data-subdiv]").forEach(btn => {
+        const isSel = btn.dataset.subdiv === targetSub;
+        btn.classList.toggle("active", isSel);
+        btn.setAttribute("aria-pressed", isSel ? "true" : "false");
+      });
+    }
+  }
+
+  handleTapTempo() {
+    const now = performance.now();
+    if (this._tapTimes.length > 0 && now - this._tapTimes[this._tapTimes.length - 1] > 2500) {
+      this._tapTimes = [];
+    }
+    this._tapTimes.push(now);
+    if (this._tapTimes.length > 6) {
+      this._tapTimes.shift();
+    }
+
+    if (this.freeMetTapBtn) {
+      this.freeMetTapBtn.classList.add("is-tapped");
+      clearTimeout(this._tapFlashTimer);
+      this._tapFlashTimer = setTimeout(() => {
+        if (this.freeMetTapBtn) this.freeMetTapBtn.classList.remove("is-tapped");
+      }, 110);
+    }
+
+    if (this._tapTimes.length >= 2) {
+      let sum = 0;
+      for (let i = 1; i < this._tapTimes.length; i++) {
+        sum += this._tapTimes[i] - this._tapTimes[i - 1];
+      }
+      const avgMs = sum / (this._tapTimes.length - 1);
+      if (avgMs > 0) {
+        const detectedBpm = Math.round(60000 / avgMs);
+        this.setBpm(detectedBpm);
+        if (this.freeMetStatusCue && !this.isPlaying) {
+          this.freeMetStatusCue.textContent = `Tap Tempo detected: ${this.bpm} BPM`;
+        }
+      }
+    } else if (this.freeMetStatusCue && !this.isPlaying) {
+      this.freeMetStatusCue.textContent = "Keep tapping steadily to set BPM...";
+    }
+  }
+
+  renderFreeMetronomeDots() {
+    if (!this.freeMetDotsRow) return;
+    const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+    const ts = (this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly))
+      ? (this.currentExercise.timeSignature || cfg.ts)
+      : cfg.ts;
+    const numBeats = ts[0] || 4;
+    const subdiv = this.freeMetSubdivision || 1;
+
+    while (this.freeMetBeatModes.length < numBeats) {
+      const idx = this.freeMetBeatModes.length;
+      this.freeMetBeatModes.push(cfg.modes[idx] || (idx === 0 ? "accent" : "normal"));
+    }
+
+    this.freeMetDotsRow.classList.toggle("has-subdiv", subdiv > 1);
+
+    let html = "";
+    for (let i = 0; i < numBeats; i++) {
+      const mode = this.freeMetBeatModes[i] || (i === 0 ? "accent" : "normal");
+      const modeLabel = mode === "secondary" ? "Secondary Accent" : (mode.charAt(0).toUpperCase() + mode.slice(1));
+      html += `
+        <div class="free-met-dot-col" data-beat-col="${i}">
+          <button type="button" class="free-met-dot mode-${mode}" data-free-beat="${i}" title="Beat ${i + 1} (${modeLabel}) — Click to cycle Accent / Normal / Muted" aria-label="Beat ${i + 1}: ${modeLabel}"></button>
+          <span class="free-met-dot-num">${i + 1}</span>
+        </div>
+      `;
+      if (subdiv > 1) {
+        for (let s = 1; s < subdiv; s++) {
+          const subLbl = subdiv === 2 ? "&amp;" : "&middot;";
+          html += `
+            <div class="free-met-subdot-col" data-sub-parent="${i}" data-sub-idx="${s}">
+              <span class="free-met-subdot" data-sub-parent="${i}" data-sub-idx="${s}" aria-hidden="true"></span>
+              <span class="free-met-subdot-lbl">${subLbl}</span>
+            </div>
+          `;
+        }
+      }
+    }
+    this.freeMetDotsRow.innerHTML = html;
+
+    this.freeMetDotsRow.querySelectorAll(".free-met-dot").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const beatIdx = parseInt(btn.dataset.freeBeat, 10);
+        this.cycleFreeBeatMode(beatIdx);
+      });
+    });
+  }
+
+  cycleFreeBeatMode(beatIdx) {
+    const order = ["accent", "normal", "muted"];
+    const cur = this.freeMetBeatModes[beatIdx] || (beatIdx === 0 ? "accent" : "normal");
+    const next = cur === "secondary"
+      ? "normal"
+      : order[(order.indexOf(cur) + 1) % order.length];
+    this.freeMetBeatModes[beatIdx] = next;
+
+    // Sync beat mode into tabData & bottom dock beat dot
+    if (this.currentExercise && this.currentExercise.tabData && this.currentExercise.tabData[0]) {
+      const beatObj = this.currentExercise.tabData[0].beats[beatIdx];
+      if (beatObj) {
+        beatObj.type = next === "muted" ? "rest" : "metronome";
+        beatObj.note = next === "muted" ? "REST" : `Beat ${beatIdx + 1}`;
+      }
+    }
+
+    if (this.freeMetDotsRow) {
+      const dotBtn = this.freeMetDotsRow.querySelector(`.free-met-dot[data-free-beat="${beatIdx}"]`);
+      if (dotBtn) {
+        dotBtn.classList.remove("mode-accent", "mode-secondary", "mode-normal", "mode-muted");
+        dotBtn.classList.add(`mode-${next}`);
+        const modeLabel = next.charAt(0).toUpperCase() + next.slice(1);
+        dotBtn.setAttribute("aria-label", `Beat ${beatIdx + 1}: ${modeLabel}`);
+        dotBtn.title = `Beat ${beatIdx + 1} (${modeLabel}) — Click to cycle Accent / Normal / Muted`;
+      }
+    }
+    if (this.beatDotsSequence) {
+      const dockDot = this.beatDotsSequence.querySelector(`.beat-dot-item[data-index="${beatIdx}"]`);
+      if (dockDot) {
+        dockDot.classList.toggle("configured-as-rest", next === "muted");
+      }
+    }
+    if (this.freeMetStatusCue && !this.isPlaying) {
+      const desc = next === "accent" ? "1200 Hz Accent" : (next === "muted" ? "Muted (Silent Drill)" : "800 Hz Normal Pulse");
+      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1} set to ${desc}`;
+    }
+  }
+
   setBpm(newBpm) {
     this.bpm = Math.max(30, Math.min(240, Math.round(newBpm)));
     if (this.bpmDisplay) this.bpmDisplay.textContent = this.bpm;
     if (this.bookTempoBpm) this.bookTempoBpm.textContent = this.bpm;
+    if (this.freeMetBpmVal) this.freeMetBpmVal.textContent = this.bpm;
+    if (this.freeMetBpmSlider) this.freeMetBpmSlider.value = this.bpm;
     if (this.bpmNumberInput && document.activeElement !== this.bpmNumberInput) {
       this.bpmNumberInput.value = this.bpm;
     }
@@ -15976,6 +16823,7 @@ class GuitarMasterApp {
       ? this.loopMeasureIndex
       : 0;
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
     this.queue = [];
@@ -16020,10 +16868,19 @@ class GuitarMasterApp {
     this.dial.setRestState(false);
     this.updateMetronomeButtonUI();
     this.currentBeatInMeasure = 0;
+    this.currentSubBeatIndex = 0;
     this.currentMeasureBeatPos = 0.0;
 
     const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
     dots.forEach(d => d.classList.remove("active-play", "active-rest"));
+
+    if (this.freeMetDotsRow) {
+      this.freeMetDotsRow.querySelectorAll(".free-met-dot, .free-met-subdot").forEach(d => d.classList.remove("is-active"));
+      this.freeMetDotsRow.querySelectorAll(".free-met-dot-col, .free-met-subdot-col").forEach(c => c.classList.remove("is-active-col"));
+    }
+    if (this.freeMetStatusCue) {
+      this.freeMetStatusCue.innerHTML = "Click any beat dot to cycle Accent &middot; Normal &middot; Muted";
+    }
 
     this.fretboard.reset();
     this.tabStaff.reset();
@@ -16047,14 +16904,22 @@ class GuitarMasterApp {
       } else {
         const curTime = ctx.currentTime;
         const secondsPerQuarterBeat = 60.0 / this.bpm;
+        const isFreeExLoop = Boolean(
+          this.isMetronomeOnlyActive &&
+          this.currentExercise &&
+          (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly)
+        );
+        const catchupStepSec = isFreeExLoop
+          ? secondsPerQuarterBeat / (this.freeMetSubdivision || 1)
+          : secondsPerQuarterBeat;
 
         if (this._needsTimeAnchor) {
           this.nextBeatTime = curTime + 0.05;
           this._needsTimeAnchor = false;
-        } else if (this.nextBeatTime < curTime - secondsPerQuarterBeat * 2) {
-          // Phase-locked drift recovery on wake/background throttle (snaps by integer beats)
-          const missedBeats = Math.ceil((curTime - this.nextBeatTime) / secondsPerQuarterBeat);
-          this.nextBeatTime += missedBeats * secondsPerQuarterBeat;
+        } else if (this.nextBeatTime < curTime - catchupStepSec * 2) {
+          // Phase-locked drift recovery on wake/background throttle (snaps by integer steps)
+          const missedBeats = Math.ceil((curTime - this.nextBeatTime) / catchupStepSec);
+          this.nextBeatTime += missedBeats * catchupStepSec;
         }
 
         while (this.isPlaying && !this.stopAtEndTime && this.nextBeatTime < curTime + this.scheduleAheadTime) {
@@ -16075,20 +16940,34 @@ class GuitarMasterApp {
   scheduleBeat(time) {
     const secondsPerQuarterBeat = 60.0 / this.bpm;
 
-    // Dedicated Decoupled Percussive Metronome Loop (1 - 2 - 3 - 4 continuous)
+    // Dedicated Decoupled Percussive Metronome Loop (supports custom N-beat meters & subdivisions)
     if (this.isMetronomeOnlyActive) {
       const ts = (this.currentExercise && this.currentExercise.timeSignature) || [4, 4];
       const numBeats = ts[0] || 4;
       const b = this.currentBeatInMeasure % numBeats;
       const isFreeEx = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
+      const subdiv = isFreeEx ? (this.freeMetSubdivision || 1) : 1;
+      const subBeat = this.currentSubBeatIndex % subdiv;
+
       const freeBeat = isFreeEx && this.currentExercise.tabData && this.currentExercise.tabData[0]
         ? this.currentExercise.tabData[0].beats[b]
         : null;
-      const isBeatMuted = Boolean(freeBeat && freeBeat.type === "rest");
-      const isAccent = (b === 0);
+      const beatMode = isFreeEx
+        ? (this.freeMetBeatModes[b] || (b === 0 ? "accent" : "normal"))
+        : (b === 0 ? "accent" : "normal");
+      const isBeatMuted = (beatMode === "muted") || Boolean(freeBeat && freeBeat.type === "rest");
+      const isAccent = (beatMode === "accent");
+      const isSecondary = (beatMode === "secondary");
 
       // Strictly play ONLY Web Audio percussive click — never touch guitar string synth
-      this.audio.playBeat(time, isAccent, isBeatMuted, false);
+      // Muted beats skip playBeat completely so silence holds even when soundOnRest === "click"
+      if (!isBeatMuted) {
+        if (subBeat === 0) {
+          this.audio.playBeat(time, beatMode, false, false);
+        } else {
+          this.audio.playBeat(time, "sub", false, false);
+        }
+      }
 
       this.queue.push({
         isMetronomeOnlyBeat: true,
@@ -16096,13 +16975,18 @@ class GuitarMasterApp {
         mIdx: 0,
         bIdx: b,
         primaryBeat: b,
-        isDownbeat: true,
+        subBeat,
+        subdiv,
+        beatMode: isBeatMuted ? "muted" : beatMode,
+        isAccent,
+        isSecondary,
+        isDownbeat: subBeat === 0,
         beatData: freeBeat || {
           beat: b + 1,
-          note: isAccent ? "Beat 1 (Accent)" : `Beat ${b + 1}`,
+          note: isAccent ? `Beat ${b + 1} (Accent)` : (isSecondary ? `Beat ${b + 1} (Secondary)` : `Beat ${b + 1}`),
           symbol: "1/4",
           type: isBeatMuted ? "rest" : "metronome",
-          tip: isAccent ? "Downbeat Accent (1200 Hz Click)" : "Steady Pulse (800 Hz Click)"
+          tip: isAccent ? "Downbeat Accent (1200 Hz Click)" : (isSecondary ? "Secondary Accent (1000 Hz Click)" : "Steady Pulse (800 Hz Click)")
         },
         chordName: null,
         isRest: isBeatMuted,
@@ -16243,8 +17127,16 @@ class GuitarMasterApp {
     if (this.isMetronomeOnlyActive) {
       const ts = (this.currentExercise && this.currentExercise.timeSignature) || [4, 4];
       const numBeats = ts[0] || 4;
-      this.currentBeatInMeasure = (this.currentBeatInMeasure + 1) % numBeats;
-      this.nextBeatTime += secondsPerQuarterBeat;
+      const isFreeEx = Boolean(this.currentExercise && (this.currentExercise.id === "free-metronome" || this.currentExercise.isMetronomeOnly));
+      const subdiv = isFreeEx ? (this.freeMetSubdivision || 1) : 1;
+      const stepSeconds = secondsPerQuarterBeat / subdiv;
+
+      this.currentSubBeatIndex++;
+      if (this.currentSubBeatIndex >= subdiv) {
+        this.currentSubBeatIndex = 0;
+        this.currentBeatInMeasure = (this.currentBeatInMeasure + 1) % numBeats;
+      }
+      this.nextBeatTime += stepSeconds;
       return;
     }
 
@@ -16324,7 +17216,7 @@ class GuitarMasterApp {
     }
 
     if (ev.isMetronomeOnlyBeat) {
-      const { mIdx, bIdx, primaryBeat, isFreeExPage, beatData, isRest } = ev;
+      const { primaryBeat, subBeat = 0, subdiv = 1, isFreeExPage, isRest, isAccent, isSecondary, beatMode } = ev;
       const dots = this.beatDotsSequence.querySelectorAll(".beat-dot-item");
       dots.forEach((d, idx) => {
         if (idx === primaryBeat) {
@@ -16335,18 +17227,66 @@ class GuitarMasterApp {
         }
       });
 
-      this.noteActiveCard.className = `telemetry-inline ${isRest ? "mode-rest" : "mode-play"}`;
-      this.noteGlyphLarge.innerHTML = this.getGlyphSvg("1/4", 1, isRest);
-      this.noteHeaderBig.textContent = isRest
-        ? `Beat ${primaryBeat + 1}: Muted`
-        : (primaryBeat === 0 ? "Beat 1: Downbeat Accent" : `Beat ${primaryBeat + 1}: Pulse`);
-      this.noteSubInstruction.textContent = isRest
-        ? "Click beat dot to unmute"
-        : (primaryBeat === 0 ? "1200 Hz Percussive Click" : "800 Hz Percussive Click");
-      this.noteRightGuidance.textContent = isRest ? "MUTED" : (primaryBeat === 0 ? "1200 Hz" : "800 Hz");
+      if (this.freeMetDotsRow && isFreeExPage) {
+        this.freeMetDotsRow.querySelectorAll(".free-met-dot-col").forEach((col, idx) => {
+          const isCurMain = idx === primaryBeat && subBeat === 0;
+          col.classList.toggle("is-active-col", isCurMain);
+          const dotBtn = col.querySelector(".free-met-dot");
+          if (dotBtn) {
+            dotBtn.classList.toggle("is-active", isCurMain);
+          }
+        });
+        this.freeMetDotsRow.querySelectorAll(".free-met-subdot-col").forEach(col => {
+          const isCurSub = subBeat > 0 &&
+            Number(col.dataset.subParent) === primaryBeat &&
+            Number(col.dataset.subIdx) === subBeat;
+          col.classList.toggle("is-active-col", isCurSub);
+          const subDot = col.querySelector(".free-met-subdot");
+          if (subDot) {
+            subDot.classList.toggle("is-active", isCurSub);
+          }
+        });
+      }
 
-      if (isFreeExPage) {
-        this.tabStaff.highlightBeat(mIdx, bIdx, isRest, null);
+      const subLabel = subdiv === 2 ? "&" : `Triplet ${subBeat + 1}/3`;
+      if (this.freeMetStatusCue && isFreeExPage) {
+        if (isRest || beatMode === "muted") {
+          this.freeMetStatusCue.textContent = subBeat > 0
+            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted (Silent Timing Drill)`
+            : `Beat ${primaryBeat + 1} · Muted (Silent Timing Drill)`;
+        } else if (subBeat > 0) {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} ${subLabel} · 660 Hz Subdivision`;
+        } else if (isAccent || beatMode === "accent") {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1200 Hz Accent`;
+        } else if (isSecondary || beatMode === "secondary") {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1000 Hz Secondary Accent`;
+        } else {
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 800 Hz Pulse`;
+        }
+      }
+
+      this.noteActiveCard.className = `telemetry-inline ${isRest ? "mode-rest" : "mode-play"}`;
+      this.noteGlyphLarge.innerHTML = this.getGlyphSvg(subBeat > 0 ? "1/8" : "1/4", 1, isRest);
+      if (isRest) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Muted`;
+        this.noteSubInstruction.textContent = "Click beat dot to unmute";
+        this.noteRightGuidance.textContent = "MUTED";
+      } else if (subBeat > 0) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1} ${subLabel}`;
+        this.noteSubInstruction.textContent = "660 Hz Subdivision Click";
+        this.noteRightGuidance.textContent = "660 Hz";
+      } else if (isAccent) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Accent`;
+        this.noteSubInstruction.textContent = "1200 Hz Percussive Click";
+        this.noteRightGuidance.textContent = "1200 Hz";
+      } else if (isSecondary) {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Secondary`;
+        this.noteSubInstruction.textContent = "1000 Hz Secondary Click";
+        this.noteRightGuidance.textContent = "1000 Hz";
+      } else {
+        this.noteHeaderBig.textContent = `Beat ${primaryBeat + 1}: Pulse`;
+        this.noteSubInstruction.textContent = "800 Hz Percussive Click";
+        this.noteRightGuidance.textContent = "800 Hz";
       }
       return;
     }
@@ -16505,7 +17445,9 @@ class GuitarMasterApp {
       noteNameMode: this.noteNameMode,
       tabVisibilityMode: this.tabVisibilityMode,
       showRhythmGuide: this.showRhythmGuide,
-      showCoachBanner: this.showCoachBanner
+      showCoachBanner: this.showCoachBanner,
+      freeMetTs: this.freeMetTimeSignature,
+      freeMetSubdiv: this.freeMetSubdivision
     };
 
     try {
@@ -16608,10 +17550,11 @@ class GuitarMasterApp {
       this.loopMode = state.loopMode;
     }
 
-    const validBooks = ["lessonBook", "bonusWorkshop", "freeMode"];
+    const validBooks = ["lessonBook", "bonusWorkshop", "freeMetronome", "freeMode"];
     if (!validBooks.includes(state.book)) {
       state.book = "lessonBook";
     }
+    if (state.book === "freeMode") state.book = "freeMetronome";
     const validPanes = ["score", "pdf", "split"];
     if (!validPanes.includes(state.paneMode)) {
       state.paneMode = "score";
@@ -16619,6 +17562,17 @@ class GuitarMasterApp {
     const validModes = ["primer", "studio"];
     if (!validModes.includes(state.appMode)) {
       state.appMode = "primer";
+    }
+
+    const validTs = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+    if (state.freeMetTs && validTs.includes(state.freeMetTs)) {
+      this.freeMetTimeSignature = state.freeMetTs;
+      const cfg = this.getFreeMetTimeSignatureConfig(this.freeMetTimeSignature);
+      this.freeMetBeatModes = [...cfg.modes];
+    }
+    const validSubdiv = [1, 2, 3];
+    if (state.freeMetSubdiv && validSubdiv.includes(Number(state.freeMetSubdiv))) {
+      this.freeMetSubdivision = Number(state.freeMetSubdiv);
     }
 
     this.setDrawerOpen(typeof state.drawerOpen === "boolean" ? state.drawerOpen : (window.innerWidth > 820));
@@ -16800,6 +17754,52 @@ class GuitarMasterApp {
     }
     if (this.btnBpmPlus) {
       this.btnBpmPlus.addEventListener("click", () => this.setBpm(this.bpm + 1));
+    }
+    if (this.freeMetBpmMinus5) {
+      this.freeMetBpmMinus5.addEventListener("click", () => this.setBpm(this.bpm - 5));
+    }
+    if (this.freeMetBpmMinus) {
+      this.freeMetBpmMinus.addEventListener("click", () => this.setBpm(this.bpm - 1));
+    }
+    if (this.freeMetBpmPlus) {
+      this.freeMetBpmPlus.addEventListener("click", () => this.setBpm(this.bpm + 1));
+    }
+    if (this.freeMetBpmPlus5) {
+      this.freeMetBpmPlus5.addEventListener("click", () => this.setBpm(this.bpm + 5));
+    }
+    if (this.freeMetBpmSlider) {
+      this.freeMetBpmSlider.addEventListener("input", () => {
+        const val = parseInt(this.freeMetBpmSlider.value, 10);
+        if (!isNaN(val)) this.setBpm(val);
+      });
+    }
+    if (this.freeMetTapBtn) {
+      this.freeMetTapBtn.addEventListener("click", () => this.handleTapTempo());
+    }
+    if (this.freeMetTimesigGroup) {
+      this.freeMetTimesigGroup.querySelectorAll("[data-ts]").forEach(btn => {
+        btn.addEventListener("click", () => this.setFreeTimeSignature(btn.dataset.ts));
+      });
+    }
+    if (this.freeMetSubdivGroup) {
+      this.freeMetSubdivGroup.querySelectorAll("[data-subdiv]").forEach(btn => {
+        btn.addEventListener("click", () => this.setFreeSubdivision(btn.dataset.subdiv));
+      });
+    }
+    if (this.timePillBadge) {
+      this.timePillBadge.addEventListener("click", () => {
+        const isFreeMet = Boolean(
+          this.currentExercise &&
+          (this.currentExercise.bookCategory === "freeMetronome" ||
+            this.currentExercise.id === "free-metronome" ||
+            this.currentExercise.isMetronomeOnly)
+        );
+        if (!isFreeMet) return;
+        const order = ["2/4", "3/4", "4/4", "5/4", "6/8"];
+        const idx = order.indexOf(this.freeMetTimeSignature);
+        const nextTs = order[(idx + 1) % order.length];
+        this.setFreeTimeSignature(nextTs);
+      });
     }
     if (this.bpmNumberInput) {
       this.bpmNumberInput.addEventListener("change", () => {
