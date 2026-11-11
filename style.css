@@ -1982,36 +1982,42 @@ button.acc-topic-btn.is-active-topic {
 .vf-note-label.vf-note-above {
   font-family: var(--font-sans);
   font-style: normal;
-  font-size: 10.5px;
-  font-weight: 600;
-  fill: #3F3F46;
+  font-size: 9.5px;
+  font-weight: 500;
+  fill: #52525B;
+}
+
+.vf-alpha-head-hidden,
+.vf-tracked-note.is-active .vf-alpha-head-hidden {
+  opacity: 0 !important;
+  fill: none !important;
+  stroke: none !important;
 }
 
 .vf-alpha-oval.is-filled {
   fill: #18181B;
-  stroke: #18181B;
-  stroke-width: 1px;
+  stroke: none;
 }
 
 .vf-alpha-oval.is-hollow {
   fill: #FFFEFC;
   stroke: #18181B;
-  stroke-width: 1.7px;
+  stroke-width: 1.1px;
 }
 
 .vf-alpha-letter {
   font-family: var(--font-sans);
-  font-size: 8.8px;
+  font-size: 7.5px;
   font-weight: 700;
   pointer-events: none;
 }
 
 .vf-alpha-letter.is-accidental {
-  font-size: 7.4px;
+  font-size: 6.4px;
 }
 
 .vf-alpha-letter.is-filled {
-  fill: #FFFFFF;
+  fill: #FFFEFC;
 }
 
 .vf-alpha-letter.is-hollow {
@@ -2020,7 +2026,7 @@ button.acc-topic-btn.is-active-topic {
 
 .vf-inside-head-group.is-active .vf-alpha-oval.is-filled {
   fill: var(--accent, #C2410C);
-  stroke: var(--accent, #C2410C);
+  stroke: none;
 }
 
 .vf-inside-head-group.is-active .vf-alpha-oval.is-hollow {

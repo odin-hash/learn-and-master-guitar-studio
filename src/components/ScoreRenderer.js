@@ -522,7 +522,7 @@ export class ScoreRenderer {
       sysEl.id = `score-system-${sysIdx}`;
       sheetWrap.appendChild(sysEl);
 
-      const topPad = 52;
+      const topPad = 56;
       const trebleY = topPad;
       const tabY = showTreble ? (topPad + 122) : (topPad + 4);
       const rhythmExtra = this.showRhythmGuide ? 38 : 0;
@@ -549,7 +549,6 @@ export class ScoreRenderer {
       if (svgEl) {
         svgEl.insertBefore(backdropLayer, svgEl.firstChild);
         svgEl.appendChild(tabLayer);
-        svgEl.appendChild(overlayLayer);
       }
 
       if (isTabBlurred) {
@@ -882,6 +881,25 @@ export class ScoreRenderer {
           const hasAnyPick = beatMeta.some(x => !x.ev.isRest && x.ev.pick && x.ev.pick !== "-");
           let runningBeatPos = 0.0;
 
+          // Compute aligned Y clearance above stems, beams, ties, dots, and measure numbers
+          let measureNoteTopY = topLineY;
+          beatMeta.forEach(meta => {
+            if (!meta.sn) return;
+            try {
+              if (typeof meta.sn.getBoundingBox === "function") {
+                const bb = meta.sn.getBoundingBox();
+                if (bb) measureNoteTopY = Math.min(measureNoteTopY, bb.getY());
+              }
+              if (typeof meta.sn.getYs === "function") {
+                const ys = meta.sn.getYs();
+                if (ys && ys.length > 0 && (meta.ev.tieToNext || meta.ev.tieFromPrev) && ys[0] <= topLineY + 12) {
+                  measureNoteTopY = Math.min(measureNoteTopY, ys[0] - 14);
+                }
+              }
+            } catch (e) {}
+          });
+          const aboveNoteY = Math.min(topLineY - 17, measureNoteTopY - 8);
+
           // Overlay labels, Note Names (Above/Inside), Rhythm Counting Guide, Cursors & Hit Targets
           beatMeta.forEach((meta, idx) => {
             const { ev, evIdx, safeDur, sn, tn, startBeatIdx } = meta;
@@ -895,7 +913,6 @@ export class ScoreRenderer {
 
             let headX = centerX;
             let headY = topLineY + 22;
-            let noteTopY = topLineY;
             if (sn) {
               try {
                 if (typeof sn.getNoteHeadBeginX === "function" && typeof sn.getNoteHeadEndX === "function") {
@@ -905,10 +922,6 @@ export class ScoreRenderer {
                   const ys = sn.getYs();
                   if (ys && ys.length > 0) headY = ys[0];
                 }
-                if (typeof sn.getBoundingBox === "function") {
-                  const bb = sn.getBoundingBox();
-                  if (bb) noteTopY = bb.getY();
-                }
               } catch (e) {}
             }
 
@@ -917,7 +930,7 @@ export class ScoreRenderer {
               const chText = document.createElementNS(SVG_NS, "text");
               chText.setAttribute("class", "vf-chord-label");
               chText.setAttribute("x", String(headX - 3));
-              chText.setAttribute("y", String(this.noteNameMode === "above" ? (topLineY - 28) : (topLineY - 18)));
+              chText.setAttribute("y", String(this.noteNameMode === "above" ? (aboveNoteY - 13) : (topLineY - 18)));
               chText.textContent = chordLabel;
               overlayLayer.appendChild(chText);
             }
@@ -931,13 +944,21 @@ export class ScoreRenderer {
                 const nmText = document.createElementNS(SVG_NS, "text");
                 nmText.setAttribute("class", "vf-note-label vf-note-above");
                 nmText.setAttribute("x", String(headX));
-                nmText.setAttribute("y", String(Math.min(topLineY - 10, noteTopY - 5)));
+                nmText.setAttribute("y", String(aboveNoteY));
                 nmText.setAttribute("text-anchor", "middle");
                 nmText.textContent = shortPitch;
                 overlayLayer.appendChild(nmText);
                 textEls.push(nmText);
               } else if (this.noteNameMode === "inside") {
                 const isHollow = safeDur === "w" || safeDur === "h";
+
+                // Mask underlying Bravura notehead glyph path while preserving stems, dots, accidentals, and ledger lines
+                if (sn && typeof sn.getSVGElement === "function") {
+                  const snSvg = sn.getSVGElement();
+                  const nhPath = snSvg ? snSvg.querySelector(".vf-notehead > path") : null;
+                  if (nhPath) nhPath.classList.add("vf-alpha-head-hidden");
+                }
+
                 const insideG = document.createElementNS(SVG_NS, "g");
                 insideG.setAttribute("class", "vf-inside-head-group");
 
@@ -945,13 +966,13 @@ export class ScoreRenderer {
                 oval.setAttribute("class", `vf-alpha-oval ${isHollow ? "is-hollow" : "is-filled"}`);
                 oval.setAttribute("cx", String(headX));
                 oval.setAttribute("cy", String(headY));
-                oval.setAttribute("rx", shortPitch.length > 1 ? "9.0" : "7.8");
-                oval.setAttribute("ry", "5.9");
+                oval.setAttribute("rx", shortPitch.length > 1 ? "6.6" : "5.5");
+                oval.setAttribute("ry", "4.2");
 
                 const letter = document.createElementNS(SVG_NS, "text");
                 letter.setAttribute("class", `vf-alpha-letter ${isHollow ? "is-hollow" : "is-filled"} ${shortPitch.length > 1 ? "is-accidental" : ""}`);
                 letter.setAttribute("x", String(headX));
-                letter.setAttribute("y", String(headY + 0.4));
+                letter.setAttribute("y", String(headY));
                 letter.setAttribute("text-anchor", "middle");
                 letter.setAttribute("dominant-baseline", "central");
                 letter.textContent = shortPitch;
@@ -1161,6 +1182,11 @@ export class ScoreRenderer {
 
         curX += mWidth;
       });
+
+      // Ensure overlayLayer paints strictly ON TOP of all VexFlow staves, noteheads, stems, beams, and ties
+      if (svgEl) {
+        svgEl.appendChild(overlayLayer);
+      }
     });
   }
 
