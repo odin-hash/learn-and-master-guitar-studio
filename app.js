@@ -1754,9 +1754,18 @@ export class GuitarMasterApp {
   }
 
   syncBookTabsUI() {
-    if (this.choiceLessonBook) this.choiceLessonBook.classList.toggle("selected", this.currentBookCategory === "lessonBook");
-    if (this.choiceWorkshopBook) this.choiceWorkshopBook.classList.toggle("selected", this.currentBookCategory === "bonusWorkshop");
-    if (this.choiceFreeMode) this.choiceFreeMode.classList.toggle("selected", this.currentBookCategory === "freeMetronome");
+    const tabs = [
+      [this.choiceLessonBook, "lessonBook"],
+      [this.choiceWorkshopBook, "bonusWorkshop"],
+      [this.choiceFreeMode, "freeMetronome"]
+    ];
+    tabs.forEach(([el, cat]) => {
+      if (!el) return;
+      const isActive = this.currentBookCategory === cat;
+      el.classList.toggle("selected", isActive);
+      el.classList.toggle("active", isActive);
+      el.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
   }
 
   renderBeatDots() {
