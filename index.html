@@ -594,8 +594,10 @@ button.acc-topic-btn.is-active-topic {
 .canvas-pane {
   height: 100%;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .workspace-body[data-pane-mode="score"] .canvas-score-pane {
@@ -2436,6 +2438,55 @@ button.acc-topic-btn.is-active-topic {
   color: #991B1B;
 }
 
+.pdf-ai-status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pdf-ai-thumb {
+  width: 34px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  background: #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-ai-thumb[hidden] {
+  display: none !important;
+}
+
+.pdf-ai-model-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-model-select {
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.pdf-ai-model-select:focus {
+  border-color: var(--text-primary);
+}
+
 .pdf-ai-status-actions {
   display: inline-flex;
   align-items: center;
@@ -2472,15 +2523,20 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .pdf-frame-wrap {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 240px;
   position: relative;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
 }
 
 #pdf-viewer-frame {
+  flex: 1 1 0%;
   width: 100%;
   height: 100%;
+  min-height: 240px;
+  display: block;
   border: none;
   background: var(--bg-hover);
 }
@@ -4935,10 +4991,19 @@ body[data-free-metronome="true"] .free-metronome-stage {
           </div>
         </div>
 
-        <!-- Inline Gemini API Key Drawer -->
+        <!-- Inline Gemini API Key & Model Selector Drawer -->
         <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Gemini API Key (stored locally in browser):</span>
+          <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
           <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
+          <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
+            <span>Model</span>
+            <select id="gemini-model-select" class="pdf-ai-model-select">
+              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
+            </select>
+          </label>
           <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
           <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
           <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
@@ -4968,7 +5033,10 @@ body[data-free-metronome="true"] .free-metronome-stage {
 
         <!-- Inline AI Extraction Status / Result Banner -->
         <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
-          <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          <div class="pdf-ai-status-left">
+            <img id="ai-extract-thumb" class="pdf-ai-thumb" alt="Captured PDF Page Preview" hidden>
+            <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          </div>
           <div class="pdf-ai-status-actions">
             <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
             <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
@@ -15471,12 +15539,20 @@ class FoundationsPrimer {
  */
 
 const STORAGE_KEY_API = "lmgs_gemini_api_key";
+const STORAGE_KEY_MODEL = "lmgs_gemini_model_pref";
 const STORAGE_KEY_EXTRACTED = "lmgs_ai_extracted_pages_v1";
 const IDB_NAME = "lmgs_omr_storage";
 const IDB_STORE = "extractedPages";
 
-const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+const DEFAULT_MODEL_CHAIN = [
+  "gemini-2.5-flash",
+  "gemini-3-flash-preview",
+  "gemini-3.1-pro-preview"
+];
+
+function buildGeminiEndpoint(modelName) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`;
+}
 
 const OMR_SYSTEM_INSTRUCTION = `You are a precision Guitar Method Book Optical Music Recognition (OMR) engine. Examine this high-resolution page from a guitar curriculum PDF.
 CRITICAL RULES:
@@ -15703,6 +15779,31 @@ class PdfAiExtractor {
     return clean;
   }
 
+  getModelPreference() {
+    try {
+      const val = (localStorage.getItem(STORAGE_KEY_MODEL) || "auto").trim();
+      return val || "auto";
+    } catch (e) {
+      return "auto";
+    }
+  }
+
+  saveModelPreference(model) {
+    const clean = String(model || "auto").trim() || "auto";
+    try {
+      localStorage.setItem(STORAGE_KEY_MODEL, clean);
+    } catch (e) {}
+    return clean;
+  }
+
+  getModelChain() {
+    const pref = this.getModelPreference();
+    if (!pref || pref === "auto" || !DEFAULT_MODEL_CHAIN.includes(pref)) {
+      return [...DEFAULT_MODEL_CHAIN];
+    }
+    return [pref, ...DEFAULT_MODEL_CHAIN.filter(m => m !== pref)];
+  }
+
   loadExtractedStoreSync() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_EXTRACTED);
@@ -15790,7 +15891,7 @@ class PdfAiExtractor {
     } catch (e) {}
   }
 
-  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 3.0) {
+  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 2.5) {
     const safePage = Math.max(1, Math.min(pageNumber, pdfDoc.numPages || pageNumber));
     const pdfPage = await pdfDoc.getPage(safePage);
     const viewport = pdfPage.getViewport({ scale });
@@ -15804,15 +15905,22 @@ class PdfAiExtractor {
 
     await pdfPage.render({ canvasContext: ctx, viewport }).promise;
     const dataUrl = offCanvas.toDataURL("image/png");
+    const width = offCanvas.width;
+    const height = offCanvas.height;
 
     // Free backing store promptly between batch pages
     offCanvas.width = 0;
     offCanvas.height = 0;
 
-    return dataUrl.replace(/^data:image\/png;base64,/, "");
+    return {
+      base64: dataUrl.replace(/^data:image\/png;base64,/, ""),
+      dataUrl,
+      width,
+      height
+    };
   }
 
-  async callGeminiVision(base64Png, apiKey, contextHint = "") {
+  async callGeminiVision(base64Png, apiKey, contextHint = "", onStatus = null) {
     if (!apiKey) {
       throw new Error("Missing Gemini API key. Click the key icon to save your API key.");
     }
@@ -15840,53 +15948,84 @@ class PdfAiExtractor {
         }
       ],
       generationConfig: {
-        temperature: 0.1,
         responseMimeType: "application/json",
         responseSchema: OMR_RESPONSE_SCHEMA
       }
     };
 
-    const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const modelsToTry = this.getModelChain();
+    let lastError = null;
 
-    if (!res.ok) {
-      let errMsg = `Gemini API error (${res.status})`;
-      try {
-        const errJson = await res.json();
-        if (errJson && errJson.error && errJson.error.message) {
-          errMsg = errJson.error.message;
+    for (let i = 0; i < modelsToTry.length; i++) {
+      const model = modelsToTry[i];
+      if (typeof onStatus === "function") {
+        onStatus(model, i > 0 ? `Fallback to ${model}...` : null);
+      }
+
+      const res = await fetch(`${buildGeminiEndpoint(model)}?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        let errMsg = `Gemini API error (${res.status}) on ${model}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.error && errJson.error.message) {
+            errMsg = `${model}: ${errJson.error.message}`;
+          }
+        } catch (e) {}
+
+        lastError = new Error(errMsg);
+        const canFallback = (res.status === 404 || res.status === 429) && i < modelsToTry.length - 1;
+        if (canFallback) {
+          if (typeof onStatus === "function") {
+            onStatus(modelsToTry[i + 1], `${model} returned ${res.status} — trying ${modelsToTry[i + 1]}...`);
+          }
+          continue;
         }
-      } catch (e) {}
-      throw new Error(errMsg);
+        throw lastError;
+      }
+
+      const data = await res.json();
+      const textPart =
+        data &&
+        data.candidates &&
+        data.candidates[0] &&
+        data.candidates[0].content &&
+        Array.isArray(data.candidates[0].content.parts)
+          ? data.candidates[0].content.parts.map(p => p.text || "").join("").trim()
+          : "";
+
+      if (!textPart) {
+        throw new Error(`${model} returned an empty response for this page.`);
+      }
+
+      const cleanedJson = textPart
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/```$/i, "")
+        .trim();
+
+      return {
+        omrJson: JSON.parse(cleanedJson),
+        modelUsed: model
+      };
     }
 
-    const data = await res.json();
-    const textPart =
-      data &&
-      data.candidates &&
-      data.candidates[0] &&
-      data.candidates[0].content &&
-      Array.isArray(data.candidates[0].content.parts)
-        ? data.candidates[0].content.parts.map(p => p.text || "").join("").trim()
-        : "";
-
-    if (!textPart) {
-      throw new Error("Gemini returned an empty response for this page.");
-    }
-
-    const cleanedJson = textPart
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```$/i, "")
-      .trim();
-
-    return JSON.parse(cleanedJson);
+    throw lastError || new Error("All configured Gemini models failed.");
   }
 
-  normalizeExtractedPage({ omrJson, bookCategory, rawPdfPage, bookPage }) {
+  normalizeExtractedPage({
+    omrJson,
+    bookCategory,
+    rawPdfPage,
+    bookPage,
+    targetTopicId = null,
+    targetExerciseId = null,
+    modelUsed = "gemini-2.5-flash"
+  }) {
     const rawList = Array.isArray(omrJson && omrJson.exercises) ? omrJson.exercises : [];
     const mathWarnings = [];
 
@@ -16076,19 +16215,22 @@ class PdfAiExtractor {
       });
 
       const prefix = bookCategory === "bonusWorkshop" ? "bw" : "lb";
-      const safeId = `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
+      const safeId = targetExerciseId
+        ? (idx === 0 ? targetExerciseId : `${targetExerciseId}-ex${idx + 1}`)
+        : `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
       const barCount = measures.length;
 
       return {
         id: safeId,
         title: rawEx.title || `Exercise ${idx + 1} (p. ${bookPage})`,
-        description: rawEx.description || `Extracted from Book p. ${bookPage} via Gemini 2.5 Pro Vision OMR.`,
+        description: rawEx.description || `Extracted from Book p. ${bookPage} via ${modelUsed} Vision OMR.`,
         timeSignature: [tsNum, tsDen],
         defaultBpm: Number(rawEx.defaultBpm) >= 30 && Number(rawEx.defaultBpm) <= 240 ? Number(rawEx.defaultBpm) : 65,
         pdfPage: bookPage,
         pdfRawPage: rawPdfPage,
         verificationStatus: "pdf-verified",
         aiExtracted: true,
+        modelUsed,
         notationMode,
         concepts: [`Book p. ${bookPage}`, `${barCount} Bars`, "AI Extracted"],
         measures,
@@ -16102,6 +16244,9 @@ class PdfAiExtractor {
       bookCategory,
       rawPdfPage,
       bookPage,
+      targetTopicId: targetTopicId || null,
+      targetExerciseId: targetExerciseId || null,
+      modelUsed,
       pageTitle: (omrJson && omrJson.pageTitle) ? String(omrJson.pageTitle).trim() : `Book Page ${bookPage}`,
       extractedAt: new Date().toISOString(),
       mathWarnings,
@@ -16237,6 +16382,7 @@ class GuitarMasterApp {
           "guitar_completed_exercises",
           "guitar_checked_goals",
           "lmgs_gemini_api_key",
+          "lmgs_gemini_model_pref",
           "lmgs_ai_extracted_pages_v1"
         ]);
         Object.keys(localStorage).forEach(k => {
@@ -16466,6 +16612,7 @@ class GuitarMasterApp {
     this.aiKeyDot = document.getElementById("ai-key-dot");
     this.geminiKeyBar = document.getElementById("gemini-key-bar");
     this.geminiApiKeyInput = document.getElementById("gemini-api-key-input");
+    this.geminiModelSelect = document.getElementById("gemini-model-select");
     this.btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
     this.btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
     this.btnCloseGeminiKey = document.getElementById("btn-close-gemini-key");
@@ -16482,6 +16629,7 @@ class GuitarMasterApp {
     this.aiExtractProgressFill = document.getElementById("ai-extract-progress-fill");
     this.aiExtractProgressPct = document.getElementById("ai-extract-progress-pct");
     this.aiExtractStatusBar = document.getElementById("ai-extract-status-bar");
+    this.aiExtractThumb = document.getElementById("ai-extract-thumb");
     this.aiExtractStatusText = document.getElementById("ai-extract-status-text");
     this.btnClearAiPages = document.getElementById("btn-clear-ai-pages");
     this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
@@ -17290,18 +17438,25 @@ class GuitarMasterApp {
     }
 
     const currentAttr = this.pdfViewerFrame.getAttribute("src") || "";
-    if (currentAttr === fullUrl || this._loadedPdfUrl === fullUrl) return;
+    if (currentAttr === fullUrl || this._loadedPdfUrl === fullUrl) {
+      this.pdfViewerFrame.style.display = "block";
+      return;
+    }
 
     const currentBase = currentAttr.split("#")[0];
     this._loadedPdfUrl = fullUrl;
+    this._pendingPdfUrl = fullUrl;
     if (currentAttr && currentBase === baseSrc) {
       // Chromium PDF viewer ignores fragment-only #page= changes unless src resets cleanly first
+      clearTimeout(this._pdfFrameReloadTimer);
       this.pdfViewerFrame.src = "about:blank";
-      requestAnimationFrame(() => {
-        if (seq !== this._pdfLoadSeq || !this.pdfViewerFrame) return;
-        this.pdfViewerFrame.src = fullUrl;
-      });
+      this._pdfFrameReloadTimer = setTimeout(() => {
+        if (!this.pdfViewerFrame || !this._pendingPdfUrl) return;
+        this.pdfViewerFrame.style.display = "block";
+        this.pdfViewerFrame.src = this._pendingPdfUrl;
+      }, 24);
     } else {
+      this.pdfViewerFrame.style.display = "block";
       this.pdfViewerFrame.src = fullUrl;
     }
   }
@@ -17321,19 +17476,31 @@ class GuitarMasterApp {
     if (this.btnGeminiApiKey) {
       this.btnGeminiApiKey.classList.toggle("has-key", hasKey);
       this.btnGeminiApiKey.title = hasKey
-        ? "Gemini API Key saved locally (click to view/update)"
-        : "Set Gemini API Key for PDF OMR Extraction";
+        ? "Gemini API Key & Model saved locally (click to view/update)"
+        : "Set Gemini API Key & Model for PDF OMR Extraction";
     }
     if (this.geminiApiKeyInput && hasKey && document.activeElement !== this.geminiApiKeyInput) {
       this.geminiApiKeyInput.value = this.pdfAiExtractor.getApiKey();
     }
+    if (this.geminiModelSelect && this.pdfAiExtractor) {
+      this.geminiModelSelect.value = this.pdfAiExtractor.getModelPreference();
+    }
   }
 
-  setAiExtractStatus(msg, variant = "info") {
+  setAiExtractStatus(msg, variant = "info", thumbDataUrl = undefined) {
     if (!this.aiExtractStatusBar || !this.aiExtractStatusText) return;
     this.aiExtractStatusBar.hidden = false;
     this.aiExtractStatusBar.dataset.variant = variant;
     this.aiExtractStatusText.textContent = msg;
+    if (this.aiExtractThumb) {
+      if (typeof thumbDataUrl === "string" && thumbDataUrl.length > 0) {
+        this.aiExtractThumb.src = thumbDataUrl;
+        this.aiExtractThumb.hidden = false;
+      } else if (thumbDataUrl === null) {
+        this.aiExtractThumb.removeAttribute("src");
+        this.aiExtractThumb.hidden = true;
+      }
+    }
   }
 
   _extractTopicPageSpan(topic, sessionFallback = 1) {
@@ -17368,7 +17535,45 @@ class GuitarMasterApp {
     let matchedSession = null;
     let matchedTopic = null;
 
-    // 1. Exact/range topic match for that book page
+    // 1. Direct binding to active curriculum lesson/topic when triggered from current PDF page
+    if (entry.targetTopicId || entry.targetExerciseId) {
+      for (const session of sessions) {
+        const tList = session.topics || [];
+        for (let tIdx = 0; tIdx < tList.length; tIdx++) {
+          const topic = tList[tIdx];
+          const computedTopicId = topic.topicId || `${bookCat}_s${session.sessionNumber}_t${tIdx}`;
+          const topicMatches = entry.targetTopicId && computedTopicId === entry.targetTopicId;
+          const exIdx = entry.targetExerciseId
+            ? (topic.exercises || []).findIndex(ex => ex.id === entry.targetExerciseId)
+            : -1;
+
+          if (topicMatches || exIdx >= 0) {
+            const exList = topic.exercises || [];
+            if (exList.length <= 1 || !entry.targetExerciseId || exIdx < 0) {
+              topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+            } else {
+              const allSamePage = exList.every(ex => this.extractPageNumberFromExercise(ex) === targetBookPage);
+              if (allSamePage) {
+                topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+              } else {
+                const updated = [...exList];
+                updated.splice(exIdx, 1, ...entry.exercises.map(ex => ({ ...ex })));
+                topic.exercises = updated;
+              }
+            }
+            topic.pdfPage = targetBookPage;
+            topic.aiExtracted = true;
+            return {
+              bookCategory: bookCat,
+              sessionNumber: session.sessionNumber,
+              firstExerciseId: entry.exercises[0].id
+            };
+          }
+        }
+      }
+    }
+
+    // 2. Exact/range topic match for that book page
     for (const session of sessions) {
       for (const topic of (session.topics || [])) {
         if (topic.topicId === `${bookCat}_ai_p${entry.rawPdfPage}`) {
@@ -17473,43 +17678,60 @@ class GuitarMasterApp {
     return { pdfDoc, baseSrc };
   }
 
-  async extractSinglePdfPage(rawPdfPage, { switchExercise = true } = {}) {
+  async extractSinglePdfPage(rawPdfPage, { switchExercise = true, bindToActive = true } = {}) {
     const apiKey = this.pdfAiExtractor.getApiKey();
     if (!apiKey) {
       if (this.geminiKeyBar) {
         this.geminiKeyBar.hidden = false;
         if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
       }
-      this.setAiExtractStatus("Enter and save your Gemini API key first (key icon in toolbar).", "error");
+      this.setAiExtractStatus("Enter and save your Gemini API key first (key icon in toolbar).", "error", null);
       return null;
     }
 
     const pageNum = Math.max(1, parseInt(rawPdfPage, 10) || 1);
     const bookCat = this.pdfBookCategory || "lessonBook";
     const bookPage = this.pdfPageToBookPage(pageNum, bookCat);
+    const activeEx = this.currentExercise;
+    const shouldBindActive = Boolean(
+      bindToActive &&
+      activeEx &&
+      activeEx.bookCategory === bookCat &&
+      !activeEx.isMetronomeOnly
+    );
+    const targetTopicId = shouldBindActive ? activeEx.topicId : null;
+    const targetExerciseId = shouldBindActive ? activeEx.id : null;
 
-    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 3.0x high-DPI...`, "busy");
+    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 2.5x via pdf.js...`, "busy", null);
     const { pdfDoc } = await this.getPdfDocumentForExtraction();
     const clampedPage = Math.max(1, Math.min(pageNum, pdfDoc.numPages || pageNum));
-    const base64Png = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 3.0);
+    const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 2.5);
 
-    this.setAiExtractStatus(`Calling Gemini 2.5 Pro Vision OMR for PDF p. ${clampedPage} (Book p. ${bookPage})...`, "busy");
     const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
-    const omrJson = await this.pdfAiExtractor.callGeminiVision(
-      base64Png,
+    const { omrJson, modelUsed } = await this.pdfAiExtractor.callGeminiVision(
+      snap.base64,
       apiKey,
-      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`
+      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`,
+      (activeModel, fallbackNote) => {
+        const msg = fallbackNote
+          ? fallbackNote
+          : `Extracting PDF p. ${clampedPage} (Book p. ${bookPage}) with ${activeModel}...`;
+        this.setAiExtractStatus(msg, "busy", snap.dataUrl);
+      }
     );
 
     const entry = this.pdfAiExtractor.normalizeExtractedPage({
       omrJson,
       bookCategory: bookCat,
       rawPdfPage: clampedPage,
-      bookPage
+      bookPage,
+      targetTopicId,
+      targetExerciseId,
+      modelUsed
     });
 
     if (!entry.exercises || entry.exercises.length === 0) {
-      this.setAiExtractStatus(`No musical exercises detected on PDF p. ${clampedPage}.`, "warn");
+      this.setAiExtractStatus(`No musical exercises detected on PDF p. ${clampedPage}.`, "warn", snap.dataUrl);
       return entry;
     }
 
@@ -17534,11 +17756,12 @@ class GuitarMasterApp {
     }
 
     const warnNote = entry.mathWarnings && entry.mathWarnings.length > 0
-      ? ` (Note: ${entry.mathWarnings.slice(0, 2).join("; ")})`
+      ? ` · Math note: ${entry.mathWarnings.slice(0, 2).join("; ")}`
       : "";
     this.setAiExtractStatus(
-      `Extracted ${entry.exercises.length} exercise${entry.exercises.length === 1 ? "" : "s"} from PDF p. ${clampedPage} (Book p. ${bookPage}) — saved & updated live!${warnNote}`,
-      entry.mathWarnings && entry.mathWarnings.length > 0 ? "warn" : "success"
+      `Extracted ${entry.exercises.length} exercise${entry.exercises.length === 1 ? "" : "s"} from PDF p. ${clampedPage} via ${modelUsed} — bound & live!${warnNote}`,
+      entry.mathWarnings && entry.mathWarnings.length > 0 ? "warn" : "success",
+      snap.dataUrl
     );
     return entry;
   }
@@ -17597,7 +17820,7 @@ class GuitarMasterApp {
 
         this.pdfCurrentPage = p;
         if (this.pdfPageInput) this.pdfPageInput.value = p;
-        const entry = await this.extractSinglePdfPage(p, { switchExercise: false });
+        const entry = await this.extractSinglePdfPage(p, { switchExercise: false, bindToActive: false });
         completedPages++;
         if (entry && Array.isArray(entry.exercises) && entry.exercises.length > 0) {
           totalExercises += entry.exercises.length;
@@ -17639,7 +17862,7 @@ class GuitarMasterApp {
     const exportPayload = {
       schemaVersion: "2.0.0",
       exportedAt: new Date().toISOString(),
-      model: "gemini-2.5-pro",
+      modelPreference: this.pdfAiExtractor.getModelPreference(),
       extractedPageCount: pageList.length,
       extractedPages: pageList,
       courses: {
@@ -19651,13 +19874,26 @@ class GuitarMasterApp {
       this.btnSaveGeminiKey.addEventListener("click", () => {
         const val = this.geminiApiKeyInput ? this.geminiApiKeyInput.value : "";
         const saved = this.pdfAiExtractor.saveApiKey(val);
+        if (this.geminiModelSelect) {
+          this.pdfAiExtractor.saveModelPreference(this.geminiModelSelect.value);
+        }
         this.syncGeminiKeyUI();
         if (saved) {
           if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
-          this.setAiExtractStatus("Gemini API Key saved in browser localStorage.", "success");
+          this.setAiExtractStatus(
+            `Gemini API Key & model (${this.pdfAiExtractor.getModelPreference()}) saved in localStorage.`,
+            "success",
+            null
+          );
         } else {
-          this.setAiExtractStatus("API Key cleared.", "info");
+          this.setAiExtractStatus("API Key cleared.", "info", null);
         }
+      });
+    }
+    if (this.geminiModelSelect) {
+      this.geminiModelSelect.addEventListener("change", () => {
+        const chosen = this.pdfAiExtractor.saveModelPreference(this.geminiModelSelect.value);
+        this.setAiExtractStatus(`Gemini model set to: ${chosen}`, "info", null);
       });
     }
     if (this.btnClearGeminiKey) {

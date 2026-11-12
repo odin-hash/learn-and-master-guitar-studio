@@ -8,12 +8,20 @@
  */
 
 const STORAGE_KEY_API = "lmgs_gemini_api_key";
+const STORAGE_KEY_MODEL = "lmgs_gemini_model_pref";
 const STORAGE_KEY_EXTRACTED = "lmgs_ai_extracted_pages_v1";
 const IDB_NAME = "lmgs_omr_storage";
 const IDB_STORE = "extractedPages";
 
-const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+const DEFAULT_MODEL_CHAIN = [
+  "gemini-2.5-flash",
+  "gemini-3-flash-preview",
+  "gemini-3.1-pro-preview"
+];
+
+function buildGeminiEndpoint(modelName) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`;
+}
 
 const OMR_SYSTEM_INSTRUCTION = `You are a precision Guitar Method Book Optical Music Recognition (OMR) engine. Examine this high-resolution page from a guitar curriculum PDF.
 CRITICAL RULES:
@@ -240,6 +248,31 @@ export class PdfAiExtractor {
     return clean;
   }
 
+  getModelPreference() {
+    try {
+      const val = (localStorage.getItem(STORAGE_KEY_MODEL) || "auto").trim();
+      return val || "auto";
+    } catch (e) {
+      return "auto";
+    }
+  }
+
+  saveModelPreference(model) {
+    const clean = String(model || "auto").trim() || "auto";
+    try {
+      localStorage.setItem(STORAGE_KEY_MODEL, clean);
+    } catch (e) {}
+    return clean;
+  }
+
+  getModelChain() {
+    const pref = this.getModelPreference();
+    if (!pref || pref === "auto" || !DEFAULT_MODEL_CHAIN.includes(pref)) {
+      return [...DEFAULT_MODEL_CHAIN];
+    }
+    return [pref, ...DEFAULT_MODEL_CHAIN.filter(m => m !== pref)];
+  }
+
   loadExtractedStoreSync() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_EXTRACTED);
@@ -327,7 +360,7 @@ export class PdfAiExtractor {
     } catch (e) {}
   }
 
-  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 3.0) {
+  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 2.5) {
     const safePage = Math.max(1, Math.min(pageNumber, pdfDoc.numPages || pageNumber));
     const pdfPage = await pdfDoc.getPage(safePage);
     const viewport = pdfPage.getViewport({ scale });
@@ -341,15 +374,22 @@ export class PdfAiExtractor {
 
     await pdfPage.render({ canvasContext: ctx, viewport }).promise;
     const dataUrl = offCanvas.toDataURL("image/png");
+    const width = offCanvas.width;
+    const height = offCanvas.height;
 
     // Free backing store promptly between batch pages
     offCanvas.width = 0;
     offCanvas.height = 0;
 
-    return dataUrl.replace(/^data:image\/png;base64,/, "");
+    return {
+      base64: dataUrl.replace(/^data:image\/png;base64,/, ""),
+      dataUrl,
+      width,
+      height
+    };
   }
 
-  async callGeminiVision(base64Png, apiKey, contextHint = "") {
+  async callGeminiVision(base64Png, apiKey, contextHint = "", onStatus = null) {
     if (!apiKey) {
       throw new Error("Missing Gemini API key. Click the key icon to save your API key.");
     }
@@ -377,53 +417,84 @@ export class PdfAiExtractor {
         }
       ],
       generationConfig: {
-        temperature: 0.1,
         responseMimeType: "application/json",
         responseSchema: OMR_RESPONSE_SCHEMA
       }
     };
 
-    const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const modelsToTry = this.getModelChain();
+    let lastError = null;
 
-    if (!res.ok) {
-      let errMsg = `Gemini API error (${res.status})`;
-      try {
-        const errJson = await res.json();
-        if (errJson && errJson.error && errJson.error.message) {
-          errMsg = errJson.error.message;
+    for (let i = 0; i < modelsToTry.length; i++) {
+      const model = modelsToTry[i];
+      if (typeof onStatus === "function") {
+        onStatus(model, i > 0 ? `Fallback to ${model}...` : null);
+      }
+
+      const res = await fetch(`${buildGeminiEndpoint(model)}?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        let errMsg = `Gemini API error (${res.status}) on ${model}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.error && errJson.error.message) {
+            errMsg = `${model}: ${errJson.error.message}`;
+          }
+        } catch (e) {}
+
+        lastError = new Error(errMsg);
+        const canFallback = (res.status === 404 || res.status === 429) && i < modelsToTry.length - 1;
+        if (canFallback) {
+          if (typeof onStatus === "function") {
+            onStatus(modelsToTry[i + 1], `${model} returned ${res.status} — trying ${modelsToTry[i + 1]}...`);
+          }
+          continue;
         }
-      } catch (e) {}
-      throw new Error(errMsg);
+        throw lastError;
+      }
+
+      const data = await res.json();
+      const textPart =
+        data &&
+        data.candidates &&
+        data.candidates[0] &&
+        data.candidates[0].content &&
+        Array.isArray(data.candidates[0].content.parts)
+          ? data.candidates[0].content.parts.map(p => p.text || "").join("").trim()
+          : "";
+
+      if (!textPart) {
+        throw new Error(`${model} returned an empty response for this page.`);
+      }
+
+      const cleanedJson = textPart
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/```$/i, "")
+        .trim();
+
+      return {
+        omrJson: JSON.parse(cleanedJson),
+        modelUsed: model
+      };
     }
 
-    const data = await res.json();
-    const textPart =
-      data &&
-      data.candidates &&
-      data.candidates[0] &&
-      data.candidates[0].content &&
-      Array.isArray(data.candidates[0].content.parts)
-        ? data.candidates[0].content.parts.map(p => p.text || "").join("").trim()
-        : "";
-
-    if (!textPart) {
-      throw new Error("Gemini returned an empty response for this page.");
-    }
-
-    const cleanedJson = textPart
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```$/i, "")
-      .trim();
-
-    return JSON.parse(cleanedJson);
+    throw lastError || new Error("All configured Gemini models failed.");
   }
 
-  normalizeExtractedPage({ omrJson, bookCategory, rawPdfPage, bookPage }) {
+  normalizeExtractedPage({
+    omrJson,
+    bookCategory,
+    rawPdfPage,
+    bookPage,
+    targetTopicId = null,
+    targetExerciseId = null,
+    modelUsed = "gemini-2.5-flash"
+  }) {
     const rawList = Array.isArray(omrJson && omrJson.exercises) ? omrJson.exercises : [];
     const mathWarnings = [];
 
@@ -613,19 +684,22 @@ export class PdfAiExtractor {
       });
 
       const prefix = bookCategory === "bonusWorkshop" ? "bw" : "lb";
-      const safeId = `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
+      const safeId = targetExerciseId
+        ? (idx === 0 ? targetExerciseId : `${targetExerciseId}-ex${idx + 1}`)
+        : `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
       const barCount = measures.length;
 
       return {
         id: safeId,
         title: rawEx.title || `Exercise ${idx + 1} (p. ${bookPage})`,
-        description: rawEx.description || `Extracted from Book p. ${bookPage} via Gemini 2.5 Pro Vision OMR.`,
+        description: rawEx.description || `Extracted from Book p. ${bookPage} via ${modelUsed} Vision OMR.`,
         timeSignature: [tsNum, tsDen],
         defaultBpm: Number(rawEx.defaultBpm) >= 30 && Number(rawEx.defaultBpm) <= 240 ? Number(rawEx.defaultBpm) : 65,
         pdfPage: bookPage,
         pdfRawPage: rawPdfPage,
         verificationStatus: "pdf-verified",
         aiExtracted: true,
+        modelUsed,
         notationMode,
         concepts: [`Book p. ${bookPage}`, `${barCount} Bars`, "AI Extracted"],
         measures,
@@ -639,6 +713,9 @@ export class PdfAiExtractor {
       bookCategory,
       rawPdfPage,
       bookPage,
+      targetTopicId: targetTopicId || null,
+      targetExerciseId: targetExerciseId || null,
+      modelUsed,
       pageTitle: (omrJson && omrJson.pageTitle) ? String(omrJson.pageTitle).trim() : `Book Page ${bookPage}`,
       extractedAt: new Date().toISOString(),
       mathWarnings,

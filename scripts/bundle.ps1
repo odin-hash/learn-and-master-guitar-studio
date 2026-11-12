@@ -387,10 +387,19 @@ $css
           </div>
         </div>
 
-        <!-- Inline Gemini API Key Drawer -->
+        <!-- Inline Gemini API Key & Model Selector Drawer -->
         <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Gemini API Key (stored locally in browser):</span>
+          <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
           <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
+          <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
+            <span>Model</span>
+            <select id="gemini-model-select" class="pdf-ai-model-select">
+              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
+            </select>
+          </label>
           <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
           <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
           <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
@@ -420,7 +429,10 @@ $css
 
         <!-- Inline AI Extraction Status / Result Banner -->
         <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
-          <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          <div class="pdf-ai-status-left">
+            <img id="ai-extract-thumb" class="pdf-ai-thumb" alt="Captured PDF Page Preview" hidden>
+            <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          </div>
           <div class="pdf-ai-status-actions">
             <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
             <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
