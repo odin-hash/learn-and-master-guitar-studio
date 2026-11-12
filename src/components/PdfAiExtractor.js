@@ -29,19 +29,28 @@ CRITICAL RULES:
 2. Identify every separate numbered or titled exercise on the page (e.g., 1, 2, 3, 4).
 3. For each exercise, count the exact number of measures (bars) separated by vertical barlines.
 4. Read the Time Signature (default to 4/4 if Common Time 'C' or 4/4 is shown).
-5. IF A 6-LINE TAB STAFF IS PRESENT: Read the exact string (1 = top line High E, 6 = bottom line Low E) and the exact fret number printed on that line for every note, left to right. Look up to the standard notation staff directly above each TAB number to read its exact rhythm duration:
+5. IGNORE any introductory fretboard diagrams, note pitch reference charts, or finger charts at the top/middle of the page — ONLY transcribe the numbered musical staves/TAB exercises.
+6. Count every vertical barline carefully! Many exercises (especially on Workshop p. 26 or p. 30+) have 6, 7, or 8 measures squeezed onto ONE single horizontal line. Never drop the last 2-3 bars on the right edge of the staff.
+7. IF A 6-LINE TAB STAFF IS PRESENT: Look directly at the printed numbers on the 6-line TAB staff (1 = top line High E, 6 = bottom line Low E) AND the rhythm stems/beams directly above them for every single beat, reading left to right:
    - Whole note (hollow oval, no stem) = 'w' (4 beats)
    - Half note (hollow oval with stem) = 'h' (2 beats)
    - Quarter note (solid black oval with single stem) = 'q' (1 beat)
    - Eighth note (solid oval with flag or horizontal beam connecting stems) = 'e' (0.5 beats)
    - Dotted half note = 'h.' (3 beats)
-6. IF ONLY A 5-LINE STANDARD STAFF IS PRESENT (NO TAB): Read each note's treble clef pitch (e.g., E4 = 1st string fret 0, F4 = 1st string fret 1, G4 = 1st string fret 3; B3 = 2nd string fret 0, C4 = 2nd string fret 1, D4 = 2nd string fret 3; G3 = 3rd string fret 0, A3 = 3rd string fret 2; D3 = 4th string fret 0, E3 = 4th string fret 2, F3 = 4th string fret 3; A2 = 5th string fret 0, B2 = 5th string fret 2, C3 = 5th string fret 3; E2 = 6th string fret 0, F2 = 6th string fret 1, G2 = 6th string fret 3) and convert it into the exact String, Fret, Pitch, and Duration.
-7. MATH CHECK: Before returning JSON, verify that the sum of beat durations in EVERY measure equals the time signature (e.g., 4.0 beats per measure in 4/4).`;
+8. IF ONLY A 5-LINE STANDARD STAFF IS PRESENT (NO TAB): Read each note's treble clef pitch (e.g., E4 = 1st string fret 0, F4 = 1st string fret 1, G4 = 1st string fret 3; B3 = 2nd string fret 0, C4 = 2nd string fret 1, D4 = 2nd string fret 3; G3 = 3rd string fret 0, A3 = 3rd string fret 2; D3 = 4th string fret 0, E3 = 4th string fret 2, F3 = 4th string fret 3; A2 = 5th string fret 0, B2 = 5th string fret 2, C3 = 5th string fret 3; E2 = 6th string fret 0, F2 = 6th string fret 1, G2 = 6th string fret 3) and convert it into the exact String, Fret, Pitch, and Duration.
+9. MATH CHECK: Before returning JSON, verify that the sum of beat durations in EVERY measure equals the time signature (e.g., 4.0 beats per measure in 4/4).
+
+Before outputting JSON, step through each exercise bar by bar:
+1. Identify every distinct numbered exercise on the page (e.g., 1, 2, 3, 4) and the allowed strings/notes from the page heading and instructional text. Capture the real printed playing instructions in 'pageInstructions' and each exercise's 'description'.
+2. For each measure, count the noteheads left-to-right and look closely at whether each notehead is a hollow oval without stem (whole = 'w', 4 beats), hollow oval with stem (half = 'h', 2 beats), solid black oval with single stem (quarter = 'q', 1 beat), or beamed/flagged (eighth = 'e', 0.5 beats).
+3. If a 6-line TAB staff is present, read the exact string (1-6) and printed fret number for every beat.
+4. Verify the beat sum of every single measure strictly equals the time signature.`;
 
 const OMR_RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
     pageTitle: { type: "STRING", description: "Heading or topic printed at the top of the PDF page" },
+    pageInstructions: { type: "STRING", description: "Real playing instructions printed on the PDF page for these exercises" },
     exercises: {
       type: "ARRAY",
       description: "Every numbered or titled musical exercise printed on this page in order",
@@ -360,7 +369,7 @@ export class PdfAiExtractor {
     } catch (e) {}
   }
 
-  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 2.5) {
+  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 4.0) {
     const safePage = Math.max(1, Math.min(pageNumber, pdfDoc.numPages || pageNumber));
     const pdfPage = await pdfDoc.getPage(safePage);
     const viewport = pdfPage.getViewport({ scale });
@@ -398,30 +407,6 @@ export class PdfAiExtractor {
       ? `Extract every numbered/titled guitar exercise on this page (${contextHint}). Verify duration math sums per measure against the time signature.`
       : "Extract every numbered/titled guitar exercise on this page. Verify duration math sums per measure against the time signature.";
 
-    const payload = {
-      systemInstruction: {
-        parts: [{ text: OMR_SYSTEM_INSTRUCTION }]
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: userPrompt },
-            {
-              inlineData: {
-                mimeType: "image/png",
-                data: base64Png
-              }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: OMR_RESPONSE_SCHEMA
-      }
-    };
-
     const modelsToTry = this.getModelChain();
     let lastError = null;
 
@@ -430,6 +415,35 @@ export class PdfAiExtractor {
       if (typeof onStatus === "function") {
         onStatus(model, i > 0 ? `Fallback to ${model}...` : null);
       }
+
+      const generationConfig = {
+        responseMimeType: "application/json",
+        responseSchema: OMR_RESPONSE_SCHEMA
+      };
+      if (model === "gemini-2.5-flash") {
+        generationConfig.thinkingConfig = { thinkingBudget: 8192 };
+      }
+
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: OMR_SYSTEM_INSTRUCTION }]
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: userPrompt },
+              {
+                inlineData: {
+                  mimeType: "image/png",
+                  data: base64Png
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig
+      };
 
       const res = await fetch(`${buildGeminiEndpoint(model)}?key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
@@ -493,7 +507,8 @@ export class PdfAiExtractor {
     bookPage,
     targetTopicId = null,
     targetExerciseId = null,
-    modelUsed = "gemini-2.5-flash"
+    modelUsed = "gemini-2.5-flash",
+    fallbackInstruction = ""
   }) {
     const rawList = Array.isArray(omrJson && omrJson.exercises) ? omrJson.exercises : [];
     const mathWarnings = [];
@@ -688,11 +703,20 @@ export class PdfAiExtractor {
         ? (idx === 0 ? targetExerciseId : `${targetExerciseId}-ex${idx + 1}`)
         : `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
       const barCount = measures.length;
+      const printedPageInstructions = omrJson && omrJson.pageInstructions
+        ? String(omrJson.pageInstructions).trim()
+        : "";
+      const cleanTitle = PdfAiExtractor.formatCleanExerciseTitle(rawEx.title, idx);
+      const cleanDesc = PdfAiExtractor.cleanExerciseDescription(
+        rawEx.description,
+        printedPageInstructions,
+        fallbackInstruction
+      );
 
       return {
         id: safeId,
-        title: rawEx.title || `Exercise ${idx + 1} (p. ${bookPage})`,
-        description: rawEx.description || `Extracted from Book p. ${bookPage} via ${modelUsed} Vision OMR.`,
+        title: cleanTitle,
+        description: cleanDesc,
         timeSignature: [tsNum, tsDen],
         defaultBpm: Number(rawEx.defaultBpm) >= 30 && Number(rawEx.defaultBpm) <= 240 ? Number(rawEx.defaultBpm) : 65,
         pdfPage: bookPage,
@@ -717,9 +741,53 @@ export class PdfAiExtractor {
       targetExerciseId: targetExerciseId || null,
       modelUsed,
       pageTitle: (omrJson && omrJson.pageTitle) ? String(omrJson.pageTitle).trim() : `Book Page ${bookPage}`,
+      pageInstructions: (omrJson && omrJson.pageInstructions) ? String(omrJson.pageInstructions).trim() : "",
       extractedAt: new Date().toISOString(),
       mathWarnings,
       exercises
     };
+  }
+
+  static formatCleanExerciseTitle(rawTitle, idx = 0) {
+    const raw = String(rawTitle || "").trim();
+    const fallbackNum = idx + 1;
+    if (!raw) return `Exercise ${fallbackNum}`;
+
+    // Convert bare numbers like "1", "1.", "2)", "Ex 3.", "Exercise 4:" into clean headers
+    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]*\s*(.*)$/i);
+    if (numOnlyMatch) {
+      const num = parseInt(numOnlyMatch[1], 10) || fallbackNum;
+      const rest = String(numOnlyMatch[2] || "").replace(/^\(p\.\s*\d+\)$/i, "").trim();
+      if (!rest) return `Exercise ${num}`;
+      return `Exercise ${num}: ${rest}`;
+    }
+
+    return raw;
+  }
+
+  static cleanExerciseDescription(rawDesc, pageInstructions = "", fallbackInstruction = "") {
+    const isAutoPlaceholder = (s) => /^Extracted from Book p\.\s*\d+\s+via\s+/i.test(String(s || "").trim());
+    const d = String(rawDesc || "").trim();
+    if (d && !isAutoPlaceholder(d)) return d;
+    const pInst = String(pageInstructions || "").trim();
+    if (pInst && !isAutoPlaceholder(pInst)) return pInst;
+    const fInst = String(fallbackInstruction || "").trim();
+    if (fInst && !isAutoPlaceholder(fInst)) return fInst;
+    return "";
+  }
+
+  static sanitizeEntryExercises(entry, fallbackInstruction = "") {
+    if (!entry || !Array.isArray(entry.exercises)) return [];
+    const pageInst = entry.pageInstructions ? String(entry.pageInstructions).trim() : "";
+    return entry.exercises.map((ex, idx) => {
+      const next = { ...ex };
+      next.title = PdfAiExtractor.formatCleanExerciseTitle(next.title, idx);
+      next.description = PdfAiExtractor.cleanExerciseDescription(
+        next.description,
+        pageInst,
+        fallbackInstruction
+      );
+      return next;
+    });
   }
 }

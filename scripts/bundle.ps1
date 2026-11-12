@@ -16,6 +16,7 @@ $requiredFiles = @(
     "src\data\primerCatalog.js",
     "src\components\FoundationsPrimer.js",
     "src\components\PdfAiExtractor.js",
+    "src\components\NotationEditor.js",
     "app.js"
 )
 foreach ($f in $requiredFiles) {
@@ -69,6 +70,11 @@ Write-Host "Reading src/components/PdfAiExtractor.js..."
 $pdfAiExtractorJs = [System.IO.File]::ReadAllText((Join-Path $root "src\components\PdfAiExtractor.js"), [System.Text.Encoding]::UTF8)
 $pdfAiExtractorJs = $pdfAiExtractorJs -replace 'import\s*\{[^}]+\}\s*from\s*["''][^"'']+["''];?', ''
 $pdfAiExtractorJs = $pdfAiExtractorJs -replace "export\s+(const|function|class)\s+", '$1 '
+
+Write-Host "Reading src/components/NotationEditor.js..."
+$notationEditorJs = [System.IO.File]::ReadAllText((Join-Path $root "src\components\NotationEditor.js"), [System.Text.Encoding]::UTF8)
+$notationEditorJs = $notationEditorJs -replace 'import\s*\{[^}]+\}\s*from\s*["''][^"'']+["''];?', ''
+$notationEditorJs = $notationEditorJs -replace "export\s+(const|function|class)\s+", '$1 '
 
 Write-Host "Reading app.js..."
 $appJs = [System.IO.File]::ReadAllText((Join-Path $root "app.js"), [System.Text.Encoding]::UTF8)
@@ -134,6 +140,7 @@ $css
     </div>
 
     <div class="topbar-right">
+      <button type="button" class="admin-mode-badge admin-only-control" id="admin-mode-badge" title="Admin / Creator Mode Active (Ctrl+Shift+A to toggle)">Admin Mode &times;</button>
       <div class="topbar-studio-only topbar-studio-actions">
         <div class="topbar-steppers">
           <button class="icon-btn" id="btn-prev-exercise" title="Previous Exercise (&larr;)" aria-label="Previous Exercise">
@@ -366,17 +373,17 @@ $css
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
-            <button type="button" class="micro-pill pdf-ai-key-btn" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
+            <button type="button" class="micro-pill pdf-ai-key-btn admin-only-control" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
               <span class="ai-key-dot" id="ai-key-dot"></span>
             </button>
-            <button type="button" class="micro-pill pdf-ai-extract-btn" id="btn-extract-pdf-page" title="Snapshot current PDF page at 3.0x and extract exact exercises via Gemini 2.5 Pro">
+            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Snapshot current PDF page at 4.0x Ultra-HD and extract exact exercises via Gemini Vision">
               &#10024; Extract Exercises from Current PDF Page
             </button>
-            <button type="button" class="micro-pill" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
+            <button type="button" class="micro-pill admin-only-control" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
               Batch Extract
             </button>
-            <button type="button" class="micro-pill" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
+            <button type="button" class="micro-pill admin-only-control" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
               Export Curriculum JSON
             </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
@@ -388,7 +395,7 @@ $css
         </div>
 
         <!-- Inline Gemini API Key & Model Selector Drawer -->
-        <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
+        <div class="pdf-ai-drawer admin-only-control" id="gemini-key-bar" hidden>
           <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
           <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
           <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
@@ -406,7 +413,7 @@ $css
         </div>
 
         <!-- Inline Batch Extraction Drawer -->
-        <div class="pdf-ai-drawer" id="pdf-batch-bar" hidden>
+        <div class="pdf-ai-drawer admin-only-control" id="pdf-batch-bar" hidden>
           <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
           <label class="pdf-batch-field">
             <span>From p.</span>
@@ -428,13 +435,13 @@ $css
         </div>
 
         <!-- Inline AI Extraction Status / Result Banner -->
-        <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
+        <div class="pdf-ai-status-bar admin-only-control" id="ai-extract-status-bar" hidden>
           <div class="pdf-ai-status-left">
             <img id="ai-extract-thumb" class="pdf-ai-thumb" alt="Captured PDF Page Preview" hidden>
             <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
           </div>
           <div class="pdf-ai-status-actions">
-            <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
             <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
           </div>
         </div>
@@ -588,6 +595,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine($primerCatalogJs)
 [void]$sb.AppendLine($primerJs)
 [void]$sb.AppendLine($pdfAiExtractorJs)
+[void]$sb.AppendLine($notationEditorJs)
 [void]$sb.AppendLine($appJs)
 [void]$sb.AppendLine($htmlFooter)
 

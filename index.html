@@ -4183,6 +4183,299 @@ body[data-free-metronome="true"] .free-metronome-stage {
   margin: 12px auto;
 }
 
+/* ==========================================================================
+   ADMIN / CREATOR MODE GATE & NOTEI.CO-STYLE VISUAL NOTATION EDITOR
+   ========================================================================== */
+
+body:not([data-admin-mode="true"]) .admin-only-control {
+  display: none !important;
+}
+
+.admin-mode-badge {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(194, 65, 12, 0.35);
+  background: rgba(194, 65, 12, 0.09);
+  color: #C2410C;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 0.12s ease;
+}
+
+.admin-mode-badge:hover {
+  background: rgba(194, 65, 12, 0.16);
+}
+
+.topic-ex-edit-btn {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(24, 24, 27, 0.18);
+  background: #FAF9F5;
+  color: #18181B;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.topic-ex-edit-btn:hover {
+  border-color: #18181B;
+  background: #FFFFFF;
+}
+
+.topic-ex-edit-btn.is-active {
+  background: #18181B;
+  border-color: #18181B;
+  color: #FFFFFF;
+}
+
+.topic-add-subex-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.topic-add-subex-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px dashed #A1A1AA;
+  background: #FAF9F5;
+  color: #3F3F46;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.topic-add-subex-btn:hover {
+  border-color: #18181B;
+  background: #FFFFFF;
+  color: #18181B;
+}
+
+.notation-editor-palette {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  background: #FAF9F5;
+  border: 1px solid #D4D4D8;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(24, 24, 27, 0.05);
+}
+
+.ne-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.ne-bar-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ne-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #C2410C;
+  margin-right: 4px;
+}
+
+.ne-bar-pill {
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-hairline);
+  background: #FFFFFF;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ne-bar-pill.active {
+  background: #18181B;
+  border-color: #18181B;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.ne-header-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ne-beat-counter {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.ne-beat-counter.is-ok {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #166534;
+}
+
+.ne-beat-counter.is-warn {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+  color: #92400E;
+}
+
+.ne-sel-readout {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+
+.ne-tools-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ne-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 2px 4px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-radius: 6px;
+}
+
+.ne-lbl {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 5px 0 3px;
+}
+
+.ne-sym-btn,
+.ne-num-btn,
+.ne-action-btn {
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #18181B;
+  font-size: 11.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.ne-num-btn {
+  min-width: 24px;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ne-sym-btn:hover,
+.ne-num-btn:hover,
+.ne-action-btn:hover:not(:disabled) {
+  background: #F3F2EE;
+  border-color: var(--border-hairline);
+}
+
+.ne-sym-btn.active,
+.ne-num-btn.active {
+  background: #18181B;
+  border-color: #18181B;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.ne-glyph {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ne-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.78;
+}
+
+.ne-fret-val {
+  min-width: 24px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #C2410C;
+}
+
+.ne-action-btn.is-danger {
+  color: #B91C1C;
+}
+
+.ne-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ne-shorthand-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.ne-shorthand-row[hidden] {
+  display: none !important;
+}
+
+.ne-shorthand-input {
+  flex: 1 1 200px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+  background: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: #18181B;
+  outline: none;
+}
+
+.ne-shorthand-input:focus {
+  border-color: #18181B;
+}
+
 @media (max-width: 1180px) {
   .jam-speed-presets,
   .dock-select-wrap .dock-lbl {
@@ -4738,6 +5031,7 @@ body[data-free-metronome="true"] .free-metronome-stage {
     </div>
 
     <div class="topbar-right">
+      <button type="button" class="admin-mode-badge admin-only-control" id="admin-mode-badge" title="Admin / Creator Mode Active (Ctrl+Shift+A to toggle)">Admin Mode &times;</button>
       <div class="topbar-studio-only topbar-studio-actions">
         <div class="topbar-steppers">
           <button class="icon-btn" id="btn-prev-exercise" title="Previous Exercise (&larr;)" aria-label="Previous Exercise">
@@ -4970,17 +5264,17 @@ body[data-free-metronome="true"] .free-metronome-stage {
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
-            <button type="button" class="micro-pill pdf-ai-key-btn" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
+            <button type="button" class="micro-pill pdf-ai-key-btn admin-only-control" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
               <span class="ai-key-dot" id="ai-key-dot"></span>
             </button>
-            <button type="button" class="micro-pill pdf-ai-extract-btn" id="btn-extract-pdf-page" title="Snapshot current PDF page at 3.0x and extract exact exercises via Gemini 2.5 Pro">
+            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Snapshot current PDF page at 4.0x Ultra-HD and extract exact exercises via Gemini Vision">
               &#10024; Extract Exercises from Current PDF Page
             </button>
-            <button type="button" class="micro-pill" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
+            <button type="button" class="micro-pill admin-only-control" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
               Batch Extract
             </button>
-            <button type="button" class="micro-pill" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
+            <button type="button" class="micro-pill admin-only-control" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
               Export Curriculum JSON
             </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
@@ -4992,7 +5286,7 @@ body[data-free-metronome="true"] .free-metronome-stage {
         </div>
 
         <!-- Inline Gemini API Key & Model Selector Drawer -->
-        <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
+        <div class="pdf-ai-drawer admin-only-control" id="gemini-key-bar" hidden>
           <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
           <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
           <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
@@ -5010,7 +5304,7 @@ body[data-free-metronome="true"] .free-metronome-stage {
         </div>
 
         <!-- Inline Batch Extraction Drawer -->
-        <div class="pdf-ai-drawer" id="pdf-batch-bar" hidden>
+        <div class="pdf-ai-drawer admin-only-control" id="pdf-batch-bar" hidden>
           <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
           <label class="pdf-batch-field">
             <span>From p.</span>
@@ -5032,13 +5326,13 @@ body[data-free-metronome="true"] .free-metronome-stage {
         </div>
 
         <!-- Inline AI Extraction Status / Result Banner -->
-        <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
+        <div class="pdf-ai-status-bar admin-only-control" id="ai-extract-status-bar" hidden>
           <div class="pdf-ai-status-left">
             <img id="ai-extract-thumb" class="pdf-ai-thumb" alt="Captured PDF Page Preview" hidden>
             <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
           </div>
           <div class="pdf-ai-status-actions">
-            <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
             <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
           </div>
         </div>
@@ -11818,7 +12112,7 @@ class ScoreRenderer {
             hitRect.style.cursor = "pointer";
             hitRect.addEventListener("click", (e) => {
               e.stopPropagation();
-              if (this.onBeatClick) this.onBeatClick(mIdx, startBeatIdx);
+              if (this.onBeatClick) this.onBeatClick(mIdx, startBeatIdx, evIdx);
             });
             overlayLayer.appendChild(hitRect);
 
@@ -15560,19 +15854,28 @@ CRITICAL RULES:
 2. Identify every separate numbered or titled exercise on the page (e.g., 1, 2, 3, 4).
 3. For each exercise, count the exact number of measures (bars) separated by vertical barlines.
 4. Read the Time Signature (default to 4/4 if Common Time 'C' or 4/4 is shown).
-5. IF A 6-LINE TAB STAFF IS PRESENT: Read the exact string (1 = top line High E, 6 = bottom line Low E) and the exact fret number printed on that line for every note, left to right. Look up to the standard notation staff directly above each TAB number to read its exact rhythm duration:
+5. IGNORE any introductory fretboard diagrams, note pitch reference charts, or finger charts at the top/middle of the page — ONLY transcribe the numbered musical staves/TAB exercises.
+6. Count every vertical barline carefully! Many exercises (especially on Workshop p. 26 or p. 30+) have 6, 7, or 8 measures squeezed onto ONE single horizontal line. Never drop the last 2-3 bars on the right edge of the staff.
+7. IF A 6-LINE TAB STAFF IS PRESENT: Look directly at the printed numbers on the 6-line TAB staff (1 = top line High E, 6 = bottom line Low E) AND the rhythm stems/beams directly above them for every single beat, reading left to right:
    - Whole note (hollow oval, no stem) = 'w' (4 beats)
    - Half note (hollow oval with stem) = 'h' (2 beats)
    - Quarter note (solid black oval with single stem) = 'q' (1 beat)
    - Eighth note (solid oval with flag or horizontal beam connecting stems) = 'e' (0.5 beats)
    - Dotted half note = 'h.' (3 beats)
-6. IF ONLY A 5-LINE STANDARD STAFF IS PRESENT (NO TAB): Read each note's treble clef pitch (e.g., E4 = 1st string fret 0, F4 = 1st string fret 1, G4 = 1st string fret 3; B3 = 2nd string fret 0, C4 = 2nd string fret 1, D4 = 2nd string fret 3; G3 = 3rd string fret 0, A3 = 3rd string fret 2; D3 = 4th string fret 0, E3 = 4th string fret 2, F3 = 4th string fret 3; A2 = 5th string fret 0, B2 = 5th string fret 2, C3 = 5th string fret 3; E2 = 6th string fret 0, F2 = 6th string fret 1, G2 = 6th string fret 3) and convert it into the exact String, Fret, Pitch, and Duration.
-7. MATH CHECK: Before returning JSON, verify that the sum of beat durations in EVERY measure equals the time signature (e.g., 4.0 beats per measure in 4/4).`;
+8. IF ONLY A 5-LINE STANDARD STAFF IS PRESENT (NO TAB): Read each note's treble clef pitch (e.g., E4 = 1st string fret 0, F4 = 1st string fret 1, G4 = 1st string fret 3; B3 = 2nd string fret 0, C4 = 2nd string fret 1, D4 = 2nd string fret 3; G3 = 3rd string fret 0, A3 = 3rd string fret 2; D3 = 4th string fret 0, E3 = 4th string fret 2, F3 = 4th string fret 3; A2 = 5th string fret 0, B2 = 5th string fret 2, C3 = 5th string fret 3; E2 = 6th string fret 0, F2 = 6th string fret 1, G2 = 6th string fret 3) and convert it into the exact String, Fret, Pitch, and Duration.
+9. MATH CHECK: Before returning JSON, verify that the sum of beat durations in EVERY measure equals the time signature (e.g., 4.0 beats per measure in 4/4).
+
+Before outputting JSON, step through each exercise bar by bar:
+1. Identify every distinct numbered exercise on the page (e.g., 1, 2, 3, 4) and the allowed strings/notes from the page heading and instructional text. Capture the real printed playing instructions in 'pageInstructions' and each exercise's 'description'.
+2. For each measure, count the noteheads left-to-right and look closely at whether each notehead is a hollow oval without stem (whole = 'w', 4 beats), hollow oval with stem (half = 'h', 2 beats), solid black oval with single stem (quarter = 'q', 1 beat), or beamed/flagged (eighth = 'e', 0.5 beats).
+3. If a 6-line TAB staff is present, read the exact string (1-6) and printed fret number for every beat.
+4. Verify the beat sum of every single measure strictly equals the time signature.`;
 
 const OMR_RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
     pageTitle: { type: "STRING", description: "Heading or topic printed at the top of the PDF page" },
+    pageInstructions: { type: "STRING", description: "Real playing instructions printed on the PDF page for these exercises" },
     exercises: {
       type: "ARRAY",
       description: "Every numbered or titled musical exercise printed on this page in order",
@@ -15891,7 +16194,7 @@ class PdfAiExtractor {
     } catch (e) {}
   }
 
-  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 2.5) {
+  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 4.0) {
     const safePage = Math.max(1, Math.min(pageNumber, pdfDoc.numPages || pageNumber));
     const pdfPage = await pdfDoc.getPage(safePage);
     const viewport = pdfPage.getViewport({ scale });
@@ -15929,30 +16232,6 @@ class PdfAiExtractor {
       ? `Extract every numbered/titled guitar exercise on this page (${contextHint}). Verify duration math sums per measure against the time signature.`
       : "Extract every numbered/titled guitar exercise on this page. Verify duration math sums per measure against the time signature.";
 
-    const payload = {
-      systemInstruction: {
-        parts: [{ text: OMR_SYSTEM_INSTRUCTION }]
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: userPrompt },
-            {
-              inlineData: {
-                mimeType: "image/png",
-                data: base64Png
-              }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: OMR_RESPONSE_SCHEMA
-      }
-    };
-
     const modelsToTry = this.getModelChain();
     let lastError = null;
 
@@ -15961,6 +16240,35 @@ class PdfAiExtractor {
       if (typeof onStatus === "function") {
         onStatus(model, i > 0 ? `Fallback to ${model}...` : null);
       }
+
+      const generationConfig = {
+        responseMimeType: "application/json",
+        responseSchema: OMR_RESPONSE_SCHEMA
+      };
+      if (model === "gemini-2.5-flash") {
+        generationConfig.thinkingConfig = { thinkingBudget: 8192 };
+      }
+
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: OMR_SYSTEM_INSTRUCTION }]
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: userPrompt },
+              {
+                inlineData: {
+                  mimeType: "image/png",
+                  data: base64Png
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig
+      };
 
       const res = await fetch(`${buildGeminiEndpoint(model)}?key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
@@ -16024,7 +16332,8 @@ class PdfAiExtractor {
     bookPage,
     targetTopicId = null,
     targetExerciseId = null,
-    modelUsed = "gemini-2.5-flash"
+    modelUsed = "gemini-2.5-flash",
+    fallbackInstruction = ""
   }) {
     const rawList = Array.isArray(omrJson && omrJson.exercises) ? omrJson.exercises : [];
     const mathWarnings = [];
@@ -16219,11 +16528,20 @@ class PdfAiExtractor {
         ? (idx === 0 ? targetExerciseId : `${targetExerciseId}-ex${idx + 1}`)
         : `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
       const barCount = measures.length;
+      const printedPageInstructions = omrJson && omrJson.pageInstructions
+        ? String(omrJson.pageInstructions).trim()
+        : "";
+      const cleanTitle = PdfAiExtractor.formatCleanExerciseTitle(rawEx.title, idx);
+      const cleanDesc = PdfAiExtractor.cleanExerciseDescription(
+        rawEx.description,
+        printedPageInstructions,
+        fallbackInstruction
+      );
 
       return {
         id: safeId,
-        title: rawEx.title || `Exercise ${idx + 1} (p. ${bookPage})`,
-        description: rawEx.description || `Extracted from Book p. ${bookPage} via ${modelUsed} Vision OMR.`,
+        title: cleanTitle,
+        description: cleanDesc,
         timeSignature: [tsNum, tsDen],
         defaultBpm: Number(rawEx.defaultBpm) >= 30 && Number(rawEx.defaultBpm) <= 240 ? Number(rawEx.defaultBpm) : 65,
         pdfPage: bookPage,
@@ -16248,12 +16566,1151 @@ class PdfAiExtractor {
       targetExerciseId: targetExerciseId || null,
       modelUsed,
       pageTitle: (omrJson && omrJson.pageTitle) ? String(omrJson.pageTitle).trim() : `Book Page ${bookPage}`,
+      pageInstructions: (omrJson && omrJson.pageInstructions) ? String(omrJson.pageInstructions).trim() : "",
       extractedAt: new Date().toISOString(),
       mathWarnings,
       exercises
     };
   }
+
+  static formatCleanExerciseTitle(rawTitle, idx = 0) {
+    const raw = String(rawTitle || "").trim();
+    const fallbackNum = idx + 1;
+    if (!raw) return `Exercise ${fallbackNum}`;
+
+    // Convert bare numbers like "1", "1.", "2)", "Ex 3.", "Exercise 4:" into clean headers
+    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]*\s*(.*)$/i);
+    if (numOnlyMatch) {
+      const num = parseInt(numOnlyMatch[1], 10) || fallbackNum;
+      const rest = String(numOnlyMatch[2] || "").replace(/^\(p\.\s*\d+\)$/i, "").trim();
+      if (!rest) return `Exercise ${num}`;
+      return `Exercise ${num}: ${rest}`;
+    }
+
+    return raw;
+  }
+
+  static cleanExerciseDescription(rawDesc, pageInstructions = "", fallbackInstruction = "") {
+    const isAutoPlaceholder = (s) => /^Extracted from Book p\.\s*\d+\s+via\s+/i.test(String(s || "").trim());
+    const d = String(rawDesc || "").trim();
+    if (d && !isAutoPlaceholder(d)) return d;
+    const pInst = String(pageInstructions || "").trim();
+    if (pInst && !isAutoPlaceholder(pInst)) return pInst;
+    const fInst = String(fallbackInstruction || "").trim();
+    if (fInst && !isAutoPlaceholder(fInst)) return fInst;
+    return "";
+  }
+
+  static sanitizeEntryExercises(entry, fallbackInstruction = "") {
+    if (!entry || !Array.isArray(entry.exercises)) return [];
+    const pageInst = entry.pageInstructions ? String(entry.pageInstructions).trim() : "";
+    return entry.exercises.map((ex, idx) => {
+      const next = { ...ex };
+      next.title = PdfAiExtractor.formatCleanExerciseTitle(next.title, idx);
+      next.description = PdfAiExtractor.cleanExerciseDescription(
+        next.description,
+        pageInst,
+        fallbackInstruction
+      );
+      return next;
+    });
+  }
 }
+
+/**
+ * <NotationEditor /> — Visual Notei.co-Style Music & Guitar TAB Editor
+ * ----------------------------------------------------------------------
+ * Renders an inline editorial symbol palette above an exercise's VexFlow stave
+ * when Admin Mode is active. Every edit keeps Treble Staff pitch, Guitar TAB
+ * string/fret, rhythm durations, rests, dots, ties, pick strokes, and fingers
+ * 100% synchronized, immediately re-rendering ScoreRenderer and auto-saving.
+ */
+
+const EDITOR_OPEN_MIDI = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
+const EDITOR_SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const EDITOR_NOTE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+const EDITOR_DURATIONS = [
+  { code: "w", vexDur: "w", beats: 4, symbol: "1/1", label: "Whole", glyph: "&#119133;" },
+  { code: "h", vexDur: "h", beats: 2, symbol: "1/2", label: "Half", glyph: "&#119134;" },
+  { code: "q", vexDur: "q", beats: 1, symbol: "1/4", label: "Quarter", glyph: "&#119135;" },
+  { code: "e", vexDur: "8", beats: 0.5, symbol: "1/8", label: "Eighth", glyph: "&#119136;" },
+  { code: "16", vexDur: "16", beats: 0.25, symbol: "1/16", label: "16th", glyph: "&#119137;" }
+];
+
+function editorMidiToInfo(midi, forcedAccidental = null, forcedLetterOct = null) {
+  const clamped = Math.max(40, Math.min(88, Math.round(midi)));
+  if (forcedLetterOct) {
+    const { letter, oct, acc } = forcedLetterOct;
+    const displayName = letter === "E" && !acc && oct >= 4
+      ? "High E"
+      : (letter === "E" && !acc && oct <= 2 ? "Low E" : `${letter}${acc || ""}`);
+    return {
+      concertPitch: `${letter}${acc || ""}${oct}`,
+      vexKey: `${letter.toLowerCase()}${acc || ""}/${oct + 1}`,
+      accidental: acc || null,
+      displayName
+    };
+  }
+  const oct = Math.floor(clamped / 12) - 1;
+  const name = EDITOR_SHARP_NAMES[clamped % 12];
+  const acc = name.includes("#") ? "#" : (forcedAccidental === "n" ? "n" : null);
+  const letter = name[0];
+  let displayName = name;
+  if (name === "E" && oct >= 4) displayName = "High E";
+  if (name === "E" && oct <= 2) displayName = "Low E";
+  return {
+    concertPitch: `${name}${oct}`,
+    vexKey: `${letter.toLowerCase()}${acc && acc !== "n" ? acc : ""}/${oct + 1}`,
+    accidental: acc,
+    displayName
+  };
+}
+
+function editorPitchToMidi(concertPitch) {
+  const m = String(concertPitch || "").trim().match(/^([A-Ga-g])(#|b|n)?(\d)$/);
+  if (!m) return 64;
+  const base = EDITOR_NOTE_SEMITONES[m[1].toUpperCase()];
+  if (base === undefined) return 64;
+  const acc = m[2] === "#" ? 1 : (m[2] === "b" ? -1 : 0);
+  const oct = parseInt(m[3], 10);
+  return (oct + 1) * 12 + base + acc;
+}
+
+function findBestPositionForMidi(midi, preferredString = null) {
+  if (preferredString >= 1 && preferredString <= 6) {
+    const f = midi - EDITOR_OPEN_MIDI[preferredString];
+    if (f >= 0 && f <= 12) {
+      return { string: preferredString, fret: f };
+    }
+  }
+  // Prefer open position (frets 0..4) across strings 1..6 cleanly
+  for (let s = 1; s <= 6; s++) {
+    const f = midi - EDITOR_OPEN_MIDI[s];
+    if (f >= 0 && f <= 4) {
+      return { string: s, fret: f };
+    }
+  }
+  let best = { string: 1, fret: 0, dist: 999 };
+  for (let s = 1; s <= 6; s++) {
+    const f = midi - EDITOR_OPEN_MIDI[s];
+    if (f >= 0 && f <= 20 && f < best.dist) {
+      best = { string: s, fret: f, dist: f };
+    }
+  }
+  return { string: best.string, fret: best.fret };
+}
+
+function editorDurSpec(codeOrDur, isDotted = false) {
+  const norm = String(codeOrDur || "q").toLowerCase();
+  let spec = EDITOR_DURATIONS.find(d => d.code === norm || d.vexDur === norm) || EDITOR_DURATIONS[2];
+  const baseBeats = spec.beats;
+  const durationBeats = isDotted ? Number((baseBeats * 1.5).toFixed(3)) : baseBeats;
+  let symbol = spec.symbol;
+  if (isDotted && spec.code === "w") symbol = "3/2";
+  else if (isDotted && spec.code === "h") symbol = "3/4";
+  else if (isDotted && spec.code === "q") symbol = "3/8";
+  return { spec, durationBeats, symbol };
+}
+
+class NotationEditor {
+  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise } = {}) {
+    this.onCommitExercise = onCommitExercise || null;
+    this.onSelectNoteForFeedback = onSelectNoteForFeedback || null;
+    this.onAddSubExercise = onAddSubExercise || null;
+
+    this.exercise = null;
+    this.hostEl = null;
+    this.paletteEl = null;
+    this.selectedMeasureIdx = 0;
+    this.selectedEventIdx = 0;
+    this.shorthandOpen = false;
+    this._fretDigitBuffer = "";
+    this._fretDigitTimer = null;
+  }
+
+  isActive() {
+    return Boolean(this.exercise && this.hostEl && this.paletteEl);
+  }
+
+  open(exercise, hostContainerEl, measureIdx = 0, eventIdx = 0) {
+    this.close(false);
+    if (!exercise || !hostContainerEl) return;
+    this.exercise = exercise;
+    this.ensureCanonicalMeasures(this.exercise);
+    this.hostEl = hostContainerEl;
+
+    const totalM = Math.max(1, (this.exercise.measures || []).length);
+    this.selectedMeasureIdx = Math.max(0, Math.min(measureIdx, totalM - 1));
+    const evs = (this.exercise.measures[this.selectedMeasureIdx] && this.exercise.measures[this.selectedMeasureIdx].events) || [];
+    this.selectedEventIdx = Math.max(0, Math.min(eventIdx, Math.max(0, evs.length - 1)));
+
+    this.renderPalette();
+  }
+
+  close(notify = true) {
+    if (this.paletteEl && this.paletteEl.parentNode) {
+      this.paletteEl.parentNode.removeChild(this.paletteEl);
+    }
+    this.paletteEl = null;
+    this.hostEl = null;
+    const prevId = this.exercise ? this.exercise.id : null;
+    this.exercise = null;
+    if (notify && prevId && typeof this.onCommitExercise === "function") {
+      // Nothing to mutate on close
+    }
+  }
+
+  selectNote(mIdx, beatOrEventIdx, explicitEvIdx = null) {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return;
+    if (mIdx < 0 || mIdx >= this.exercise.measures.length) return;
+    this.selectedMeasureIdx = mIdx;
+    const evs = this.exercise.measures[mIdx].events || [];
+    if (explicitEvIdx !== null && explicitEvIdx >= 0 && explicitEvIdx < evs.length) {
+      this.selectedEventIdx = explicitEvIdx;
+    } else {
+      const matchedIdx = evs.findIndex(ev => ev.tabBeatIndex === beatOrEventIdx);
+      this.selectedEventIdx = matchedIdx >= 0
+        ? matchedIdx
+        : Math.max(0, Math.min(beatOrEventIdx, Math.max(0, evs.length - 1)));
+    }
+    this.renderPalette();
+  }
+
+  ensureCanonicalMeasures(ex) {
+    if (!ex) return;
+    if (Array.isArray(ex.measures) && ex.measures.length > 0) {
+      ex.measures.forEach((m, idx) => {
+        if (!m.measure) m.measure = idx + 1;
+        if (!Array.isArray(m.events)) m.events = [];
+        m.events.forEach(ev => {
+          if (ev.isRest) {
+            ev.vexDuration = ev.vexDuration || `${ev.duration || "q"}r`;
+          } else {
+            if (typeof ev.string === "number" && (ev.fret === null || ev.fret === undefined)) ev.fret = 0;
+            if (typeof ev.string === "number" && !ev.concertPitch) {
+              const info = editorMidiToInfo(EDITOR_OPEN_MIDI[ev.string] + (ev.fret || 0));
+              ev.concertPitch = info.concertPitch;
+              ev.vexKey = ev.vexKey || info.vexKey;
+              ev.note = ev.note || info.displayName;
+            }
+            if (!Array.isArray(ev.positions) || ev.positions.length === 0) {
+              ev.positions = typeof ev.string === "number" ? [{ str: ev.string, fret: ev.fret || 0 }] : [];
+            }
+          }
+        });
+      });
+      this.syncMeasuresToTabData(ex);
+      return;
+    }
+
+    const ts = ex.timeSignature || [4, 4];
+    const tsStr = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
+    const rawMeasures = ex.tabData || [];
+    ex.measures = rawMeasures.map((m, idx) => {
+      const beats = m.beats || [];
+      const events = [];
+      beats.forEach((b, bIdx) => {
+        const isLeadingTie = bIdx === 0 && idx > 0 && (b.isSustain || b.type === "sustain") && b.type !== "rest";
+        if ((b.isSustain || b.type === "sustain") && !isLeadingTie) return;
+
+        let durBeats = b.duration || 1;
+        if (isLeadingTie) {
+          let tieSpan = 1;
+          for (let k = bIdx + 1; k < beats.length; k++) {
+            if ((beats[k].isSustain || beats[k].type === "sustain") && beats[k].note === b.note) tieSpan++;
+            else break;
+          }
+          durBeats = tieSpan;
+        }
+        const sym = String(b.symbol || "").toLowerCase();
+        let code = "q";
+        let dotted = Boolean(b.isDotted);
+        if (durBeats >= 4 || sym === "1/1") code = "w";
+        else if (durBeats >= 3 || sym === "3/4") { code = "h"; dotted = true; }
+        else if (durBeats >= 2 || sym === "1/2") code = "h";
+        else if (Math.abs(durBeats - 1.5) < 0.05 || sym === "3/8") { code = "q"; dotted = true; }
+        else if (sym === "1/8" || durBeats === 0.5) code = "e";
+        else if (sym === "1/16" || durBeats === 0.25) code = "16";
+
+        const { spec, durationBeats, symbol } = editorDurSpec(code, dotted);
+        if (b.type === "rest") {
+          events.push({
+            beat: b.beat || (bIdx + 1),
+            tabBeatIndex: bIdx,
+            isRest: true,
+            type: "rest",
+            note: "REST",
+            concertPitch: null,
+            vexKey: spec.vexDur === "w" ? "d/5" : "b/4",
+            accidental: null,
+            duration: spec.vexDur,
+            isDotted: dotted,
+            vexDuration: `${spec.vexDur}r`,
+            durationBeats,
+            symbol: "REST",
+            string: null,
+            fret: null,
+            finger: null,
+            pick: "-",
+            positions: []
+          });
+        } else {
+          const str = typeof b.string === "number" ? b.string : 1;
+          const fret = typeof b.fret === "number" ? b.fret : 0;
+          const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
+          events.push({
+            beat: b.beat || (bIdx + 1),
+            tabBeatIndex: bIdx,
+            isRest: false,
+            isChord: false,
+            type: "play",
+            note: b.note || info.displayName,
+            concertPitch: b.concertPitch || info.concertPitch,
+            vexKey: b.vexKey || info.vexKey,
+            accidental: info.accidental,
+            duration: spec.vexDur,
+            isDotted: dotted,
+            vexDuration: spec.vexDur,
+            durationBeats,
+            symbol,
+            string: str,
+            fret,
+            finger: b.finger !== undefined && b.finger !== null ? b.finger : (fret === 0 ? 0 : Math.min(4, fret)),
+            pick: isLeadingTie ? "-" : (b.pick || "Down"),
+            positions: [{ str, fret }],
+            tieFromPrev: isLeadingTie || Boolean(b.tieFromPrev),
+            tieToNext: Boolean(b.tieToNext),
+            tip: `String ${str}, Fret ${fret}`
+          });
+        }
+      });
+
+      return {
+        measure: m.measure || (idx + 1),
+        clef: "treble",
+        notationMode: "standard",
+        timeSignature: tsStr,
+        chordName: m.chordName || null,
+        events
+      };
+    });
+    this.syncMeasuresToTabData(ex);
+  }
+
+  syncMeasuresToTabData(ex) {
+    if (!ex || !Array.isArray(ex.measures)) return;
+    const ts = ex.timeSignature || [4, 4];
+    const tsStr = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
+
+    ex.tabData = ex.measures.map((m, mIdx) => {
+      m.measure = mIdx + 1;
+      m.clef = "treble";
+      m.notationMode = "standard";
+      m.timeSignature = m.timeSignature || tsStr;
+      const legacyBeats = [];
+      let beatCursor = 1;
+      let runningOffset = 0;
+
+      (m.events || []).forEach((ev, evIdx) => {
+        ev.beat = beatCursor;
+        ev.tabBeatIndex = legacyBeats.length;
+        const durBeats = ev.durationBeats || 1;
+
+        if (ev.isRest) {
+          ev.type = "rest";
+          ev.note = "REST";
+          ev.vexKey = ev.duration === "w" ? "d/5" : "b/4";
+          ev.vexDuration = `${ev.duration || "q"}r`;
+          legacyBeats.push({
+            beat: runningOffset + 1,
+            eventIndex: evIdx,
+            note: "REST",
+            symbol: "REST",
+            type: "rest",
+            string: null,
+            fret: null,
+            finger: null,
+            pick: "-",
+            duration: durBeats,
+            isDotted: Boolean(ev.isDotted),
+            isStart: true,
+            isSustain: false,
+            tip: `Rest (${durBeats} beats)`
+          });
+          const pads = Math.floor(durBeats) - 1;
+          for (let p = 1; p <= pads; p++) {
+            legacyBeats.push({
+              beat: runningOffset + 1 + p,
+              eventIndex: evIdx,
+              note: "REST",
+              symbol: "REST",
+              type: "rest",
+              string: null,
+              fret: null,
+              finger: null,
+              pick: "-",
+              duration: 1,
+              isDotted: Boolean(ev.isDotted),
+              isStart: false,
+              isSustain: true,
+              tip: "Rest"
+            });
+          }
+        } else {
+          ev.type = "play";
+          ev.vexDuration = ev.duration || "q";
+          const isTieCont = Boolean(ev.tieFromPrev);
+          legacyBeats.push({
+            beat: runningOffset + 1,
+            eventIndex: evIdx,
+            note: ev.note,
+            concertPitch: ev.concertPitch,
+            vexKey: ev.vexKey,
+            symbol: ev.symbol || "1/4",
+            type: "play",
+            string: ev.string,
+            fret: ev.fret,
+            finger: ev.finger,
+            pick: isTieCont ? "-" : (ev.pick || "Down"),
+            duration: durBeats,
+            isDotted: Boolean(ev.isDotted),
+            tieFromPrev: isTieCont,
+            tieToNext: Boolean(ev.tieToNext),
+            isTieContinuation: isTieCont,
+            isStart: true,
+            isSustain: false,
+            chordChange: ev.chordChange || null,
+            tip: isTieCont ? "Keep Holding (Tied)" : `String ${ev.string}, Fret ${ev.fret}`
+          });
+          const pads = Math.floor(durBeats) - 1;
+          for (let p = 1; p <= pads; p++) {
+            legacyBeats.push({
+              beat: runningOffset + 1 + p,
+              eventIndex: evIdx,
+              note: ev.note,
+              concertPitch: ev.concertPitch,
+              vexKey: ev.vexKey,
+              symbol: ev.symbol || "1/4",
+              type: "sustain",
+              string: ev.string,
+              fret: ev.fret,
+              finger: ev.finger,
+              pick: "-",
+              duration: durBeats,
+              isDotted: Boolean(ev.isDotted),
+              isStart: false,
+              isSustain: true,
+              tip: "Keep Holding"
+            });
+          }
+        }
+
+        beatCursor += durBeats;
+        runningOffset += durBeats;
+      });
+
+      return {
+        measure: m.measure,
+        chordName: m.chordName || null,
+        beats: legacyBeats
+      };
+    });
+
+    ex.verificationStatus = "pdf-verified";
+    ex.aiEdited = true;
+  }
+
+  getActiveEvent() {
+    if (!this.exercise || !this.exercise.measures) return null;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m || !Array.isArray(m.events)) return null;
+    return m.events[this.selectedEventIdx] || null;
+  }
+
+  formatBarShorthand(m) {
+    if (!m || !Array.isArray(m.events)) return "";
+    return m.events.map(ev => {
+      let code = "q";
+      if (ev.duration === "w") code = "w";
+      else if (ev.duration === "h") code = "h";
+      else if (ev.duration === "8") code = "e";
+      else if (ev.duration === "16") code = "16";
+      const dot = ev.isDotted ? "." : "";
+      const tie = ev.tieToNext ? "~" : "";
+      if (ev.isRest) return `R/${code}${dot}`;
+      const s = typeof ev.string === "number" ? ev.string : 1;
+      const f = typeof ev.fret === "number" ? ev.fret : 0;
+      const p = ev.pick === "Up" ? "[Up]" : "";
+      return `${s}:${f}/${code}${dot}${tie}${p}`;
+    }).join(" ");
+  }
+
+  formatExerciseShorthand() {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return "";
+    return this.exercise.measures.map(m => this.formatBarShorthand(m)).join(" | ");
+  }
+
+  _parseShorthandBarEvents(barText) {
+    const tokens = String(barText || "")
+      .split(/[\s,]+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+    const newEvents = [];
+    tokens.forEach(tok => {
+      let work = tok;
+      let pick = "Down";
+      const pickM = work.match(/\[(Down|Up)\]/i);
+      if (pickM) {
+        pick = pickM[1].toLowerCase() === "up" ? "Up" : "Down";
+        work = work.replace(pickM[0], "");
+      }
+      const tieToNext = work.endsWith("~");
+      if (tieToNext) work = work.slice(0, -1);
+
+      const parts = work.split("/");
+      const head = (parts[0] || "1:0").trim();
+      let durRaw = (parts[1] || "q").trim().toLowerCase();
+      const isDotted = durRaw.endsWith(".");
+      if (isDotted) durRaw = durRaw.slice(0, -1);
+      const { spec, durationBeats, symbol } = editorDurSpec(durRaw, isDotted);
+
+      if (/^R(EST)?$/i.test(head)) {
+        newEvents.push({
+          beat: 1,
+          isRest: true,
+          type: "rest",
+          note: "REST",
+          concertPitch: null,
+          vexKey: spec.vexDur === "w" ? "d/5" : "b/4",
+          accidental: null,
+          duration: spec.vexDur,
+          isDotted,
+          vexDuration: `${spec.vexDur}r`,
+          durationBeats,
+          symbol: "REST",
+          string: null,
+          fret: null,
+          finger: null,
+          pick: "-",
+          positions: []
+        });
+        return;
+      }
+
+      const sf = head.match(/^([1-6]):(\d{1,2})$/);
+      const str = sf ? parseInt(sf[1], 10) : 1;
+      const fret = sf ? Math.max(0, Math.min(22, parseInt(sf[2], 10))) : 0;
+      const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
+      newEvents.push({
+        beat: 1,
+        isRest: false,
+        isChord: false,
+        type: "play",
+        note: info.displayName,
+        concertPitch: info.concertPitch,
+        vexKey: info.vexKey,
+        accidental: info.accidental,
+        duration: spec.vexDur,
+        isDotted,
+        vexDuration: spec.vexDur,
+        durationBeats,
+        symbol,
+        string: str,
+        fret,
+        finger: fret === 0 ? 0 : Math.min(4, fret),
+        pick,
+        positions: [{ str, fret }],
+        tieToNext,
+        tieFromPrev: false,
+        tip: `String ${str}, Fret ${fret}`
+      });
+    });
+    return newEvents;
+  }
+
+  applyQuickShorthand(rawText) {
+    if (!this.exercise || !this.exercise.measures) return;
+    const rawStr = String(rawText || "").trim();
+    if (!rawStr) return;
+
+    const tsArr = this.exercise.timeSignature || [4, 4];
+    const tsStr = `${tsArr[0] || 4}/${tsArr[1] || 4}`;
+
+    if (rawStr.includes("|")) {
+      const barChunks = rawStr.split("|").map(s => s.trim()).filter(Boolean);
+      if (barChunks.length === 0) return;
+      const parsedBars = barChunks.map((chunk, idx) => {
+        const events = this._parseShorthandBarEvents(chunk);
+        const existing = this.exercise.measures[idx] || {};
+        return {
+          measure: idx + 1,
+          clef: existing.clef || "treble",
+          notationMode: existing.notationMode || "standard",
+          timeSignature: existing.timeSignature || tsStr,
+          chordName: existing.chordName || null,
+          events: events.length > 0 ? events : this._parseShorthandBarEvents("R/w")
+        };
+      });
+      this.exercise.measures = parsedBars;
+      this.selectedMeasureIdx = Math.max(0, Math.min(this.selectedMeasureIdx, parsedBars.length - 1));
+      this.selectedEventIdx = 0;
+      this.commitChanges();
+      return;
+    }
+
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    const newEvents = this._parseShorthandBarEvents(rawStr);
+    if (newEvents.length > 0) {
+      m.events = newEvents;
+      this.selectedEventIdx = 0;
+      this.commitChanges();
+    }
+  }
+
+  commitChanges() {
+    if (!this.exercise) return;
+    this.syncMeasuresToTabData(this.exercise);
+    const activeEv = this.getActiveEvent();
+    const tabBeatIdx = activeEv && activeEv.tabBeatIndex !== undefined ? activeEv.tabBeatIndex : 0;
+    if (typeof this.onCommitExercise === "function") {
+      this.onCommitExercise(this.exercise, this.selectedMeasureIdx, tabBeatIdx, this.selectedEventIdx);
+    }
+    this.renderPalette();
+  }
+
+  mutateActiveEvent(fn) {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    fn(ev);
+    this.commitChanges();
+  }
+
+  handleDirectFretDigit(digitChar) {
+    if (!this.isActive()) return false;
+    const ev = this.getActiveEvent();
+    if (!ev) return false;
+
+    clearTimeout(this._fretDigitTimer);
+    let nextBuffer = `${this._fretDigitBuffer}${digitChar}`;
+    let parsed = parseInt(nextBuffer, 10);
+    if (isNaN(parsed) || parsed > 15) {
+      nextBuffer = digitChar;
+      parsed = parseInt(nextBuffer, 10);
+    }
+    this._fretDigitBuffer = nextBuffer;
+    this._fretDigitTimer = setTimeout(() => {
+      this._fretDigitBuffer = "";
+    }, 650);
+
+    this.setStringAndFret(typeof ev.string === "number" ? ev.string : 1, parsed);
+    return true;
+  }
+
+  setDurationCode(code) {
+    this.mutateActiveEvent(ev => {
+      const { spec, durationBeats, symbol } = editorDurSpec(code, Boolean(ev.isDotted));
+      ev.duration = spec.vexDur;
+      ev.durationBeats = durationBeats;
+      ev.symbol = ev.isRest ? "REST" : symbol;
+      ev.vexDuration = ev.isRest ? `${spec.vexDur}r` : spec.vexDur;
+    });
+  }
+
+  toggleRest() {
+    this.mutateActiveEvent(ev => {
+      ev.isRest = !ev.isRest;
+      if (ev.isRest) {
+        ev.note = "REST";
+        ev.vexDuration = `${ev.duration || "q"}r`;
+        ev.symbol = "REST";
+        ev.positions = [];
+      } else {
+        const str = typeof ev.string === "number" ? ev.string : 1;
+        const fret = typeof ev.fret === "number" ? ev.fret : 0;
+        const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
+        ev.string = str;
+        ev.fret = fret;
+        ev.finger = fret === 0 ? 0 : Math.min(4, fret);
+        ev.concertPitch = info.concertPitch;
+        ev.vexKey = info.vexKey;
+        ev.accidental = info.accidental;
+        ev.note = info.displayName;
+        ev.vexDuration = ev.duration || "q";
+        ev.pick = ev.pick && ev.pick !== "-" ? ev.pick : "Down";
+        ev.positions = [{ str, fret }];
+        const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
+        ev.symbol = symbol;
+      }
+    });
+  }
+
+  toggleDotted() {
+    this.mutateActiveEvent(ev => {
+      ev.isDotted = !ev.isDotted;
+      const { durationBeats, symbol } = editorDurSpec(ev.duration || "q", ev.isDotted);
+      ev.durationBeats = durationBeats;
+      ev.symbol = ev.isRest ? "REST" : symbol;
+    });
+  }
+
+  toggleTieToNext() {
+    const measures = this.exercise && this.exercise.measures;
+    const m = measures && measures[this.selectedMeasureIdx];
+    const ev = this.getActiveEvent();
+    if (!m || !ev || ev.isRest) return;
+    ev.tieToNext = !ev.tieToNext;
+    // Sync next note tieFromPrev cleanly when same bar or next bar
+    let nextEv = m.events[this.selectedEventIdx + 1] || null;
+    if (!nextEv && measures[this.selectedMeasureIdx + 1]) {
+      nextEv = (measures[this.selectedMeasureIdx + 1].events || [])[0] || null;
+    }
+    if (nextEv && !nextEv.isRest) {
+      nextEv.tieFromPrev = ev.tieToNext;
+    }
+    this.commitChanges();
+  }
+
+  applyAccidental(accType) {
+    this.mutateActiveEvent(ev => {
+      if (ev.isRest) ev.isRest = false;
+      const m = String(ev.concertPitch || "E4").match(/^([A-Ga-g])(#|b|n)?(\d)$/);
+      const letter = m ? m[1].toUpperCase() : "E";
+      const oct = m ? parseInt(m[3], 10) : 4;
+      const baseMidi = (oct + 1) * 12 + (EDITOR_NOTE_SEMITONES[letter] || 0);
+      const offset = accType === "#" ? 1 : (accType === "b" ? -1 : 0);
+      const newMidi = Math.max(40, Math.min(84, baseMidi + offset));
+      const pos = findBestPositionForMidi(newMidi, ev.string);
+      const acc = accType === "#" || accType === "b" ? accType : null;
+      const info = editorMidiToInfo(newMidi, accType, { letter, oct, acc: accType === "n" ? "n" : acc });
+      ev.string = pos.string;
+      ev.fret = pos.fret;
+      ev.finger = pos.fret === 0 ? 0 : Math.min(4, pos.fret);
+      ev.concertPitch = `${letter}${acc || ""}${oct}`;
+      ev.vexKey = info.vexKey;
+      ev.accidental = accType === "n" ? "n" : acc;
+      ev.note = info.displayName;
+      ev.positions = [{ str: pos.string, fret: pos.fret }];
+    });
+  }
+
+  setStringAndFret(strVal, fretVal) {
+    this.mutateActiveEvent(ev => {
+      const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
+      const fret = Math.max(0, Math.min(22, parseInt(fretVal, 10) || 0));
+      const midi = EDITOR_OPEN_MIDI[str] + fret;
+      const info = editorMidiToInfo(midi);
+      ev.isRest = false;
+      ev.string = str;
+      ev.fret = fret;
+      ev.finger = fret === 0 ? 0 : Math.min(4, fret);
+      ev.concertPitch = info.concertPitch;
+      ev.vexKey = info.vexKey;
+      ev.accidental = info.accidental;
+      ev.note = info.displayName;
+      ev.vexDuration = ev.duration || "q";
+      ev.pick = ev.pick && ev.pick !== "-" ? ev.pick : "Down";
+      ev.positions = [{ str, fret }];
+      const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
+      ev.symbol = symbol;
+    });
+  }
+
+  stepPitch(deltaSemitones) {
+    this.mutateActiveEvent(ev => {
+      if (ev.isRest) ev.isRest = false;
+      const curMidi = (typeof ev.string === "number" && typeof ev.fret === "number")
+        ? (EDITOR_OPEN_MIDI[ev.string] + ev.fret)
+        : editorPitchToMidi(ev.concertPitch);
+      const nextMidi = Math.max(40, Math.min(84, curMidi + deltaSemitones));
+      const pos = findBestPositionForMidi(nextMidi, ev.string);
+      const info = editorMidiToInfo(nextMidi);
+      ev.string = pos.string;
+      ev.fret = pos.fret;
+      ev.finger = pos.fret === 0 ? 0 : Math.min(4, pos.fret);
+      ev.concertPitch = info.concertPitch;
+      ev.vexKey = info.vexKey;
+      ev.accidental = info.accidental;
+      ev.note = info.displayName;
+      ev.vexDuration = ev.duration || "q";
+      ev.positions = [{ str: pos.string, fret: pos.fret }];
+      const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
+      ev.symbol = symbol;
+    });
+  }
+
+  addNoteAfterSelected() {
+    if (!this.exercise || !this.exercise.measures) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    const cur = this.getActiveEvent();
+    const str = cur && typeof cur.string === "number" ? cur.string : 1;
+    const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
+    const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
+    const { spec, durationBeats, symbol } = editorDurSpec(cur ? cur.duration : "q", false);
+
+    const newEv = {
+      beat: 1,
+      isRest: false,
+      isChord: false,
+      type: "play",
+      note: info.displayName,
+      concertPitch: info.concertPitch,
+      vexKey: info.vexKey,
+      accidental: info.accidental,
+      duration: spec.vexDur,
+      isDotted: false,
+      vexDuration: spec.vexDur,
+      durationBeats,
+      symbol,
+      string: str,
+      fret,
+      finger: fret === 0 ? 0 : Math.min(4, fret),
+      pick: cur && cur.pick === "Down" ? "Up" : "Down",
+      positions: [{ str, fret }],
+      tieToNext: false,
+      tieFromPrev: false,
+      tip: `String ${str}, Fret ${fret}`
+    };
+
+    const insertIdx = Math.min(m.events.length, this.selectedEventIdx + 1);
+    m.events.splice(insertIdx, 0, newEv);
+    this.selectedEventIdx = insertIdx;
+    this.commitChanges();
+  }
+
+  deleteSelectedNote() {
+    if (!this.exercise || !this.exercise.measures) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m || !Array.isArray(m.events)) return;
+    if (m.events.length <= 1) {
+      // Turn single remaining slot into a Whole Rest so the measure remains valid
+      const ev = m.events[0];
+      if (ev) {
+        ev.isRest = true;
+        ev.duration = "w";
+        ev.durationBeats = 4;
+        ev.isDotted = false;
+        ev.vexDuration = "wr";
+        ev.symbol = "REST";
+      }
+      this.selectedEventIdx = 0;
+    } else {
+      m.events.splice(this.selectedEventIdx, 1);
+      this.selectedEventIdx = Math.max(0, Math.min(this.selectedEventIdx, m.events.length - 1));
+    }
+    this.commitChanges();
+  }
+
+  addMeasure() {
+    if (!this.exercise || !this.exercise.measures) return;
+    const ts = this.exercise.timeSignature || [4, 4];
+    const tsNum = Array.isArray(ts) ? ts[0] : 4;
+    const tsDen = Array.isArray(ts) ? ts[1] : 4;
+    const tsStr = `${tsNum}/${tsDen}`;
+    const beatsPerBar = tsNum * (4 / tsDen);
+    const cur = this.getActiveEvent();
+    const str = cur && typeof cur.string === "number" ? cur.string : 1;
+    const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
+    const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
+
+    const quarterCount = Math.max(1, Math.round(beatsPerBar));
+    const events = [];
+    for (let i = 0; i < quarterCount; i++) {
+      events.push({
+        beat: i + 1,
+        isRest: false,
+        isChord: false,
+        type: "play",
+        note: info.displayName,
+        concertPitch: info.concertPitch,
+        vexKey: info.vexKey,
+        accidental: info.accidental,
+        duration: "q",
+        isDotted: false,
+        vexDuration: "q",
+        durationBeats: 1,
+        symbol: "1/4",
+        string: str,
+        fret,
+        finger: fret === 0 ? 0 : Math.min(4, fret),
+        pick: i % 2 === 0 ? "Down" : "Up",
+        positions: [{ str, fret }],
+        tieToNext: false,
+        tieFromPrev: false,
+        tip: `String ${str}, Fret ${fret}`
+      });
+    }
+
+    this.exercise.measures.push({
+      measure: this.exercise.measures.length + 1,
+      clef: "treble",
+      notationMode: "standard",
+      timeSignature: tsStr,
+      chordName: null,
+      events
+    });
+    this.selectedMeasureIdx = this.exercise.measures.length - 1;
+    this.selectedEventIdx = 0;
+    this.commitChanges();
+  }
+
+  deleteMeasure() {
+    if (!this.exercise || !this.exercise.measures || this.exercise.measures.length <= 1) return;
+    this.exercise.measures.splice(this.selectedMeasureIdx, 1);
+    this.selectedMeasureIdx = Math.max(0, Math.min(this.selectedMeasureIdx, this.exercise.measures.length - 1));
+    this.selectedEventIdx = 0;
+    this.commitChanges();
+  }
+
+  renderPalette() {
+    if (!this.hostEl || !this.exercise) return;
+    if (!this.paletteEl) {
+      this.paletteEl = document.createElement("div");
+      this.paletteEl.className = "notation-editor-palette admin-only-control";
+      this.paletteEl.id = "notation-editor-palette";
+      this.hostEl.prepend(this.paletteEl);
+    }
+
+    const measures = this.exercise.measures || [];
+    const curMeasure = measures[this.selectedMeasureIdx] || measures[0];
+    const ev = this.getActiveEvent();
+    const ts = this.exercise.timeSignature || [4, 4];
+    const expectedBeats = (ts[0] || 4) * (4 / (ts[1] || 4));
+    const curBeatsSum = curMeasure
+      ? (curMeasure.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0)
+      : 0;
+    const isMathOk = Math.abs(curBeatsSum - expectedBeats) < 0.05;
+
+    const curDur = ev ? (ev.duration || "q") : "q";
+    const isRest = Boolean(ev && ev.isRest);
+    const isDotted = Boolean(ev && ev.isDotted);
+    const isTied = Boolean(ev && ev.tieToNext);
+    const curAcc = ev ? ev.accidental : null;
+    const curStr = ev && typeof ev.string === "number" ? ev.string : 1;
+    const curFret = ev && typeof ev.fret === "number" ? ev.fret : 0;
+    const curPick = ev && ev.pick === "Up" ? "Up" : "Down";
+    const curFinger = ev && ev.finger !== null && ev.finger !== undefined ? ev.finger : 0;
+    const pitchSummary = ev
+      ? (ev.isRest ? "Rest" : `${ev.concertPitch || ev.note} · S${curStr} F${curFret}`)
+      : "No Selection";
+
+    this.paletteEl.innerHTML = `
+      <div class="ne-header-row">
+        <div class="ne-bar-tabs">
+          <span class="ne-kicker">NOTE EDITOR</span>
+          ${measures.map((m, idx) => `
+            <button type="button" class="ne-bar-pill ${idx === this.selectedMeasureIdx ? "active" : ""}" data-ne-bar="${idx}">Bar ${idx + 1}</button>
+          `).join("")}
+        </div>
+        <div class="ne-header-meta">
+          <span class="ne-beat-counter ${isMathOk ? "is-ok" : "is-warn"}" title="Total beats in Bar ${this.selectedMeasureIdx + 1} vs Time Signature">
+            ${Number(curBeatsSum.toFixed(2))} / ${Number(expectedBeats.toFixed(2))} beats
+          </span>
+          <span class="ne-sel-readout">${pitchSummary}</span>
+          <button type="button" class="micro-pill ne-shorthand-toggle ${this.shorthandOpen ? "active" : ""}" id="ne-btn-shorthand">Quick Shorthand</button>
+          <button type="button" class="micro-pill" id="ne-btn-close">Done</button>
+        </div>
+      </div>
+
+      <div class="ne-tools-row">
+        <div class="ne-group" role="group" aria-label="Note Duration">
+          ${EDITOR_DURATIONS.map(d => `
+            <button type="button" class="ne-sym-btn ${curDur === d.vexDur ? "active" : ""}" data-ne-dur="${d.code}" title="${d.label} (${d.beats} beats)">
+              <span class="ne-glyph">${d.glyph}</span>
+              <span class="ne-sub">${d.code}</span>
+            </button>
+          `).join("")}
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Rests, Dots, Ties and Accidentals">
+          <button type="button" class="ne-sym-btn ${isRest ? "active" : ""}" id="ne-btn-rest" title="Toggle Rest">&#119101; Rest</button>
+          <button type="button" class="ne-sym-btn ${isDotted ? "active" : ""}" id="ne-btn-dot" title="Toggle Dotted Note">&bull; Dot</button>
+          <button type="button" class="ne-sym-btn ${isTied ? "active" : ""}" id="ne-btn-tie" title="Tie to Next Note">&#8255; Tie</button>
+          <button type="button" class="ne-sym-btn ${curAcc === "#" ? "active" : ""}" data-ne-acc="#" title="Sharp">&#9839;</button>
+          <button type="button" class="ne-sym-btn ${curAcc === "b" ? "active" : ""}" data-ne-acc="b" title="Flat">&#9837;</button>
+          <button type="button" class="ne-sym-btn ${curAcc === "n" ? "active" : ""}" data-ne-acc="n" title="Natural">&#9838;</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Bar Actions">
+          <button type="button" class="ne-action-btn" id="ne-btn-add-note">+ Add Note</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note">Delete Note</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-add-bar">+ Add Bar</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""}>- Delete Bar</button>
+        </div>
+      </div>
+
+      <div class="ne-tools-row">
+        <div class="ne-group" role="group" aria-label="String Selector">
+          <span class="ne-lbl">String</span>
+          ${[1, 2, 3, 4, 5, 6].map(s => `
+            <button type="button" class="ne-num-btn ${!isRest && curStr === s ? "active" : ""}" data-ne-str="${s}">${s}</button>
+          `).join("")}
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Fret Stepper">
+          <span class="ne-lbl">Fret</span>
+          <button type="button" class="ne-num-btn" id="ne-fret-dec" title="Decrease Fret">&minus;</button>
+          <span class="ne-fret-val" id="ne-fret-val" title="Use 0-15 keyboard number keys while editor is open">${isRest ? "-" : curFret}</span>
+          <button type="button" class="ne-num-btn" id="ne-fret-inc" title="Increase Fret">+</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Staff Pitch Step">
+          <span class="ne-lbl">Pitch</span>
+          <button type="button" class="ne-num-btn" id="ne-pitch-down" title="Step Pitch Down (&darr;)">&darr;</button>
+          <button type="button" class="ne-num-btn" id="ne-pitch-up" title="Step Pitch Up (&uarr;)">&uarr;</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Pick Stroke">
+          <span class="ne-lbl">Pick</span>
+          <button type="button" class="ne-sym-btn ${curPick === "Down" ? "active" : ""}" data-ne-pick="Down">&darr; Down</button>
+          <button type="button" class="ne-sym-btn ${curPick === "Up" ? "active" : ""}" data-ne-pick="Up">&uarr; Up</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Left Hand Finger">
+          <span class="ne-lbl">Finger</span>
+          ${[0, 1, 2, 3, 4].map(f => `
+            <button type="button" class="ne-num-btn ${!isRest && curFinger === f ? "active" : ""}" data-ne-finger="${f}">${f}</button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="ne-shorthand-row" ${this.shorthandOpen ? "" : "hidden"}>
+        <span class="ne-lbl">Quick Shorthand (Str:Fret/Dur, use | between bars)</span>
+        <input type="text" class="ne-shorthand-input" id="ne-shorthand-input" value="${this.formatExerciseShorthand().replace(/"/g, "&quot;")}" placeholder="e.g. 3:0/h 3:2/h | 3:0/q 3:0/q 3:0/h | 3:2/q 3:2/q 3:2/h">
+        <button type="button" class="micro-pill pdf-ai-primary-sm" id="ne-btn-apply-shorthand">Apply Shorthand</button>
+      </div>
+    `;
+
+    this._bindPaletteEvents();
+  }
+
+  _bindPaletteEvents() {
+    if (!this.paletteEl) return;
+
+    this.paletteEl.querySelectorAll("[data-ne-bar]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const b = parseInt(btn.dataset.neBar, 10);
+        this.selectNote(b, 0, 0);
+        if (typeof this.onSelectNoteForFeedback === "function") {
+          const ev = this.getActiveEvent();
+          this.onSelectNoteForFeedback(this.selectedMeasureIdx, ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0, Boolean(ev && ev.isRest));
+        }
+      });
+    });
+
+    this.paletteEl.querySelectorAll("[data-ne-dur]").forEach(btn => {
+      btn.addEventListener("click", () => this.setDurationCode(btn.dataset.neDur));
+    });
+
+    const btnRest = this.paletteEl.querySelector("#ne-btn-rest");
+    if (btnRest) btnRest.addEventListener("click", () => this.toggleRest());
+
+    const btnDot = this.paletteEl.querySelector("#ne-btn-dot");
+    if (btnDot) btnDot.addEventListener("click", () => this.toggleDotted());
+
+    const btnTie = this.paletteEl.querySelector("#ne-btn-tie");
+    if (btnTie) btnTie.addEventListener("click", () => this.toggleTieToNext());
+
+    this.paletteEl.querySelectorAll("[data-ne-acc]").forEach(btn => {
+      btn.addEventListener("click", () => this.applyAccidental(btn.dataset.neAcc));
+    });
+
+    this.paletteEl.querySelectorAll("[data-ne-str]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const ev = this.getActiveEvent();
+        const curF = ev && typeof ev.fret === "number" ? ev.fret : 0;
+        this.setStringAndFret(parseInt(btn.dataset.neStr, 10), curF);
+      });
+    });
+
+    const btnFretDec = this.paletteEl.querySelector("#ne-fret-dec");
+    if (btnFretDec) {
+      btnFretDec.addEventListener("click", () => {
+        const ev = this.getActiveEvent();
+        const s = ev && typeof ev.string === "number" ? ev.string : 1;
+        const f = ev && typeof ev.fret === "number" ? ev.fret : 0;
+        this.setStringAndFret(s, Math.max(0, f - 1));
+      });
+    }
+
+    const btnFretInc = this.paletteEl.querySelector("#ne-fret-inc");
+    if (btnFretInc) {
+      btnFretInc.addEventListener("click", () => {
+        const ev = this.getActiveEvent();
+        const s = ev && typeof ev.string === "number" ? ev.string : 1;
+        const f = ev && typeof ev.fret === "number" ? ev.fret : 0;
+        this.setStringAndFret(s, Math.min(22, f + 1));
+      });
+    }
+
+    const btnPitchUp = this.paletteEl.querySelector("#ne-pitch-up");
+    if (btnPitchUp) btnPitchUp.addEventListener("click", () => this.stepPitch(1));
+
+    const btnPitchDown = this.paletteEl.querySelector("#ne-pitch-down");
+    if (btnPitchDown) btnPitchDown.addEventListener("click", () => this.stepPitch(-1));
+
+    this.paletteEl.querySelectorAll("[data-ne-pick]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.mutateActiveEvent(ev => {
+          ev.pick = btn.dataset.nePick;
+        });
+      });
+    });
+
+    this.paletteEl.querySelectorAll("[data-ne-finger]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.mutateActiveEvent(ev => {
+          ev.finger = parseInt(btn.dataset.neFinger, 10);
+        });
+      });
+    });
+
+    const btnAddNote = this.paletteEl.querySelector("#ne-btn-add-note");
+    if (btnAddNote) btnAddNote.addEventListener("click", () => this.addNoteAfterSelected());
+
+    const btnDelNote = this.paletteEl.querySelector("#ne-btn-del-note");
+    if (btnDelNote) btnDelNote.addEventListener("click", () => this.deleteSelectedNote());
+
+    const btnAddBar = this.paletteEl.querySelector("#ne-btn-add-bar");
+    if (btnAddBar) btnAddBar.addEventListener("click", () => this.addMeasure());
+
+    const btnDelBar = this.paletteEl.querySelector("#ne-btn-del-bar");
+    if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteMeasure());
+
+    const btnShortToggle = this.paletteEl.querySelector("#ne-btn-shorthand");
+    if (btnShortToggle) {
+      btnShortToggle.addEventListener("click", () => {
+        this.shorthandOpen = !this.shorthandOpen;
+        this.renderPalette();
+      });
+    }
+
+    const btnApplyShort = this.paletteEl.querySelector("#ne-btn-apply-shorthand");
+    const shortInput = this.paletteEl.querySelector("#ne-shorthand-input");
+    if (btnApplyShort && shortInput) {
+      btnApplyShort.addEventListener("click", () => this.applyQuickShorthand(shortInput.value));
+      shortInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.applyQuickShorthand(shortInput.value);
+        }
+      });
+    }
+
+    const btnClose = this.paletteEl.querySelector("#ne-btn-close");
+    if (btnClose) {
+      btnClose.addEventListener("click", () => {
+        this.close();
+        if (typeof this.onSelectNoteForFeedback === "function") {
+          this.onSelectNoteForFeedback(null, null, false);
+        }
+      });
+    }
+  }
+}
+
 
 
 
@@ -16270,6 +17727,12 @@ class GuitarMasterApp {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
     this.pdfAiExtractor = new PdfAiExtractor();
+    this.adminMode = false;
+    this.editingExerciseId = null;
+    this.notationEditor = new NotationEditor({
+      onCommitExercise: (updatedEx, mIdx, tabBeatIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx),
+      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest)
+    });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
     // Apply any persisted AI-extracted pages synchronously before flattening catalog
@@ -16381,6 +17844,7 @@ class GuitarMasterApp {
           "lmgs_app_version",
           "guitar_completed_exercises",
           "guitar_checked_goals",
+          "lmgs_admin_mode",
           "lmgs_gemini_api_key",
           "lmgs_gemini_model_pref",
           "lmgs_ai_extracted_pages_v1"
@@ -16522,6 +17986,7 @@ class GuitarMasterApp {
     this.workspaceBody = document.getElementById("workspace-body");
     this.appModeTabs = document.getElementById("app-mode-tabs");
     this.primerViewEl = document.getElementById("primer-view");
+    this.adminModeBadge = document.getElementById("admin-mode-badge");
     this.btnMobileMenu = document.getElementById("btn-mobile-menu");
     this.drawerBackdrop = document.getElementById("drawer-backdrop");
     this.btnToggleDrawer = document.getElementById("btn-toggle-drawer");
@@ -16634,6 +18099,7 @@ class GuitarMasterApp {
     this.btnClearAiPages = document.getElementById("btn-clear-ai-pages");
     this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
     this.syncGeminiKeyUI();
+    this.initAdminMode();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -17487,6 +18953,188 @@ class GuitarMasterApp {
     }
   }
 
+  initAdminMode() {
+    let enabled = false;
+    try {
+      const searchParams = new URLSearchParams(window.location.search || "");
+      const hashStr = window.location.hash || "";
+      const hashQuery = hashStr.includes("?") ? hashStr.split("?")[1] : hashStr.replace(/^#/, "");
+      const hashParams = new URLSearchParams(hashQuery);
+      const urlAdmin = searchParams.get("admin") || hashParams.get("admin");
+
+      if (urlAdmin === "1" || urlAdmin === "true") {
+        enabled = true;
+        localStorage.setItem("lmgs_admin_mode", "true");
+      } else if (urlAdmin === "0" || urlAdmin === "false") {
+        enabled = false;
+        localStorage.setItem("lmgs_admin_mode", "false");
+      } else {
+        enabled = localStorage.getItem("lmgs_admin_mode") === "true";
+      }
+    } catch (e) {}
+    this.setAdminMode(enabled, false);
+  }
+
+  setAdminMode(enabled, persist = true) {
+    this.adminMode = !!enabled;
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.adminMode = this.adminMode ? "true" : "false";
+    }
+    if (persist) {
+      try {
+        localStorage.setItem("lmgs_admin_mode", this.adminMode ? "true" : "false");
+      } catch (e) {}
+    }
+    if (!this.adminMode) {
+      this.editingExerciseId = null;
+      if (this.notationEditor) this.notationEditor.close(false);
+      if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+      if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
+      if (this.aiExtractStatusBar) this.aiExtractStatusBar.hidden = true;
+      document.querySelectorAll(".topic-ex-edit-btn").forEach(btn => btn.classList.remove("is-active"));
+    }
+  }
+
+  _findCourseSlotForExercise(exId) {
+    for (const bookCat of ["lessonBook", "bonusWorkshop"]) {
+      const sessions = GUITAR_COURSES[bookCat] || [];
+      for (let sIdx = 0; sIdx < sessions.length; sIdx++) {
+        const session = sessions[sIdx];
+        const topics = session.topics || [];
+        for (let tIdx = 0; tIdx < topics.length; tIdx++) {
+          const topic = topics[tIdx];
+          const computedTopicId = topic.topicId || `${bookCat}_s${session.sessionNumber}_t${tIdx}`;
+          const eIdx = (topic.exercises || []).findIndex(e => e.id === exId);
+          if (eIdx >= 0) {
+            return { bookCat, session, topic, computedTopicId, exIdx: eIdx };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  async persistEditedTopicOrExercise(updatedEx) {
+    if (!updatedEx || !this.pdfAiExtractor) return;
+    const slot = this._findCourseSlotForExercise(updatedEx.id);
+    if (!slot) return;
+    const { bookCat, topic, computedTopicId, exIdx } = slot;
+
+    // Update source exercise inside GUITAR_COURSES in-place
+    topic.exercises[exIdx] = JSON.parse(JSON.stringify(updatedEx));
+    topic.aiExtracted = true;
+    const bookPage = updatedEx.pdfPage || this.extractPageNumberFromExercise(updatedEx) || topic.pdfPage || 1;
+    const rawPdfPage = updatedEx.pdfRawPage || this.bookPageToPdfPage(bookPage, bookCat);
+    const samePageExercises = (topic.exercises || []).filter(
+      e => (e.pdfPage || this.extractPageNumberFromExercise(e)) === bookPage
+    );
+    const entryExercises = samePageExercises.length > 0 ? samePageExercises : [topic.exercises[exIdx]];
+
+    const entry = {
+      pageKey: `${bookCat}_p${rawPdfPage}`,
+      bookCategory: bookCat,
+      rawPdfPage,
+      bookPage,
+      targetTopicId: computedTopicId,
+      targetExerciseId: entryExercises[0].id,
+      modelUsed: updatedEx.modelUsed || "manual-editor",
+      pageTitle: topic.topicTitle || updatedEx.title,
+      extractedAt: new Date().toISOString(),
+      mathWarnings: [],
+      exercises: entryExercises.map(e => JSON.parse(JSON.stringify(e)))
+    };
+
+    await this.pdfAiExtractor.savePageEntry(entry);
+    this.allExercises = this.buildFlatExerciseList();
+  }
+
+  handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx) {
+    if (!updatedEx) return;
+    // Refresh currentExercise & renderer immediately for snappy visual editing
+    if (this.currentExercise && this.currentExercise.id === updatedEx.id) {
+      this.currentExercise = JSON.parse(JSON.stringify(updatedEx));
+    }
+    const entry = this.activeTopicRenderers.get(updatedEx.id);
+    if (entry && entry.renderer) {
+      entry.renderer.loadExercise(updatedEx, {
+        noteNameMode: this.noteNameMode,
+        tabVisibilityMode: this.tabVisibilityMode,
+        showRhythmGuide: this.showRhythmGuide,
+        showCoachBanner: this.showCoachBanner
+      });
+      if (mIdx !== null && tabBeatIdx !== null) {
+        const beatObj = updatedEx.tabData && updatedEx.tabData[mIdx] && updatedEx.tabData[mIdx].beats[tabBeatIdx];
+        entry.renderer.highlightBeat(mIdx, tabBeatIdx, Boolean(beatObj && beatObj.type === "rest"));
+        if (beatObj) {
+          this.updateCard(beatObj, beatObj.type === "rest", mIdx + 1, updatedEx.tabData[mIdx].chordName);
+          this.fretboard.update(beatObj, beatObj.type === "rest", updatedEx.tabData[mIdx].chordName);
+        }
+      }
+    }
+    this.persistEditedTopicOrExercise(updatedEx);
+  }
+
+  handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest) {
+    if (!this.editingExerciseId) return;
+    const entry = this.activeTopicRenderers.get(this.editingExerciseId);
+    if (!entry || !entry.renderer) return;
+    if (mIdx === null) {
+      this.editingExerciseId = null;
+      entry.renderer.reset();
+      document.querySelectorAll(".topic-ex-edit-btn").forEach(b => b.classList.remove("is-active"));
+      return;
+    }
+    entry.renderer.highlightBeat(mIdx, tabBeatIdx, isRest);
+    if (this.currentExercise && this.currentExercise.tabData && this.currentExercise.tabData[mIdx]) {
+      const beatObj = this.currentExercise.tabData[mIdx].beats[tabBeatIdx];
+      if (beatObj) {
+        this.updateCard(beatObj, isRest, mIdx + 1, this.currentExercise.tabData[mIdx].chordName);
+        this.fretboard.update(beatObj, isRest, this.currentExercise.tabData[mIdx].chordName);
+      }
+    }
+  }
+
+  async addSubExerciseToCurrentTopic() {
+    if (!this.currentExercise) return;
+    const slot = this._findCourseSlotForExercise(this.currentExercise.id);
+    if (!slot) return;
+    const { bookCat, topic } = slot;
+    const nextNum = (topic.exercises || []).length + 1;
+    const bookPage = this.extractPageNumberFromExercise(this.currentExercise) || topic.pdfPage || 1;
+    const rawPdfPage = this.bookPageToPdfPage(bookPage, bookCat);
+    const prefix = bookCat === "bonusWorkshop" ? "bw" : "lb";
+    const newId = `${prefix}-sub-p${bookPage}-ex${nextNum}-${Date.now().toString(36).slice(-4)}`;
+
+    const newEx = {
+      id: newId,
+      title: `Exercise ${nextNum} (p. ${bookPage})`,
+      description: `Added sub-exercise on p. ${bookPage}. Edit measures visually below.`,
+      timeSignature: [4, 4],
+      defaultBpm: 65,
+      pdfPage: bookPage,
+      pdfRawPage: rawPdfPage,
+      verificationStatus: "pdf-verified",
+      aiExtracted: true,
+      tabData: [
+        {
+          measure: 1,
+          beats: [
+            { beat: 1, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Down", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 2, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Up", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 3, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Down", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 4, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Up", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" }
+          ]
+        }
+      ]
+    };
+    this.notationEditor.ensureCanonicalMeasures(newEx);
+    topic.exercises.push(newEx);
+    topic.aiExtracted = true;
+    await this.persistEditedTopicOrExercise(newEx);
+    this.editingExerciseId = newEx.id;
+    this.loadExercise(newEx.id, false, { forceTopicRebuild: true, noPdfReload: true });
+  }
+
   setAiExtractStatus(msg, variant = "info", thumbDataUrl = undefined) {
     if (!this.aiExtractStatusBar || !this.aiExtractStatusText) return;
     this.aiExtractStatusBar.hidden = false;
@@ -17525,6 +19173,16 @@ class GuitarMasterApp {
     return { min: sessionFallback, max: sessionFallback };
   }
 
+  _sanitizeEntryForTopic(entry, existingList = [], topicFallbackDesc = "") {
+    const existingInstruction = (existingList.find(
+      e => e && e.description && !/^Extracted from Book p\./i.test(String(e.description).trim())
+    ) || {}).description || topicFallbackDesc || "";
+    const sanitizedList = typeof PdfAiExtractor !== "undefined" && PdfAiExtractor.sanitizeEntryExercises
+      ? PdfAiExtractor.sanitizeEntryExercises(entry, existingInstruction)
+      : entry.exercises.map(ex => ({ ...ex }));
+    return sanitizedList.map(ex => ({ ...ex }));
+  }
+
   applyExtractedEntryToCourses(entry) {
     if (!entry || !Array.isArray(entry.exercises) || entry.exercises.length === 0) return null;
     const bookCat = entry.bookCategory === "bonusWorkshop" ? "bonusWorkshop" : "lessonBook";
@@ -17549,15 +19207,16 @@ class GuitarMasterApp {
 
           if (topicMatches || exIdx >= 0) {
             const exList = topic.exercises || [];
+            const sanitizedExercises = this._sanitizeEntryForTopic(entry, exList, topic.description || "");
             if (exList.length <= 1 || !entry.targetExerciseId || exIdx < 0) {
-              topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+              topic.exercises = sanitizedExercises;
             } else {
               const allSamePage = exList.every(ex => this.extractPageNumberFromExercise(ex) === targetBookPage);
               if (allSamePage) {
-                topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+                topic.exercises = sanitizedExercises;
               } else {
                 const updated = [...exList];
-                updated.splice(exIdx, 1, ...entry.exercises.map(ex => ({ ...ex })));
+                updated.splice(exIdx, 1, ...sanitizedExercises);
                 topic.exercises = updated;
               }
             }
@@ -17566,7 +19225,7 @@ class GuitarMasterApp {
             return {
               bookCategory: bookCat,
               sessionNumber: session.sessionNumber,
-              firstExerciseId: entry.exercises[0].id
+              firstExerciseId: topic.exercises[0].id
             };
           }
         }
@@ -17592,17 +19251,21 @@ class GuitarMasterApp {
     }
 
     if (matchedTopic) {
-      matchedTopic.exercises = entry.exercises.map(ex => ({ ...ex }));
+      matchedTopic.exercises = this._sanitizeEntryForTopic(
+        entry,
+        matchedTopic.exercises || [],
+        matchedTopic.description || ""
+      );
       matchedTopic.pdfPage = targetBookPage;
       matchedTopic.aiExtracted = true;
       return {
         bookCategory: bookCat,
         sessionNumber: matchedSession.sessionNumber,
-        firstExerciseId: entry.exercises[0].id
+        firstExerciseId: matchedTopic.exercises[0].id
       };
     }
 
-    // 2. Fallback: attach new topic under nearest preceding session by printed page
+    // 3. Fallback: attach ONE clean topic under nearest preceding session by printed page
     let fallbackSession = sessions[0];
     let bestStartPage = -1;
     for (const session of sessions) {
@@ -17614,19 +19277,23 @@ class GuitarMasterApp {
       }
     }
 
+    const rawPageHeading = String(entry.pageTitle || "").trim();
+    const safeTopicHeading = rawPageHeading && !/^(?:ex(?:ercise)?\s*)?\d+[.):\s]*$/i.test(rawPageHeading)
+      ? rawPageHeading
+      : `Page ${targetBookPage} Exercises`;
     const newTopic = {
       topicId: `${bookCat}_ai_p${entry.rawPdfPage}`,
-      topicTitle: `${entry.pageTitle || "Extracted Lesson"} (p. ${targetBookPage})`,
+      topicTitle: /\(p\.\s*\d+/i.test(safeTopicHeading) ? safeTopicHeading : `${safeTopicHeading} (p. ${targetBookPage})`,
       pdfPage: targetBookPage,
       aiExtracted: true,
-      exercises: entry.exercises.map(ex => ({ ...ex }))
+      exercises: this._sanitizeEntryForTopic(entry, [], "")
     };
     fallbackSession.topics = fallbackSession.topics || [];
     fallbackSession.topics.push(newTopic);
     return {
       bookCategory: bookCat,
       sessionNumber: fallbackSession.sessionNumber,
-      firstExerciseId: entry.exercises[0].id
+      firstExerciseId: newTopic.exercises[0].id
     };
   }
 
@@ -17702,16 +19369,26 @@ class GuitarMasterApp {
     const targetTopicId = shouldBindActive ? activeEx.topicId : null;
     const targetExerciseId = shouldBindActive ? activeEx.id : null;
 
-    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 2.5x via pdf.js...`, "busy", null);
+    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 4.0x Ultra-HD via pdf.js...`, "busy", null);
     const { pdfDoc } = await this.getPdfDocumentForExtraction();
     const clampedPage = Math.max(1, Math.min(pageNum, pdfDoc.numPages || pageNum));
-    const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 2.5);
+    const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 4.0);
 
+    const fallbackInstruction = (activeEx && activeEx.bookCategory === bookCat && activeEx.description && !/^Extracted from Book p\./i.test(activeEx.description))
+      ? activeEx.description
+      : "";
     const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+    const sessionCtx = (activeEx && activeEx.bookCategory === bookCat)
+      ? `${activeEx.sessionTitle || ""}${activeEx.topicTitle ? ` · ${activeEx.topicTitle}` : ""}${activeEx.title ? ` (${activeEx.title})` : ""}`
+      : "";
+    const fullContextHint = sessionCtx
+      ? `${bookLabel} — ${sessionCtx} · Printed page ${bookPage} (PDF page ${clampedPage})`
+      : `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`;
+
     const { omrJson, modelUsed } = await this.pdfAiExtractor.callGeminiVision(
       snap.base64,
       apiKey,
-      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`,
+      fullContextHint,
       (activeModel, fallbackNote) => {
         const msg = fallbackNote
           ? fallbackNote
@@ -17727,7 +19404,8 @@ class GuitarMasterApp {
       bookPage,
       targetTopicId,
       targetExerciseId,
-      modelUsed
+      modelUsed,
+      fallbackInstruction
     });
 
     if (!entry.exercises || entry.exercises.length === 0) {
@@ -18069,7 +19747,9 @@ class GuitarMasterApp {
           topic.exercises.some(e => (e.topicId || topic.topicId) === this.currentTopicId || e.id === activeId)
         );
         const firstExId = topic.exercises[0] ? topic.exercises[0].id : "";
-        const exRows = topic.exercises.map(ex => {
+        // Group AI-extracted sub-exercises cleanly under one single sidebar topic row
+        const hideExtractedSubRows = Boolean(topic.aiExtracted) && !query;
+        const exRows = hideExtractedSubRows ? "" : topic.exercises.map(ex => {
           const isRestDrill = ex.id.includes("rest") || ex.id.includes("tdr") || ex.title.toLowerCase().includes("rest");
           const isDone = this.completedExercises.has(ex.id);
           const isActive = ex.id === activeId;
@@ -18202,10 +19882,10 @@ class GuitarMasterApp {
 
     this.topicExercisesStack.innerHTML = list.map((ex, idx) => {
       const isSelected = ex.id === found.id;
+      const isEditing = this.adminMode && this.editingExerciseId === ex.id;
       const ts = ex.timeSignature || [4, 4];
       const tsLabel = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
       const exPage = ex.pdfPage || this.extractPageNumberFromExercise(ex);
-      const isSong = /song:/i.test(ex.title);
       return `
         <section class="topic-exercise-block ${isSelected ? "is-selected" : ""}" id="topic-ex-${ex.id}" data-ex-id="${ex.id}">
           <div class="topic-ex-head" data-select-header="${ex.id}" title="Click to select for Bottom Dock playback">
@@ -18220,27 +19900,40 @@ class GuitarMasterApp {
               ${ex.bookCategory !== "freeMetronome" && exPage ? `<span class="topic-ex-meta-pill">p. ${exPage}</span>` : ""}
               <span class="topic-ex-meta-pill">${tsLabel}</span>
               <span class="topic-ex-meta-pill">&#9833; ${ex.defaultBpm || 60}</span>
+              <button class="topic-ex-edit-btn admin-only-control ${isEditing ? "is-active" : ""}" type="button" data-edit-ex="${ex.id}" title="Open visual notation editor">Edit Exercise</button>
               <button class="topic-ex-select-btn" type="button" data-select-ex="${ex.id}">${isSelected ? "Active" : "Select"}</button>
               <button class="topic-ex-play-btn" type="button" data-play-ex="${ex.id}" title="Select and play this exercise">&#9654;</button>
             </div>
           </div>
+          <div class="topic-editor-slot" data-editor-slot="${ex.id}"></div>
           <div class="topic-ex-score-host" data-score-ex="${ex.id}"></div>
         </section>
       `;
-    }).join("");
+    }).join("") + `
+      <div class="topic-add-subex-row admin-only-control">
+        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">+ Add Sub-Exercise to Page</button>
+      </div>
+    `;
 
     list.forEach((ex) => {
       const blockEl = this.topicExercisesStack.querySelector(`#topic-ex-${ex.id}`);
       const scoreHost = blockEl ? blockEl.querySelector(".topic-ex-score-host") : null;
+      const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${ex.id}"]`) : null;
+      const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${ex.id}"]`) : null;
       const selectBtn = blockEl ? blockEl.querySelector(`[data-select-ex="${ex.id}"]`) : null;
       const playBtn = blockEl ? blockEl.querySelector(`[data-play-ex="${ex.id}"]`) : null;
       const headEl = blockEl ? blockEl.querySelector(`[data-select-header="${ex.id}"]`) : null;
 
       let renderer = null;
       if (scoreHost && typeof ScoreRenderer !== "undefined") {
-        renderer = new ScoreRenderer(scoreHost, (mIdx, bIdx) => {
+        renderer = new ScoreRenderer(scoreHost, (mIdx, bIdx, evIdx) => {
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
+          }
+          if (this.adminMode && this.notationEditor && this.editingExerciseId === ex.id) {
+            this.notationEditor.selectNote(mIdx, bIdx, evIdx);
+            this.handleEditorNoteFeedback(mIdx, bIdx, false);
+            return;
           }
           this.seekToMeasureBeat(mIdx, bIdx);
         });
@@ -18252,9 +19945,39 @@ class GuitarMasterApp {
         });
       }
 
+      if (editBtn) {
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!this.adminMode) return;
+          if (!this.currentExercise || this.currentExercise.id !== ex.id) {
+            this.loadExercise(ex.id, false, { noScroll: true });
+          }
+          const isAlreadyOpen = this.editingExerciseId === ex.id && this.notationEditor.isActive();
+          document.querySelectorAll(".topic-ex-edit-btn").forEach(b => b.classList.remove("is-active"));
+          if (isAlreadyOpen) {
+            this.editingExerciseId = null;
+            this.notationEditor.close();
+            if (renderer) renderer.reset();
+          } else {
+            this.editingExerciseId = ex.id;
+            editBtn.classList.add("is-active");
+            const liveEx = this.findExerciseById(ex.id) || ex;
+            this.currentExercise = JSON.parse(JSON.stringify(liveEx));
+            this.notationEditor.open(this.currentExercise, editorSlot, 0, 0);
+            if (renderer) renderer.highlightBeat(0, 0, false);
+          }
+        });
+      }
+
+      if (this.adminMode && this.editingExerciseId === ex.id && editorSlot) {
+        const liveEx = (this.currentExercise && this.currentExercise.id === ex.id) ? this.currentExercise : ex;
+        this.notationEditor.open(liveEx, editorSlot, 0, 0);
+        if (renderer) renderer.highlightBeat(0, 0, false);
+      }
+
       if (headEl) {
         headEl.addEventListener("click", (e) => {
-          if (e.target.closest("[data-play-ex]")) return;
+          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]")) return;
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -18271,8 +19994,15 @@ class GuitarMasterApp {
         });
       }
 
-      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn });
+      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn });
     });
+
+    const addSubBtn = this.topicExercisesStack.querySelector("#btn-add-sub-exercise");
+    if (addSubBtn) {
+      addSubBtn.addEventListener("click", () => {
+        if (this.adminMode) this.addSubExerciseToCurrentTopic();
+      });
+    }
   }
 
   updateTopicSelectionUI(activeId) {
@@ -20141,10 +21871,26 @@ class GuitarMasterApp {
       });
     }
 
-    // Keyboard shortcuts (active only inside Curriculum Studio)
+    if (this.adminModeBadge) {
+      this.adminModeBadge.addEventListener("click", () => {
+        this.setAdminMode(false);
+      });
+    }
+
+    // Keyboard shortcuts (Ctrl+Shift+A / Cmd+Shift+A works globally; Studio shortcuts below)
     window.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && String(e.key || "").toLowerCase() === "a") {
+        e.preventDefault();
+        this.setAdminMode(!this.adminMode);
+        return;
+      }
       if (this.appMode !== "studio") return;
-      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
+      if (this.adminMode && this.notationEditor && this.notationEditor.isActive() && /^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        this.notationEditor.handleDirectFretDigit(e.key);
+        return;
+      }
       if (e.code === "Space") {
         e.preventDefault();
         this.togglePlay();

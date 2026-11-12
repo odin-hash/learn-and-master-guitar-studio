@@ -1166,7 +1166,7 @@ export class ScoreRenderer {
             hitRect.style.cursor = "pointer";
             hitRect.addEventListener("click", (e) => {
               e.stopPropagation();
-              if (this.onBeatClick) this.onBeatClick(mIdx, startBeatIdx);
+              if (this.onBeatClick) this.onBeatClick(mIdx, startBeatIdx, evIdx);
             });
             overlayLayer.appendChild(hitRect);
 

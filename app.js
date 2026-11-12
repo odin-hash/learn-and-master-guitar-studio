@@ -6,6 +6,7 @@ import { FretboardVisualizer } from "./fretboard.js";
 import { FoundationsPrimer } from "./src/components/FoundationsPrimer.js";
 import { ScoreRenderer } from "./src/components/ScoreRenderer.js";
 import { PdfAiExtractor } from "./src/components/PdfAiExtractor.js";
+import { NotationEditor } from "./src/components/NotationEditor.js";
 
 export class GuitarMasterApp {
   constructor() {
@@ -13,6 +14,12 @@ export class GuitarMasterApp {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
     this.pdfAiExtractor = new PdfAiExtractor();
+    this.adminMode = false;
+    this.editingExerciseId = null;
+    this.notationEditor = new NotationEditor({
+      onCommitExercise: (updatedEx, mIdx, tabBeatIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx),
+      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest)
+    });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
     // Apply any persisted AI-extracted pages synchronously before flattening catalog
@@ -124,6 +131,7 @@ export class GuitarMasterApp {
           "lmgs_app_version",
           "guitar_completed_exercises",
           "guitar_checked_goals",
+          "lmgs_admin_mode",
           "lmgs_gemini_api_key",
           "lmgs_gemini_model_pref",
           "lmgs_ai_extracted_pages_v1"
@@ -265,6 +273,7 @@ export class GuitarMasterApp {
     this.workspaceBody = document.getElementById("workspace-body");
     this.appModeTabs = document.getElementById("app-mode-tabs");
     this.primerViewEl = document.getElementById("primer-view");
+    this.adminModeBadge = document.getElementById("admin-mode-badge");
     this.btnMobileMenu = document.getElementById("btn-mobile-menu");
     this.drawerBackdrop = document.getElementById("drawer-backdrop");
     this.btnToggleDrawer = document.getElementById("btn-toggle-drawer");
@@ -377,6 +386,7 @@ export class GuitarMasterApp {
     this.btnClearAiPages = document.getElementById("btn-clear-ai-pages");
     this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
     this.syncGeminiKeyUI();
+    this.initAdminMode();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -1230,6 +1240,188 @@ export class GuitarMasterApp {
     }
   }
 
+  initAdminMode() {
+    let enabled = false;
+    try {
+      const searchParams = new URLSearchParams(window.location.search || "");
+      const hashStr = window.location.hash || "";
+      const hashQuery = hashStr.includes("?") ? hashStr.split("?")[1] : hashStr.replace(/^#/, "");
+      const hashParams = new URLSearchParams(hashQuery);
+      const urlAdmin = searchParams.get("admin") || hashParams.get("admin");
+
+      if (urlAdmin === "1" || urlAdmin === "true") {
+        enabled = true;
+        localStorage.setItem("lmgs_admin_mode", "true");
+      } else if (urlAdmin === "0" || urlAdmin === "false") {
+        enabled = false;
+        localStorage.setItem("lmgs_admin_mode", "false");
+      } else {
+        enabled = localStorage.getItem("lmgs_admin_mode") === "true";
+      }
+    } catch (e) {}
+    this.setAdminMode(enabled, false);
+  }
+
+  setAdminMode(enabled, persist = true) {
+    this.adminMode = !!enabled;
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.adminMode = this.adminMode ? "true" : "false";
+    }
+    if (persist) {
+      try {
+        localStorage.setItem("lmgs_admin_mode", this.adminMode ? "true" : "false");
+      } catch (e) {}
+    }
+    if (!this.adminMode) {
+      this.editingExerciseId = null;
+      if (this.notationEditor) this.notationEditor.close(false);
+      if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+      if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
+      if (this.aiExtractStatusBar) this.aiExtractStatusBar.hidden = true;
+      document.querySelectorAll(".topic-ex-edit-btn").forEach(btn => btn.classList.remove("is-active"));
+    }
+  }
+
+  _findCourseSlotForExercise(exId) {
+    for (const bookCat of ["lessonBook", "bonusWorkshop"]) {
+      const sessions = GUITAR_COURSES[bookCat] || [];
+      for (let sIdx = 0; sIdx < sessions.length; sIdx++) {
+        const session = sessions[sIdx];
+        const topics = session.topics || [];
+        for (let tIdx = 0; tIdx < topics.length; tIdx++) {
+          const topic = topics[tIdx];
+          const computedTopicId = topic.topicId || `${bookCat}_s${session.sessionNumber}_t${tIdx}`;
+          const eIdx = (topic.exercises || []).findIndex(e => e.id === exId);
+          if (eIdx >= 0) {
+            return { bookCat, session, topic, computedTopicId, exIdx: eIdx };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  async persistEditedTopicOrExercise(updatedEx) {
+    if (!updatedEx || !this.pdfAiExtractor) return;
+    const slot = this._findCourseSlotForExercise(updatedEx.id);
+    if (!slot) return;
+    const { bookCat, topic, computedTopicId, exIdx } = slot;
+
+    // Update source exercise inside GUITAR_COURSES in-place
+    topic.exercises[exIdx] = JSON.parse(JSON.stringify(updatedEx));
+    topic.aiExtracted = true;
+    const bookPage = updatedEx.pdfPage || this.extractPageNumberFromExercise(updatedEx) || topic.pdfPage || 1;
+    const rawPdfPage = updatedEx.pdfRawPage || this.bookPageToPdfPage(bookPage, bookCat);
+    const samePageExercises = (topic.exercises || []).filter(
+      e => (e.pdfPage || this.extractPageNumberFromExercise(e)) === bookPage
+    );
+    const entryExercises = samePageExercises.length > 0 ? samePageExercises : [topic.exercises[exIdx]];
+
+    const entry = {
+      pageKey: `${bookCat}_p${rawPdfPage}`,
+      bookCategory: bookCat,
+      rawPdfPage,
+      bookPage,
+      targetTopicId: computedTopicId,
+      targetExerciseId: entryExercises[0].id,
+      modelUsed: updatedEx.modelUsed || "manual-editor",
+      pageTitle: topic.topicTitle || updatedEx.title,
+      extractedAt: new Date().toISOString(),
+      mathWarnings: [],
+      exercises: entryExercises.map(e => JSON.parse(JSON.stringify(e)))
+    };
+
+    await this.pdfAiExtractor.savePageEntry(entry);
+    this.allExercises = this.buildFlatExerciseList();
+  }
+
+  handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx) {
+    if (!updatedEx) return;
+    // Refresh currentExercise & renderer immediately for snappy visual editing
+    if (this.currentExercise && this.currentExercise.id === updatedEx.id) {
+      this.currentExercise = JSON.parse(JSON.stringify(updatedEx));
+    }
+    const entry = this.activeTopicRenderers.get(updatedEx.id);
+    if (entry && entry.renderer) {
+      entry.renderer.loadExercise(updatedEx, {
+        noteNameMode: this.noteNameMode,
+        tabVisibilityMode: this.tabVisibilityMode,
+        showRhythmGuide: this.showRhythmGuide,
+        showCoachBanner: this.showCoachBanner
+      });
+      if (mIdx !== null && tabBeatIdx !== null) {
+        const beatObj = updatedEx.tabData && updatedEx.tabData[mIdx] && updatedEx.tabData[mIdx].beats[tabBeatIdx];
+        entry.renderer.highlightBeat(mIdx, tabBeatIdx, Boolean(beatObj && beatObj.type === "rest"));
+        if (beatObj) {
+          this.updateCard(beatObj, beatObj.type === "rest", mIdx + 1, updatedEx.tabData[mIdx].chordName);
+          this.fretboard.update(beatObj, beatObj.type === "rest", updatedEx.tabData[mIdx].chordName);
+        }
+      }
+    }
+    this.persistEditedTopicOrExercise(updatedEx);
+  }
+
+  handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest) {
+    if (!this.editingExerciseId) return;
+    const entry = this.activeTopicRenderers.get(this.editingExerciseId);
+    if (!entry || !entry.renderer) return;
+    if (mIdx === null) {
+      this.editingExerciseId = null;
+      entry.renderer.reset();
+      document.querySelectorAll(".topic-ex-edit-btn").forEach(b => b.classList.remove("is-active"));
+      return;
+    }
+    entry.renderer.highlightBeat(mIdx, tabBeatIdx, isRest);
+    if (this.currentExercise && this.currentExercise.tabData && this.currentExercise.tabData[mIdx]) {
+      const beatObj = this.currentExercise.tabData[mIdx].beats[tabBeatIdx];
+      if (beatObj) {
+        this.updateCard(beatObj, isRest, mIdx + 1, this.currentExercise.tabData[mIdx].chordName);
+        this.fretboard.update(beatObj, isRest, this.currentExercise.tabData[mIdx].chordName);
+      }
+    }
+  }
+
+  async addSubExerciseToCurrentTopic() {
+    if (!this.currentExercise) return;
+    const slot = this._findCourseSlotForExercise(this.currentExercise.id);
+    if (!slot) return;
+    const { bookCat, topic } = slot;
+    const nextNum = (topic.exercises || []).length + 1;
+    const bookPage = this.extractPageNumberFromExercise(this.currentExercise) || topic.pdfPage || 1;
+    const rawPdfPage = this.bookPageToPdfPage(bookPage, bookCat);
+    const prefix = bookCat === "bonusWorkshop" ? "bw" : "lb";
+    const newId = `${prefix}-sub-p${bookPage}-ex${nextNum}-${Date.now().toString(36).slice(-4)}`;
+
+    const newEx = {
+      id: newId,
+      title: `Exercise ${nextNum} (p. ${bookPage})`,
+      description: `Added sub-exercise on p. ${bookPage}. Edit measures visually below.`,
+      timeSignature: [4, 4],
+      defaultBpm: 65,
+      pdfPage: bookPage,
+      pdfRawPage: rawPdfPage,
+      verificationStatus: "pdf-verified",
+      aiExtracted: true,
+      tabData: [
+        {
+          measure: 1,
+          beats: [
+            { beat: 1, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Down", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 2, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Up", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 3, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Down", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" },
+            { beat: 4, note: "High E", symbol: "1/4", type: "play", string: 1, fret: 0, finger: 0, pick: "Up", duration: 1, isStart: true, isSustain: false, tip: "String 1 Open" }
+          ]
+        }
+      ]
+    };
+    this.notationEditor.ensureCanonicalMeasures(newEx);
+    topic.exercises.push(newEx);
+    topic.aiExtracted = true;
+    await this.persistEditedTopicOrExercise(newEx);
+    this.editingExerciseId = newEx.id;
+    this.loadExercise(newEx.id, false, { forceTopicRebuild: true, noPdfReload: true });
+  }
+
   setAiExtractStatus(msg, variant = "info", thumbDataUrl = undefined) {
     if (!this.aiExtractStatusBar || !this.aiExtractStatusText) return;
     this.aiExtractStatusBar.hidden = false;
@@ -1268,6 +1460,16 @@ export class GuitarMasterApp {
     return { min: sessionFallback, max: sessionFallback };
   }
 
+  _sanitizeEntryForTopic(entry, existingList = [], topicFallbackDesc = "") {
+    const existingInstruction = (existingList.find(
+      e => e && e.description && !/^Extracted from Book p\./i.test(String(e.description).trim())
+    ) || {}).description || topicFallbackDesc || "";
+    const sanitizedList = typeof PdfAiExtractor !== "undefined" && PdfAiExtractor.sanitizeEntryExercises
+      ? PdfAiExtractor.sanitizeEntryExercises(entry, existingInstruction)
+      : entry.exercises.map(ex => ({ ...ex }));
+    return sanitizedList.map(ex => ({ ...ex }));
+  }
+
   applyExtractedEntryToCourses(entry) {
     if (!entry || !Array.isArray(entry.exercises) || entry.exercises.length === 0) return null;
     const bookCat = entry.bookCategory === "bonusWorkshop" ? "bonusWorkshop" : "lessonBook";
@@ -1292,15 +1494,16 @@ export class GuitarMasterApp {
 
           if (topicMatches || exIdx >= 0) {
             const exList = topic.exercises || [];
+            const sanitizedExercises = this._sanitizeEntryForTopic(entry, exList, topic.description || "");
             if (exList.length <= 1 || !entry.targetExerciseId || exIdx < 0) {
-              topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+              topic.exercises = sanitizedExercises;
             } else {
               const allSamePage = exList.every(ex => this.extractPageNumberFromExercise(ex) === targetBookPage);
               if (allSamePage) {
-                topic.exercises = entry.exercises.map(ex => ({ ...ex }));
+                topic.exercises = sanitizedExercises;
               } else {
                 const updated = [...exList];
-                updated.splice(exIdx, 1, ...entry.exercises.map(ex => ({ ...ex })));
+                updated.splice(exIdx, 1, ...sanitizedExercises);
                 topic.exercises = updated;
               }
             }
@@ -1309,7 +1512,7 @@ export class GuitarMasterApp {
             return {
               bookCategory: bookCat,
               sessionNumber: session.sessionNumber,
-              firstExerciseId: entry.exercises[0].id
+              firstExerciseId: topic.exercises[0].id
             };
           }
         }
@@ -1335,17 +1538,21 @@ export class GuitarMasterApp {
     }
 
     if (matchedTopic) {
-      matchedTopic.exercises = entry.exercises.map(ex => ({ ...ex }));
+      matchedTopic.exercises = this._sanitizeEntryForTopic(
+        entry,
+        matchedTopic.exercises || [],
+        matchedTopic.description || ""
+      );
       matchedTopic.pdfPage = targetBookPage;
       matchedTopic.aiExtracted = true;
       return {
         bookCategory: bookCat,
         sessionNumber: matchedSession.sessionNumber,
-        firstExerciseId: entry.exercises[0].id
+        firstExerciseId: matchedTopic.exercises[0].id
       };
     }
 
-    // 2. Fallback: attach new topic under nearest preceding session by printed page
+    // 3. Fallback: attach ONE clean topic under nearest preceding session by printed page
     let fallbackSession = sessions[0];
     let bestStartPage = -1;
     for (const session of sessions) {
@@ -1357,19 +1564,23 @@ export class GuitarMasterApp {
       }
     }
 
+    const rawPageHeading = String(entry.pageTitle || "").trim();
+    const safeTopicHeading = rawPageHeading && !/^(?:ex(?:ercise)?\s*)?\d+[.):\s]*$/i.test(rawPageHeading)
+      ? rawPageHeading
+      : `Page ${targetBookPage} Exercises`;
     const newTopic = {
       topicId: `${bookCat}_ai_p${entry.rawPdfPage}`,
-      topicTitle: `${entry.pageTitle || "Extracted Lesson"} (p. ${targetBookPage})`,
+      topicTitle: /\(p\.\s*\d+/i.test(safeTopicHeading) ? safeTopicHeading : `${safeTopicHeading} (p. ${targetBookPage})`,
       pdfPage: targetBookPage,
       aiExtracted: true,
-      exercises: entry.exercises.map(ex => ({ ...ex }))
+      exercises: this._sanitizeEntryForTopic(entry, [], "")
     };
     fallbackSession.topics = fallbackSession.topics || [];
     fallbackSession.topics.push(newTopic);
     return {
       bookCategory: bookCat,
       sessionNumber: fallbackSession.sessionNumber,
-      firstExerciseId: entry.exercises[0].id
+      firstExerciseId: newTopic.exercises[0].id
     };
   }
 
@@ -1445,16 +1656,26 @@ export class GuitarMasterApp {
     const targetTopicId = shouldBindActive ? activeEx.topicId : null;
     const targetExerciseId = shouldBindActive ? activeEx.id : null;
 
-    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 2.5x via pdf.js...`, "busy", null);
+    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 4.0x Ultra-HD via pdf.js...`, "busy", null);
     const { pdfDoc } = await this.getPdfDocumentForExtraction();
     const clampedPage = Math.max(1, Math.min(pageNum, pdfDoc.numPages || pageNum));
-    const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 2.5);
+    const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 4.0);
 
+    const fallbackInstruction = (activeEx && activeEx.bookCategory === bookCat && activeEx.description && !/^Extracted from Book p\./i.test(activeEx.description))
+      ? activeEx.description
+      : "";
     const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+    const sessionCtx = (activeEx && activeEx.bookCategory === bookCat)
+      ? `${activeEx.sessionTitle || ""}${activeEx.topicTitle ? ` · ${activeEx.topicTitle}` : ""}${activeEx.title ? ` (${activeEx.title})` : ""}`
+      : "";
+    const fullContextHint = sessionCtx
+      ? `${bookLabel} — ${sessionCtx} · Printed page ${bookPage} (PDF page ${clampedPage})`
+      : `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`;
+
     const { omrJson, modelUsed } = await this.pdfAiExtractor.callGeminiVision(
       snap.base64,
       apiKey,
-      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`,
+      fullContextHint,
       (activeModel, fallbackNote) => {
         const msg = fallbackNote
           ? fallbackNote
@@ -1470,7 +1691,8 @@ export class GuitarMasterApp {
       bookPage,
       targetTopicId,
       targetExerciseId,
-      modelUsed
+      modelUsed,
+      fallbackInstruction
     });
 
     if (!entry.exercises || entry.exercises.length === 0) {
@@ -1812,7 +2034,9 @@ export class GuitarMasterApp {
           topic.exercises.some(e => (e.topicId || topic.topicId) === this.currentTopicId || e.id === activeId)
         );
         const firstExId = topic.exercises[0] ? topic.exercises[0].id : "";
-        const exRows = topic.exercises.map(ex => {
+        // Group AI-extracted sub-exercises cleanly under one single sidebar topic row
+        const hideExtractedSubRows = Boolean(topic.aiExtracted) && !query;
+        const exRows = hideExtractedSubRows ? "" : topic.exercises.map(ex => {
           const isRestDrill = ex.id.includes("rest") || ex.id.includes("tdr") || ex.title.toLowerCase().includes("rest");
           const isDone = this.completedExercises.has(ex.id);
           const isActive = ex.id === activeId;
@@ -1945,10 +2169,10 @@ export class GuitarMasterApp {
 
     this.topicExercisesStack.innerHTML = list.map((ex, idx) => {
       const isSelected = ex.id === found.id;
+      const isEditing = this.adminMode && this.editingExerciseId === ex.id;
       const ts = ex.timeSignature || [4, 4];
       const tsLabel = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
       const exPage = ex.pdfPage || this.extractPageNumberFromExercise(ex);
-      const isSong = /song:/i.test(ex.title);
       return `
         <section class="topic-exercise-block ${isSelected ? "is-selected" : ""}" id="topic-ex-${ex.id}" data-ex-id="${ex.id}">
           <div class="topic-ex-head" data-select-header="${ex.id}" title="Click to select for Bottom Dock playback">
@@ -1963,27 +2187,40 @@ export class GuitarMasterApp {
               ${ex.bookCategory !== "freeMetronome" && exPage ? `<span class="topic-ex-meta-pill">p. ${exPage}</span>` : ""}
               <span class="topic-ex-meta-pill">${tsLabel}</span>
               <span class="topic-ex-meta-pill">&#9833; ${ex.defaultBpm || 60}</span>
+              <button class="topic-ex-edit-btn admin-only-control ${isEditing ? "is-active" : ""}" type="button" data-edit-ex="${ex.id}" title="Open visual notation editor">Edit Exercise</button>
               <button class="topic-ex-select-btn" type="button" data-select-ex="${ex.id}">${isSelected ? "Active" : "Select"}</button>
               <button class="topic-ex-play-btn" type="button" data-play-ex="${ex.id}" title="Select and play this exercise">&#9654;</button>
             </div>
           </div>
+          <div class="topic-editor-slot" data-editor-slot="${ex.id}"></div>
           <div class="topic-ex-score-host" data-score-ex="${ex.id}"></div>
         </section>
       `;
-    }).join("");
+    }).join("") + `
+      <div class="topic-add-subex-row admin-only-control">
+        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">+ Add Sub-Exercise to Page</button>
+      </div>
+    `;
 
     list.forEach((ex) => {
       const blockEl = this.topicExercisesStack.querySelector(`#topic-ex-${ex.id}`);
       const scoreHost = blockEl ? blockEl.querySelector(".topic-ex-score-host") : null;
+      const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${ex.id}"]`) : null;
+      const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${ex.id}"]`) : null;
       const selectBtn = blockEl ? blockEl.querySelector(`[data-select-ex="${ex.id}"]`) : null;
       const playBtn = blockEl ? blockEl.querySelector(`[data-play-ex="${ex.id}"]`) : null;
       const headEl = blockEl ? blockEl.querySelector(`[data-select-header="${ex.id}"]`) : null;
 
       let renderer = null;
       if (scoreHost && typeof ScoreRenderer !== "undefined") {
-        renderer = new ScoreRenderer(scoreHost, (mIdx, bIdx) => {
+        renderer = new ScoreRenderer(scoreHost, (mIdx, bIdx, evIdx) => {
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
+          }
+          if (this.adminMode && this.notationEditor && this.editingExerciseId === ex.id) {
+            this.notationEditor.selectNote(mIdx, bIdx, evIdx);
+            this.handleEditorNoteFeedback(mIdx, bIdx, false);
+            return;
           }
           this.seekToMeasureBeat(mIdx, bIdx);
         });
@@ -1995,9 +2232,39 @@ export class GuitarMasterApp {
         });
       }
 
+      if (editBtn) {
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!this.adminMode) return;
+          if (!this.currentExercise || this.currentExercise.id !== ex.id) {
+            this.loadExercise(ex.id, false, { noScroll: true });
+          }
+          const isAlreadyOpen = this.editingExerciseId === ex.id && this.notationEditor.isActive();
+          document.querySelectorAll(".topic-ex-edit-btn").forEach(b => b.classList.remove("is-active"));
+          if (isAlreadyOpen) {
+            this.editingExerciseId = null;
+            this.notationEditor.close();
+            if (renderer) renderer.reset();
+          } else {
+            this.editingExerciseId = ex.id;
+            editBtn.classList.add("is-active");
+            const liveEx = this.findExerciseById(ex.id) || ex;
+            this.currentExercise = JSON.parse(JSON.stringify(liveEx));
+            this.notationEditor.open(this.currentExercise, editorSlot, 0, 0);
+            if (renderer) renderer.highlightBeat(0, 0, false);
+          }
+        });
+      }
+
+      if (this.adminMode && this.editingExerciseId === ex.id && editorSlot) {
+        const liveEx = (this.currentExercise && this.currentExercise.id === ex.id) ? this.currentExercise : ex;
+        this.notationEditor.open(liveEx, editorSlot, 0, 0);
+        if (renderer) renderer.highlightBeat(0, 0, false);
+      }
+
       if (headEl) {
         headEl.addEventListener("click", (e) => {
-          if (e.target.closest("[data-play-ex]")) return;
+          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]")) return;
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -2014,8 +2281,15 @@ export class GuitarMasterApp {
         });
       }
 
-      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn });
+      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn });
     });
+
+    const addSubBtn = this.topicExercisesStack.querySelector("#btn-add-sub-exercise");
+    if (addSubBtn) {
+      addSubBtn.addEventListener("click", () => {
+        if (this.adminMode) this.addSubExerciseToCurrentTopic();
+      });
+    }
   }
 
   updateTopicSelectionUI(activeId) {
@@ -3884,10 +4158,26 @@ export class GuitarMasterApp {
       });
     }
 
-    // Keyboard shortcuts (active only inside Curriculum Studio)
+    if (this.adminModeBadge) {
+      this.adminModeBadge.addEventListener("click", () => {
+        this.setAdminMode(false);
+      });
+    }
+
+    // Keyboard shortcuts (Ctrl+Shift+A / Cmd+Shift+A works globally; Studio shortcuts below)
     window.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && String(e.key || "").toLowerCase() === "a") {
+        e.preventDefault();
+        this.setAdminMode(!this.adminMode);
+        return;
+      }
       if (this.appMode !== "studio") return;
-      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
+      if (this.adminMode && this.notationEditor && this.notationEditor.isActive() && /^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        this.notationEditor.handleDirectFretDigit(e.key);
+        return;
+      }
       if (e.code === "Space") {
         e.preventDefault();
         this.togglePlay();
