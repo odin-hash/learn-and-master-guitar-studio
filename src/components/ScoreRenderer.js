@@ -417,19 +417,18 @@ export class ScoreRenderer {
   _getMeasuresPerSystem(containerWidth) {
     if (!this.measures || this.measures.length === 0) return 4;
     const total = this.measures.length;
-    if (total <= 8) {
-      return total;
-    }
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 4);
-    let mps = 4;
-    if (maxEvents >= 8) {
-      mps = containerWidth >= 620 ? 3 : 2;
-    } else {
-      if (containerWidth >= 620) mps = 4;
-      else if (containerWidth >= 430) mps = 3;
-      else mps = 2;
+    // Desktop (>= 900px): keep exercises up to 8 bars on one continuous row
+    if (containerWidth >= 900) {
+      if (total <= 8) return total;
+      return Math.min(total, maxEvents >= 8 ? 3 : 4);
     }
-    return Math.min(total, mps);
+    // Tablet / iPad / Phone Landscape (540px - 899px): wrap cleanly at 4 bars per row
+    if (containerWidth >= 540) {
+      return Math.min(total, maxEvents >= 8 ? 3 : 4);
+    }
+    // Phone Portrait (< 540px): wrap at 2 bars per row so staves stay legible
+    return Math.min(total, 2);
   }
 
   _buildBeatIndexLookup(mIdx) {
@@ -472,7 +471,7 @@ export class ScoreRenderer {
     const totalMeasures = this.measures.length;
     if (totalMeasures === 0) return;
 
-    const availW = Math.max(320, this.container.clientWidth || 760);
+    const availW = Math.max(240, this.container.clientWidth || 760);
     this._lastRenderWidth = availW;
 
     const showTreble = this.hasStandardStaff(this.exercise);
@@ -480,13 +479,16 @@ export class ScoreRenderer {
     const showTab = !isMetOnly && (!showTreble || this.tabVisibilityMode !== "staff-only");
     const isTabBlurred = showTab && this.tabVisibilityMode === "blur";
 
-    const baseScale = 0.82;
+    const baseScale = availW < 540 ? 0.86 : 0.82;
     const mps = this._getMeasuresPerSystem(availW);
     const leftGutter = showTreble && showTab ? 18 : 6;
     const clefExtra = showTreble ? 78 : 54;
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 1);
     const minPerBar = maxEvents >= 6 ? 152 : (maxEvents >= 4 ? 128 : 112);
-    const minLogicalW = mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0;
+    const mobileMinPerBar = maxEvents >= 6 ? 150 : 132;
+    const minLogicalW = availW < 540
+      ? (leftGutter + clefExtra + mps * mobileMinPerBar + 16)
+      : (mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0);
     const logicalW = Math.max(Math.floor(availW / baseScale), minLogicalW);
     const SCALE = availW / logicalW;
     this._activeScale = SCALE;
@@ -586,7 +588,8 @@ export class ScoreRenderer {
         });
       };
 
-      const usableW = logicalW - leftGutter - 6;
+      const rightMargin = availW < 540 ? 14 : 6;
+      const usableW = logicalW - leftGutter - rightMargin;
       const countInRow = sys.items.length;
       const barGridCols = countInRow === 1 && totalMeasures > 1 ? Math.min(2, mps) : countInRow;
       const remainingW = usableW - clefExtra;

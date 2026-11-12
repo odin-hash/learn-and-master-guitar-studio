@@ -91,9 +91,17 @@ $css
   <!-- ZONE 1: TOP BAR (48px) -->
   <header class="topbar" id="workspace-topbar">
     <div class="topbar-left">
+      <button type="button" class="icon-btn mobile-only-menu-btn" id="btn-mobile-menu" title="Open Curriculum &amp; Metronome Menu" aria-label="Open Menu">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
       <div class="segmented-control app-mode-switch" id="app-mode-tabs" role="tablist" aria-label="Workspace Section">
-        <button class="seg-btn active" data-app-mode="primer" id="btn-mode-primer" role="tab" aria-selected="true">Foundations Primer</button>
-        <button class="seg-btn" data-app-mode="studio" id="btn-mode-studio" role="tab" aria-selected="false">Curriculum Studio</button>
+        <button class="seg-btn active" data-app-mode="primer" id="btn-mode-primer" role="tab" aria-selected="true"><span class="lbl-desktop">Foundations Primer</span><span class="lbl-mobile">Primer</span></button>
+        <button class="seg-btn" data-app-mode="studio" id="btn-mode-studio" role="tab" aria-selected="false"><span class="lbl-desktop">Curriculum Studio</span><span class="lbl-mobile">Studio</span></button>
       </div>
 
       <div class="topbar-studio-only topbar-studio-crumb">
@@ -113,9 +121,9 @@ $css
 
     <div class="topbar-center">
       <div class="segmented-control topbar-studio-only" id="workspace-view-tabs" role="tablist" aria-label="Workspace View Mode">
-        <button class="seg-btn active" data-pane="score" id="btn-pane-score" role="tab" aria-selected="true">Interactive Score</button>
-        <button class="seg-btn" data-pane="pdf" id="btn-pane-pdf" role="tab" aria-selected="false">PDF Reference</button>
-        <button class="seg-btn" data-pane="split" id="btn-pane-split" role="tab" aria-selected="false">Split View</button>
+        <button class="seg-btn active" data-pane="score" id="btn-pane-score" role="tab" aria-selected="true"><span class="lbl-desktop">Interactive Score</span><span class="lbl-mobile">Score</span></button>
+        <button class="seg-btn" data-pane="pdf" id="btn-pane-pdf" role="tab" aria-selected="false"><span class="lbl-desktop">PDF Reference</span><span class="lbl-mobile">PDF</span></button>
+        <button class="seg-btn" data-pane="split" id="btn-pane-split" role="tab" aria-selected="false"><span class="lbl-desktop">Split View</span><span class="lbl-mobile">Split</span></button>
       </div>
     </div>
 
@@ -149,6 +157,9 @@ $css
 
   <!-- MIDDLE WORKSPACE: DRAWER + MAIN CANVAS (calc(100vh - 104px)) -->
   <div class="workspace-body" id="workspace-body" data-pane-mode="score">
+
+    <!-- Tap-to-close backdrop for slide-over drawer (mobile & tablet <= 1024px only) -->
+    <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
 
     <!-- ZONE 2: LEFT COLLAPSIBLE DRAWER (240px) -->
     <aside class="left-drawer" id="workspace-sidebar" aria-label="Curriculum Navigation">
@@ -358,6 +369,17 @@ $css
         </div>
         <div class="pdf-frame-wrap">
           <iframe id="pdf-viewer-frame" title="Course Reference PDF"></iframe>
+          <div class="pdf-mobile-canvas-wrap" id="pdf-mobile-canvas-wrap" style="display:none;">
+            <div class="pdf-mobile-nav">
+              <button type="button" class="micro-pill" id="btn-pdf-prev-page" aria-label="Previous PDF Page">&lsaquo; Prev</button>
+              <span class="pdf-mobile-page-status" id="pdf-mobile-page-status">Page 1</span>
+              <button type="button" class="micro-pill" id="btn-pdf-next-page" aria-label="Next PDF Page">Next &rsaquo;</button>
+            </div>
+            <div class="pdf-canvas-scroller" id="pdf-canvas-scroller">
+              <canvas id="pdf-mobile-canvas"></canvas>
+              <div class="pdf-mobile-loading" id="pdf-mobile-loading" hidden>Loading course PDF page...</div>
+            </div>
+          </div>
           <div class="pdf-fallback-card" id="pdf-fallback-card" style="display:none;">
             <div class="pdf-fallback-inner">
               <div class="pdf-fallback-title">Course PDF not bundled on this server</div>
@@ -418,6 +440,13 @@ $css
       </div>
 
       <button type="button" class="time-pill-badge" id="time-pill-badge" title="Time Signature (Click in Free Metronome to cycle meter)">4/4</button>
+
+      <button type="button" class="icon-btn dock-mobile-settings-btn" id="btn-dock-mobile-settings" title="Audio &amp; Count-In Settings" aria-label="Audio &amp; Count-In Settings" aria-expanded="false">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
     </div>
 
     <div class="transport-right">

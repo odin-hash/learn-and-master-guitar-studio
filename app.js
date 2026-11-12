@@ -230,21 +230,31 @@ export class GuitarMasterApp {
     return this.allExercises.find(e => e.id === lookupId) || this.allExercises.find(e => e.id === id);
   }
 
+  isCompactFretboardViewport() {
+    return typeof window !== "undefined" && (window.innerWidth <= 768 || window.innerHeight <= 540);
+  }
+
   initDOM() {
     this.paneMode = "score"; // "score" | "pdf" | "split"
     this.loopMode = "all"; // "all" | "bar" | "once"
     this.loopMeasureIndex = 0;
-    this.drawerOpen = window.innerWidth > 820;
-    this.fretboardVisible = true;
+    this.drawerOpen = window.innerWidth > 1024;
+    this._lastCompactViewport = this.isCompactFretboardViewport();
+    this.fretboardVisible = !this._lastCompactViewport;
     this.expandedSessions = new Set(["lessonBook_1", "lessonBook_2"]);
     this.pdfBookCategory = "lessonBook";
     this.pdfCurrentPage = 1;
     this.customPdfUrls = {};
+    this._pdfDocCache = new Map();
+    this._pdfJsPromise = null;
+    this._pdfRenderTask = null;
 
     // Zone 1: Top Bar & App Mode Navigation
     this.workspaceBody = document.getElementById("workspace-body");
     this.appModeTabs = document.getElementById("app-mode-tabs");
     this.primerViewEl = document.getElementById("primer-view");
+    this.btnMobileMenu = document.getElementById("btn-mobile-menu");
+    this.drawerBackdrop = document.getElementById("drawer-backdrop");
     this.btnToggleDrawer = document.getElementById("btn-toggle-drawer");
     this.navCrumbSession = document.getElementById("nav-crumb-session");
     this.studioExerciseTitle = document.getElementById("studio-exercise-title");
@@ -318,10 +328,19 @@ export class GuitarMasterApp {
     this.pdfFileInputFallback = document.getElementById("pdf-file-input-fallback");
     this.pdfOpenNewTab = document.getElementById("pdf-open-newtab");
     this.pdfViewerFrame = document.getElementById("pdf-viewer-frame");
+    this.pdfMobileCanvasWrap = document.getElementById("pdf-mobile-canvas-wrap");
+    this.pdfCanvasScroller = document.getElementById("pdf-canvas-scroller");
+    this.pdfMobileCanvas = document.getElementById("pdf-mobile-canvas");
+    this.pdfMobilePageStatus = document.getElementById("pdf-mobile-page-status");
+    this.btnPdfPrevPage = document.getElementById("btn-pdf-prev-page");
+    this.btnPdfNextPage = document.getElementById("btn-pdf-next-page");
+    this.pdfMobileLoading = document.getElementById("pdf-mobile-loading");
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
 
     // Zone 4: Fixed Bottom Transport Dock
+    this.transportDock = document.getElementById("transport-dock");
+    this.btnDockMobileSettings = document.getElementById("btn-dock-mobile-settings");
     this.btnPlayToggle = document.getElementById("btn-play-toggle");
     this.playBtnLabel = document.getElementById("play-btn-label");
     this.btnMetronomeToggle = document.getElementById("btn-metronome-toggle");
@@ -342,6 +361,7 @@ export class GuitarMasterApp {
     if (this.workspaceBody) {
       this.workspaceBody.classList.toggle("drawer-collapsed", !this.drawerOpen);
     }
+    this.syncFretboardVisibilityUI();
   }
 
   initDial() {
@@ -685,10 +705,7 @@ export class GuitarMasterApp {
       if (this.btnToggleFretboard) {
         this.btnToggleFretboard.addEventListener("click", () => {
           this.fretboardVisible = !this.fretboardVisible;
-          this.btnToggleFretboard.classList.toggle("active", this.fretboardVisible);
-          if (this.fretboardWrapper) {
-            this.fretboardWrapper.classList.toggle("is-hidden", !this.fretboardVisible);
-          }
+          this.syncFretboardVisibilityUI();
         });
       }
     }
@@ -699,6 +716,21 @@ export class GuitarMasterApp {
           this.toggleExerciseCompleted(this.currentExercise.id);
         }
       });
+    }
+  }
+
+  syncFretboardVisibilityUI() {
+    if (this.btnToggleFretboard) {
+      this.btnToggleFretboard.classList.toggle("active", this.fretboardVisible);
+      this.btnToggleFretboard.setAttribute("aria-expanded", this.fretboardVisible ? "true" : "false");
+      if (this.isCompactFretboardViewport()) {
+        this.btnToggleFretboard.textContent = this.fretboardVisible ? "Hide Fretboard \u25B4" : "Show Fretboard \u25BE";
+      } else {
+        this.btnToggleFretboard.textContent = "Fretboard";
+      }
+    }
+    if (this.fretboardWrapper) {
+      this.fretboardWrapper.classList.toggle("is-hidden", !this.fretboardVisible);
     }
   }
 
@@ -783,6 +815,16 @@ export class GuitarMasterApp {
     }
     if (this.btnToggleDrawer) {
       this.btnToggleDrawer.classList.toggle("active", this.drawerOpen);
+    }
+    if (this.btnMobileMenu) {
+      this.btnMobileMenu.classList.toggle("active", this.drawerOpen);
+      this.btnMobileMenu.setAttribute("aria-expanded", this.drawerOpen ? "true" : "false");
+    }
+    if (this.drawerOpen && this.transportDock) {
+      this.transportDock.classList.remove("mobile-settings-open");
+      if (this.btnDockMobileSettings) {
+        this.btnDockMobileSettings.setAttribute("aria-expanded", "false");
+      }
     }
     this.saveState();
   }
@@ -960,6 +1002,100 @@ export class GuitarMasterApp {
       : "assets/Learn-and-Master-Guitar-Lesson-Book.pdf";
   }
 
+  isMobileOrTouchPdfDevice() {
+    if (typeof window === "undefined") return false;
+    const isNarrow = window.innerWidth <= 1024;
+    const hasTouchTablet = (navigator.maxTouchPoints > 0 || "ontouchstart" in window) && window.innerWidth <= 1280;
+    const uaMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+    return isNarrow || hasTouchTablet || uaMobile;
+  }
+
+  ensurePdfJsLoaded() {
+    if (typeof window !== "undefined" && window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      return Promise.resolve(window.pdfjsLib);
+    }
+    if (this._pdfJsPromise) return this._pdfJsPromise;
+    this._pdfJsPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      script.async = true;
+      script.onload = () => {
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          resolve(window.pdfjsLib);
+        } else {
+          reject(new Error("pdfjsLib not defined"));
+        }
+      };
+      script.onerror = () => reject(new Error("Failed to load pdf.js CDN"));
+      document.head.appendChild(script);
+    });
+    return this._pdfJsPromise;
+  }
+
+  async renderMobilePdfPage(baseSrc, page, seq) {
+    if (!this.pdfMobileCanvas) return false;
+    if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = false;
+    try {
+      const pdfjsLib = await this.ensurePdfJsLoaded();
+      if (seq !== this._pdfLoadSeq) return true;
+
+      let pdfDoc = this._pdfDocCache.get(baseSrc);
+      if (!pdfDoc) {
+        pdfDoc = await pdfjsLib.getDocument(baseSrc).promise;
+        this._pdfDocCache.set(baseSrc, pdfDoc);
+      }
+      if (seq !== this._pdfLoadSeq) return true;
+
+      const totalPages = pdfDoc.numPages || 1;
+      const safePage = Math.max(1, Math.min(page, totalPages));
+      this.pdfCurrentPage = safePage;
+      if (this.pdfPageInput) this.pdfPageInput.value = safePage;
+      if (this.pdfMobilePageStatus) {
+        this.pdfMobilePageStatus.textContent = `Page ${safePage} / ${totalPages}`;
+      }
+      if (this.btnPdfPrevPage) this.btnPdfPrevPage.disabled = safePage <= 1;
+      if (this.btnPdfNextPage) this.btnPdfNextPage.disabled = safePage >= totalPages;
+
+      const pdfPage = await pdfDoc.getPage(safePage);
+      if (seq !== this._pdfLoadSeq) return true;
+
+      const baseVp = pdfPage.getViewport({ scale: 1 });
+      const scrollerW = (this.pdfCanvasScroller && this.pdfCanvasScroller.clientWidth)
+        ? Math.max(260, this.pdfCanvasScroller.clientWidth - 20)
+        : Math.max(280, window.innerWidth - 28);
+      const cssScale = scrollerW / baseVp.width;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const vp = pdfPage.getViewport({ scale: cssScale * dpr });
+
+      if (this._pdfRenderTask && typeof this._pdfRenderTask.cancel === "function") {
+        try { this._pdfRenderTask.cancel(); } catch (e) {}
+      }
+
+      const canvas = this.pdfMobileCanvas;
+      const ctx = canvas.getContext("2d");
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
+      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
+
+      this._pdfRenderTask = pdfPage.render({ canvasContext: ctx, viewport: vp });
+      await this._pdfRenderTask.promise;
+      if (seq !== this._pdfLoadSeq) return true;
+
+      if (this.pdfCanvasScroller) this.pdfCanvasScroller.scrollTop = 0;
+      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
+      return true;
+    } catch (err) {
+      if (err && err.name === "RenderingCancelledException") return true;
+      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
+      return false;
+    }
+  }
+
   async loadPdfFrame() {
     if (!this.pdfViewerFrame) return;
     const seq = ++this._pdfLoadSeq;
@@ -979,6 +1115,7 @@ export class GuitarMasterApp {
         if (seq !== this._pdfLoadSeq) return;
         if (!res.ok) {
           if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "flex";
+          if (this.pdfMobileCanvasWrap) this.pdfMobileCanvasWrap.style.display = "none";
           this.pdfViewerFrame.removeAttribute("src");
           this._loadedPdfUrl = null;
           return;
@@ -988,6 +1125,20 @@ export class GuitarMasterApp {
 
     if (seq !== this._pdfLoadSeq) return;
     if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
+
+    // Mobile & Tablet browsers render PDF pages inline via pdf.js canvas instead of native embed "Open" box
+    if (this.isMobileOrTouchPdfDevice() && this.pdfMobileCanvasWrap && this.pdfMobileCanvas) {
+      this.pdfViewerFrame.style.display = "none";
+      this.pdfMobileCanvasWrap.style.display = "flex";
+      const ok = await this.renderMobilePdfPage(baseSrc, page, seq);
+      if (ok || seq !== this._pdfLoadSeq) return;
+      // Graceful fallback to iframe if pdf.js CDN fails offline
+      this.pdfMobileCanvasWrap.style.display = "none";
+      this.pdfViewerFrame.style.display = "block";
+    } else if (this.pdfMobileCanvasWrap) {
+      this.pdfMobileCanvasWrap.style.display = "none";
+      this.pdfViewerFrame.style.display = "block";
+    }
 
     const currentAttr = this.pdfViewerFrame.getAttribute("src") || "";
     if (currentAttr === fullUrl || this._loadedPdfUrl === fullUrl) return;
@@ -1251,7 +1402,7 @@ export class GuitarMasterApp {
         const firstId = btn.dataset.firstEx;
         if (firstId) {
           this.loadExercise(firstId, false, { scrollTopicTop: true });
-          if (window.innerWidth <= 820) {
+          if (window.innerWidth <= 1024) {
             this.setDrawerOpen(false);
           }
         }
@@ -1263,7 +1414,7 @@ export class GuitarMasterApp {
       btn.addEventListener("click", () => {
         const id = btn.dataset.exId;
         this.loadExercise(id);
-        if (window.innerWidth <= 820) {
+        if (window.innerWidth <= 1024) {
           this.setDrawerOpen(false);
         }
       });
@@ -2694,7 +2845,7 @@ export class GuitarMasterApp {
     let state = {
       appMode: "primer",
       paneMode: "score",
-      drawerOpen: window.innerWidth > 820,
+      drawerOpen: window.innerWidth > 1024,
       loopMode: "all",
       book: "lessonBook",
       exId: "lb-s2-str1-ex1",
@@ -2796,7 +2947,10 @@ export class GuitarMasterApp {
       this.freeMetSubdivision = Number(state.freeMetSubdiv);
     }
 
-    this.setDrawerOpen(typeof state.drawerOpen === "boolean" ? state.drawerOpen : (window.innerWidth > 820));
+    const initialDrawerOpen = window.innerWidth <= 1024
+      ? false
+      : (typeof state.drawerOpen === "boolean" ? state.drawerOpen : true);
+    this.setDrawerOpen(initialDrawerOpen);
     this.setBookCategory(state.book || "lessonBook");
 
     this.loadExercise(state.exId || "lb-s2-str1-ex1", true);
@@ -2844,6 +2998,23 @@ export class GuitarMasterApp {
       });
     }
 
+    if (this.btnMobileMenu) {
+      this.btnMobileMenu.addEventListener("click", () => {
+        if (this.appMode !== "studio") {
+          this.setAppMode("studio");
+          this.setDrawerOpen(true);
+        } else {
+          this.setDrawerOpen(!this.drawerOpen);
+        }
+      });
+    }
+
+    if (this.drawerBackdrop) {
+      this.drawerBackdrop.addEventListener("click", () => {
+        this.setDrawerOpen(false);
+      });
+    }
+
     if (this.workspaceViewTabs) {
       this.workspaceViewTabs.querySelectorAll(".seg-btn").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2882,6 +3053,9 @@ export class GuitarMasterApp {
       this.choiceFreeMode.addEventListener("click", () => {
         this.setBookCategory("freeMetronome");
         this.loadExercise("free-metronome");
+        if (window.innerWidth <= 1024) {
+          this.setDrawerOpen(false);
+        }
       });
     }
 
@@ -2919,6 +3093,70 @@ export class GuitarMasterApp {
         if (this.currentExercise) this.syncPdfToExercise(this.currentExercise);
       });
     }
+    if (this.btnPdfPrevPage) {
+      this.btnPdfPrevPage.addEventListener("click", () => {
+        this.pdfCurrentPage = Math.max(1, (parseInt(this.pdfCurrentPage, 10) || 1) - 1);
+        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
+        this.loadPdfFrame();
+      });
+    }
+    if (this.btnPdfNextPage) {
+      this.btnPdfNextPage.addEventListener("click", () => {
+        this.pdfCurrentPage = (parseInt(this.pdfCurrentPage, 10) || 1) + 1;
+        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
+        this.loadPdfFrame();
+      });
+    }
+
+    if (this.btnDockMobileSettings && this.transportDock) {
+      this.btnDockMobileSettings.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = this.transportDock.classList.toggle("mobile-settings-open");
+        this.btnDockMobileSettings.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+      document.addEventListener("click", (e) => {
+        if (
+          this.transportDock.classList.contains("mobile-settings-open") &&
+          !this.transportDock.contains(e.target)
+        ) {
+          this.transportDock.classList.remove("mobile-settings-open");
+          this.btnDockMobileSettings.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    this._lastIsNarrowDrawer = window.innerWidth <= 1024;
+    this._lastPdfRenderWidth = window.innerWidth;
+    let resizeSyncTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeSyncTimer);
+      resizeSyncTimer = setTimeout(() => {
+        const activeTag = document.activeElement ? document.activeElement.tagName : "";
+        const isTypingInput = /^(INPUT|TEXTAREA|SELECT)$/.test(activeTag);
+        if (!isTypingInput) {
+          const isCompact = this.isCompactFretboardViewport();
+          if (isCompact !== this._lastCompactViewport) {
+            this._lastCompactViewport = isCompact;
+            this.fretboardVisible = !isCompact;
+          }
+          this.syncFretboardVisibilityUI();
+
+          const isNarrow = window.innerWidth <= 1024;
+          if (isNarrow && !this._lastIsNarrowDrawer && this.drawerOpen) {
+            this.setDrawerOpen(false);
+          }
+          this._lastIsNarrowDrawer = isNarrow;
+        }
+        if (
+          (this.paneMode === "pdf" || this.paneMode === "split") &&
+          this.isMobileOrTouchPdfDevice() &&
+          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 24
+        ) {
+          this._lastPdfRenderWidth = window.innerWidth;
+          this.loadPdfFrame();
+        }
+      }, 120);
+    });
 
     const handleLocalPdfFile = (file) => {
       if (!file) return;
