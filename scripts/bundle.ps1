@@ -15,6 +15,7 @@ $requiredFiles = @(
     "fretboard.js",
     "src\data\primerCatalog.js",
     "src\components\FoundationsPrimer.js",
+    "src\components\PdfAiExtractor.js",
     "app.js"
 )
 foreach ($f in $requiredFiles) {
@@ -63,6 +64,11 @@ Write-Host "Reading src/components/FoundationsPrimer.js..."
 $primerJs = [System.IO.File]::ReadAllText((Join-Path $root "src\components\FoundationsPrimer.js"), [System.Text.Encoding]::UTF8)
 $primerJs = $primerJs -replace 'import\s*\{[^}]+\}\s*from\s*["''][^"'']+["''];?', ''
 $primerJs = $primerJs -replace "export\s+(const|function|class)\s+", '$1 '
+
+Write-Host "Reading src/components/PdfAiExtractor.js..."
+$pdfAiExtractorJs = [System.IO.File]::ReadAllText((Join-Path $root "src\components\PdfAiExtractor.js"), [System.Text.Encoding]::UTF8)
+$pdfAiExtractorJs = $pdfAiExtractorJs -replace 'import\s*\{[^}]+\}\s*from\s*["''][^"'']+["''];?', ''
+$pdfAiExtractorJs = $pdfAiExtractorJs -replace "export\s+(const|function|class)\s+", '$1 '
 
 Write-Host "Reading app.js..."
 $appJs = [System.IO.File]::ReadAllText((Join-Path $root "app.js"), [System.Text.Encoding]::UTF8)
@@ -360,6 +366,19 @@ $css
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
+            <button type="button" class="micro-pill pdf-ai-key-btn" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              <span class="ai-key-dot" id="ai-key-dot"></span>
+            </button>
+            <button type="button" class="micro-pill pdf-ai-extract-btn" id="btn-extract-pdf-page" title="Snapshot current PDF page at 3.0x and extract exact exercises via Gemini 2.5 Pro">
+              &#10024; Extract Exercises from Current PDF Page
+            </button>
+            <button type="button" class="micro-pill" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
+              Batch Extract
+            </button>
+            <button type="button" class="micro-pill" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
+              Export Curriculum JSON
+            </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
@@ -367,6 +386,47 @@ $css
             <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
           </div>
         </div>
+
+        <!-- Inline Gemini API Key Drawer -->
+        <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
+          <span class="pdf-ai-drawer-lbl">Gemini API Key (stored locally in browser):</span>
+          <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
+          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
+          <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
+          <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
+        </div>
+
+        <!-- Inline Batch Extraction Drawer -->
+        <div class="pdf-ai-drawer" id="pdf-batch-bar" hidden>
+          <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
+          <label class="pdf-batch-field">
+            <span>From p.</span>
+            <input type="number" id="batch-from-page" class="mono-input" min="1" max="200" value="1">
+          </label>
+          <label class="pdf-batch-field">
+            <span>To p.</span>
+            <input type="number" id="batch-to-page" class="mono-input" min="1" max="200" value="5">
+          </label>
+          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-start-batch-extract">Start Batch</button>
+          <button type="button" class="micro-pill" id="btn-cancel-batch-extract" hidden>Stop</button>
+          <button type="button" class="micro-pill" id="btn-close-batch-extract">&times;</button>
+          <div class="pdf-ai-progress-wrap" id="ai-extract-progress-wrap" hidden>
+            <div class="pdf-ai-progress-track">
+              <div class="pdf-ai-progress-fill" id="ai-extract-progress-fill" style="width:0%"></div>
+            </div>
+            <span class="pdf-ai-progress-pct" id="ai-extract-progress-pct">0%</span>
+          </div>
+        </div>
+
+        <!-- Inline AI Extraction Status / Result Banner -->
+        <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
+          <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          <div class="pdf-ai-status-actions">
+            <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
+            <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
+          </div>
+        </div>
+
         <div class="pdf-frame-wrap">
           <iframe id="pdf-viewer-frame" title="Course Reference PDF"></iframe>
           <div class="pdf-mobile-canvas-wrap" id="pdf-mobile-canvas-wrap" style="display:none;">
@@ -515,6 +575,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine($fretboardJs)
 [void]$sb.AppendLine($primerCatalogJs)
 [void]$sb.AppendLine($primerJs)
+[void]$sb.AppendLine($pdfAiExtractorJs)
 [void]$sb.AppendLine($appJs)
 [void]$sb.AppendLine($htmlFooter)
 

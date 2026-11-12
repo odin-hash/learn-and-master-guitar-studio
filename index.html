@@ -2256,14 +2256,16 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .pdf-toolbar {
-  height: 40px;
+  min-height: 40px;
+  height: auto;
   background: var(--bg-canvas);
   border-bottom: 1px solid var(--border-hairline);
-  padding: 0 12px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   flex-shrink: 0;
 }
 
@@ -2271,7 +2273,8 @@ button.acc-topic-btn.is-active-topic {
 .pdf-toolbar-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .pdf-toolbar .micro-pill {
@@ -2282,6 +2285,162 @@ button.acc-topic-btn.is-active-topic {
 .pdf-toolbar .micro-pill.active {
   background: var(--bg-surface);
   border-color: var(--border-strong);
+}
+
+.pdf-ai-key-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px !important;
+}
+
+.ai-key-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D4D4D8;
+  transition: background-color 0.15s ease;
+}
+
+.ai-key-dot.is-saved {
+  background: #16A34A;
+}
+
+.pdf-ai-extract-btn {
+  background: #18181B !important;
+  border-color: #18181B !important;
+  color: #FFFEFC !important;
+  font-weight: 600;
+}
+
+.pdf-ai-extract-btn:hover:not(:disabled) {
+  background: #C2410C !important;
+  border-color: #C2410C !important;
+}
+
+.pdf-ai-extract-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.pdf-ai-drawer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #F4F3EE;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-shrink: 0;
+}
+
+.pdf-ai-drawer[hidden],
+.pdf-ai-status-bar[hidden],
+.pdf-ai-progress-wrap[hidden] {
+  display: none !important;
+}
+
+.pdf-ai-drawer-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-key-input {
+  flex: 1 1 180px;
+  min-width: 140px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.pdf-ai-key-input:focus {
+  border-color: var(--text-primary);
+}
+
+.pdf-ai-primary-sm {
+  background: #18181B !important;
+  border-color: #18181B !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.pdf-batch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.pdf-ai-progress-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #E4E4E7;
+  overflow: hidden;
+}
+
+.pdf-ai-progress-fill {
+  height: 100%;
+  background: #C2410C;
+  transition: width 0.2s ease;
+}
+
+.pdf-ai-progress-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  border-bottom: 1px solid var(--border-hairline);
+  background: #FAF9F5;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.pdf-ai-status-bar[data-variant="success"] {
+  background: #F0FDF4;
+  color: #166534;
+}
+
+.pdf-ai-status-bar[data-variant="warn"] {
+  background: #FFFBEB;
+  color: #92400E;
+}
+
+.pdf-ai-status-bar[data-variant="error"] {
+  background: #FEF2F2;
+  color: #991B1B;
+}
+
+.pdf-ai-status-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
 }
 
 .pdf-page-group {
@@ -4755,6 +4914,19 @@ body[data-free-metronome="true"] .free-metronome-stage {
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
+            <button type="button" class="micro-pill pdf-ai-key-btn" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              <span class="ai-key-dot" id="ai-key-dot"></span>
+            </button>
+            <button type="button" class="micro-pill pdf-ai-extract-btn" id="btn-extract-pdf-page" title="Snapshot current PDF page at 3.0x and extract exact exercises via Gemini 2.5 Pro">
+              &#10024; Extract Exercises from Current PDF Page
+            </button>
+            <button type="button" class="micro-pill" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
+              Batch Extract
+            </button>
+            <button type="button" class="micro-pill" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
+              Export Curriculum JSON
+            </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
@@ -4762,6 +4934,47 @@ body[data-free-metronome="true"] .free-metronome-stage {
             <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
           </div>
         </div>
+
+        <!-- Inline Gemini API Key Drawer -->
+        <div class="pdf-ai-drawer" id="gemini-key-bar" hidden>
+          <span class="pdf-ai-drawer-lbl">Gemini API Key (stored locally in browser):</span>
+          <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
+          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
+          <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
+          <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
+        </div>
+
+        <!-- Inline Batch Extraction Drawer -->
+        <div class="pdf-ai-drawer" id="pdf-batch-bar" hidden>
+          <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
+          <label class="pdf-batch-field">
+            <span>From p.</span>
+            <input type="number" id="batch-from-page" class="mono-input" min="1" max="200" value="1">
+          </label>
+          <label class="pdf-batch-field">
+            <span>To p.</span>
+            <input type="number" id="batch-to-page" class="mono-input" min="1" max="200" value="5">
+          </label>
+          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-start-batch-extract">Start Batch</button>
+          <button type="button" class="micro-pill" id="btn-cancel-batch-extract" hidden>Stop</button>
+          <button type="button" class="micro-pill" id="btn-close-batch-extract">&times;</button>
+          <div class="pdf-ai-progress-wrap" id="ai-extract-progress-wrap" hidden>
+            <div class="pdf-ai-progress-track">
+              <div class="pdf-ai-progress-fill" id="ai-extract-progress-fill" style="width:0%"></div>
+            </div>
+            <span class="pdf-ai-progress-pct" id="ai-extract-progress-pct">0%</span>
+          </div>
+        </div>
+
+        <!-- Inline AI Extraction Status / Result Banner -->
+        <div class="pdf-ai-status-bar" id="ai-extract-status-bar" hidden>
+          <span class="pdf-ai-status-text" id="ai-extract-status-text">Ready</span>
+          <div class="pdf-ai-status-actions">
+            <button type="button" class="micro-pill" id="btn-clear-ai-pages" title="Remove saved AI-extracted overrides">Reset AI Data</button>
+            <button type="button" class="micro-pill" id="btn-dismiss-ai-status" aria-label="Dismiss">&times;</button>
+          </div>
+        </div>
+
         <div class="pdf-frame-wrap">
           <iframe id="pdf-viewer-frame" title="Course Reference PDF"></iframe>
           <div class="pdf-mobile-canvas-wrap" id="pdf-mobile-canvas-wrap" style="display:none;">
@@ -15248,6 +15461,656 @@ class FoundationsPrimer {
   }
 }
 
+/**
+ * <PdfAiExtractor /> — Built-In Gemini 2.5 Pro PDF OMR Extractor
+ * ----------------------------------------------------------------------
+ * Renders PDF pages offscreen at scale 3.0 via pdf.js, sends high-DPI PNG
+ * snapshots to generativelanguage.googleapis.com (gemini-2.5-pro) with strict
+ * OMR JSON schema & music math validation, normalizes exercises into canonical
+ * ScoreRenderer + WebAudio tabData format, and persists to localStorage + IndexedDB.
+ */
+
+const STORAGE_KEY_API = "lmgs_gemini_api_key";
+const STORAGE_KEY_EXTRACTED = "lmgs_ai_extracted_pages_v1";
+const IDB_NAME = "lmgs_omr_storage";
+const IDB_STORE = "extractedPages";
+
+const GEMINI_ENDPOINT =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
+
+const OMR_SYSTEM_INSTRUCTION = `You are a precision Guitar Method Book Optical Music Recognition (OMR) engine. Examine this high-resolution page from a guitar curriculum PDF.
+CRITICAL RULES:
+1. NEVER invent, summarize, or generate placeholder patterns. Read ONLY the exact musical exercises printed on the page.
+2. Identify every separate numbered or titled exercise on the page (e.g., 1, 2, 3, 4).
+3. For each exercise, count the exact number of measures (bars) separated by vertical barlines.
+4. Read the Time Signature (default to 4/4 if Common Time 'C' or 4/4 is shown).
+5. IF A 6-LINE TAB STAFF IS PRESENT: Read the exact string (1 = top line High E, 6 = bottom line Low E) and the exact fret number printed on that line for every note, left to right. Look up to the standard notation staff directly above each TAB number to read its exact rhythm duration:
+   - Whole note (hollow oval, no stem) = 'w' (4 beats)
+   - Half note (hollow oval with stem) = 'h' (2 beats)
+   - Quarter note (solid black oval with single stem) = 'q' (1 beat)
+   - Eighth note (solid oval with flag or horizontal beam connecting stems) = 'e' (0.5 beats)
+   - Dotted half note = 'h.' (3 beats)
+6. IF ONLY A 5-LINE STANDARD STAFF IS PRESENT (NO TAB): Read each note's treble clef pitch (e.g., E4 = 1st string fret 0, F4 = 1st string fret 1, G4 = 1st string fret 3; B3 = 2nd string fret 0, C4 = 2nd string fret 1, D4 = 2nd string fret 3; G3 = 3rd string fret 0, A3 = 3rd string fret 2; D3 = 4th string fret 0, E3 = 4th string fret 2, F3 = 4th string fret 3; A2 = 5th string fret 0, B2 = 5th string fret 2, C3 = 5th string fret 3; E2 = 6th string fret 0, F2 = 6th string fret 1, G2 = 6th string fret 3) and convert it into the exact String, Fret, Pitch, and Duration.
+7. MATH CHECK: Before returning JSON, verify that the sum of beat durations in EVERY measure equals the time signature (e.g., 4.0 beats per measure in 4/4).`;
+
+const OMR_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    pageTitle: { type: "STRING", description: "Heading or topic printed at the top of the PDF page" },
+    exercises: {
+      type: "ARRAY",
+      description: "Every numbered or titled musical exercise printed on this page in order",
+      items: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING", description: "Exact exercise number and title from the page" },
+          description: { type: "STRING", description: "Brief instruction or performance note printed for this exercise" },
+          timeSignature: { type: "STRING", description: "Time signature such as 4/4, 3/4, 2/4, or 6/8" },
+          defaultBpm: { type: "INTEGER", description: "Printed tempo BPM if present, otherwise 65" },
+          hasTabStaff: { type: "BOOLEAN", description: "True if a 6-line guitar TAB staff is printed for this exercise" },
+          measures: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                measureNumber: { type: "INTEGER" },
+                chord: { type: "STRING", description: "Optional chord symbol printed above this measure (e.g. C, G7, Am) or empty string" },
+                events: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      isRest: { type: "BOOLEAN" },
+                      pitch: { type: "STRING", description: "Concert guitar pitch e.g. E4, F4, G4, B3, C4, D4, G3, A3, D3, E3, A2, E2, or REST" },
+                      string: { type: "INTEGER", description: "Guitar string 1 (High E) to 6 (Low E), or 0 for rest/chord" },
+                      fret: { type: "INTEGER", description: "Fret number 0..20, or -1 for rest" },
+                      durationCode: { type: "STRING", description: "One of: w, h., h, q., q, e, 16" },
+                      durationBeats: { type: "NUMBER", description: "Numeric beat length: w=4, h.=3, h=2, q.=1.5, q=1, e=0.5, 16=0.25" },
+                      pick: { type: "STRING", description: "Down, Up, or -" },
+                      chordChange: { type: "STRING", description: "Chord symbol starting on this beat if any" },
+                      tieToNext: { type: "BOOLEAN" },
+                      tieFromPrev: { type: "BOOLEAN" }
+                    },
+                    required: ["isRest", "pitch", "string", "fret", "durationCode", "durationBeats"]
+                  }
+                }
+              },
+              required: ["measureNumber", "events"]
+            }
+          }
+        },
+        required: ["title", "timeSignature", "measures"]
+      }
+    }
+  },
+  required: ["exercises"]
+};
+
+const OPEN_STRING_MIDI = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
+const CHROMATIC_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const NOTE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+const STANDARD_GUITAR_MAP = {
+  E4: { string: 1, fret: 0 }, F4: { string: 1, fret: 1 }, "F#4": { string: 1, fret: 2 },
+  G4: { string: 1, fret: 3 }, "G#4": { string: 1, fret: 4 }, A4: { string: 1, fret: 5 },
+  B3: { string: 2, fret: 0 }, C4: { string: 2, fret: 1 }, "C#4": { string: 2, fret: 2 },
+  D4: { string: 2, fret: 3 }, "D#4": { string: 2, fret: 4 },
+  G3: { string: 3, fret: 0 }, "G#3": { string: 3, fret: 1 }, A3: { string: 3, fret: 2 },
+  "A#3": { string: 3, fret: 3 }, Bb3: { string: 3, fret: 3 },
+  D3: { string: 4, fret: 0 }, "D#3": { string: 4, fret: 1 }, Eb3: { string: 4, fret: 1 },
+  E3: { string: 4, fret: 2 }, F3: { string: 4, fret: 3 }, "F#3": { string: 4, fret: 4 },
+  A2: { string: 5, fret: 0 }, "A#2": { string: 5, fret: 1 }, Bb2: { string: 5, fret: 1 },
+  B2: { string: 5, fret: 2 }, C3: { string: 5, fret: 3 }, "C#3": { string: 5, fret: 4 },
+  E2: { string: 6, fret: 0 }, F2: { string: 6, fret: 1 }, "F#2": { string: 6, fret: 2 },
+  G2: { string: 6, fret: 3 }, "G#2": { string: 6, fret: 4 }
+};
+
+const DUR_MAP = {
+  w: { vexDur: "w", isDotted: false, beats: 4, symbol: "1/1" },
+  "w.": { vexDur: "w", isDotted: true, beats: 6, symbol: "3/2" },
+  "h.": { vexDur: "h", isDotted: true, beats: 3, symbol: "3/4" },
+  hd: { vexDur: "h", isDotted: true, beats: 3, symbol: "3/4" },
+  h: { vexDur: "h", isDotted: false, beats: 2, symbol: "1/2" },
+  "q.": { vexDur: "q", isDotted: true, beats: 1.5, symbol: "3/8" },
+  qd: { vexDur: "q", isDotted: true, beats: 1.5, symbol: "3/8" },
+  q: { vexDur: "q", isDotted: false, beats: 1, symbol: "1/4" },
+  e: { vexDur: "8", isDotted: false, beats: 0.5, symbol: "1/8" },
+  "8": { vexDur: "8", isDotted: false, beats: 0.5, symbol: "1/8" },
+  "16": { vexDur: "16", isDotted: false, beats: 0.25, symbol: "1/16" },
+  s: { vexDur: "16", isDotted: false, beats: 0.25, symbol: "1/16" }
+};
+
+function pitchToMidi(concertPitch) {
+  const m = String(concertPitch || "").trim().match(/^([A-Ga-g])(#|b)?(\d)$/);
+  if (!m) return null;
+  const base = NOTE_SEMITONES[m[1].toUpperCase()];
+  if (base === undefined) return null;
+  const acc = m[2] === "#" ? 1 : (m[2] === "b" ? -1 : 0);
+  const oct = parseInt(m[3], 10);
+  return (oct + 1) * 12 + base + acc;
+}
+
+function midiToPitchInfo(midi) {
+  const clamped = Math.max(36, Math.min(88, Math.round(midi)));
+  const oct = Math.floor(clamped / 12) - 1;
+  const name = CHROMATIC_SHARP[clamped % 12];
+  const acc = name.includes("#") ? "#" : null;
+  const letter = name[0];
+  let displayName = name;
+  if (name === "E" && oct >= 4) displayName = "High E";
+  if (name === "E" && oct <= 2) displayName = "Low E";
+  return {
+    concertPitch: `${name}${oct}`,
+    vexKey: `${letter.toLowerCase()}${acc || ""}/${oct + 1}`,
+    accidental: acc,
+    displayName
+  };
+}
+
+function resolveEventPitchAndPosition(rawEv) {
+  let str = Number.isFinite(Number(rawEv.string)) ? parseInt(rawEv.string, 10) : null;
+  let fret = Number.isFinite(Number(rawEv.fret)) ? parseInt(rawEv.fret, 10) : null;
+  if (str !== null && (str < 1 || str > 6)) str = null;
+  if (fret !== null && (fret < 0 || fret > 22)) fret = null;
+
+  const rawPitch = String(rawEv.pitch || "").trim();
+  const pitchMatch = rawPitch.match(/^([A-Ga-g])(#|b|n)?(\d)$/);
+
+  // Prefer exact TAB string+fret when both are supplied; fallback to standard-staff pitch lookup
+  if (str !== null && fret !== null) {
+    const midi = OPEN_STRING_MIDI[str] + fret;
+    const derived = midiToPitchInfo(midi);
+    return {
+      string: str,
+      fret,
+      finger: fret === 0 ? 0 : Math.min(4, fret),
+      ...derived
+    };
+  }
+
+  if (pitchMatch) {
+    const normPitch = `${pitchMatch[1].toUpperCase()}${pitchMatch[2] && pitchMatch[2] !== "n" ? pitchMatch[2] : ""}${pitchMatch[3]}`;
+    const mapped = STANDARD_GUITAR_MAP[normPitch];
+    if (mapped) {
+      str = mapped.string;
+      fret = mapped.fret;
+    } else {
+      const midi = pitchToMidi(normPitch);
+      if (midi !== null) {
+        let best = { string: 1, fret: 0, dist: 99 };
+        for (let s = 1; s <= 6; s++) {
+          const f = midi - OPEN_STRING_MIDI[s];
+          if (f >= 0 && f <= 12 && f < best.dist) {
+            best = { string: s, fret: f, dist: f };
+          }
+        }
+        str = best.string;
+        fret = best.fret;
+      }
+    }
+    const letter = pitchMatch[1].toUpperCase();
+    const acc = pitchMatch[2] && pitchMatch[2] !== "n" ? pitchMatch[2] : null;
+    const oct = parseInt(pitchMatch[3], 10);
+    let displayName = `${letter}${acc || ""}`;
+    if (displayName === "E" && oct >= 4) displayName = "High E";
+    if (displayName === "E" && oct <= 2) displayName = "Low E";
+    return {
+      string: str || 1,
+      fret: fret !== null ? fret : 0,
+      finger: fret ? Math.min(4, fret) : 0,
+      concertPitch: normPitch,
+      vexKey: `${letter.toLowerCase()}${acc || ""}/${oct + 1}`,
+      accidental: acc,
+      displayName
+    };
+  }
+
+  // Safe fallback: open 1st string E4
+  return {
+    string: 1,
+    fret: 0,
+    finger: 0,
+    concertPitch: "E4",
+    vexKey: "e/5",
+    accidental: null,
+    displayName: "High E"
+  };
+}
+
+class PdfAiExtractor {
+  constructor() {
+    this._batchCancelled = false;
+    this._isBusy = false;
+  }
+
+  getApiKey() {
+    try {
+      return (localStorage.getItem(STORAGE_KEY_API) || "").trim();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  saveApiKey(key) {
+    const clean = String(key || "").trim();
+    try {
+      if (clean) {
+        localStorage.setItem(STORAGE_KEY_API, clean);
+      } else {
+        localStorage.removeItem(STORAGE_KEY_API);
+      }
+    } catch (e) {}
+    return clean;
+  }
+
+  loadExtractedStoreSync() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_EXTRACTED);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  _openIdb() {
+    return new Promise((resolve, reject) => {
+      if (typeof indexedDB === "undefined") {
+        reject(new Error("IndexedDB unavailable"));
+        return;
+      }
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE, { keyPath: "pageKey" });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async loadExtractedStoreAsync() {
+    const local = this.loadExtractedStoreSync();
+    try {
+      const db = await this._openIdb();
+      const rows = await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const store = tx.objectStore(IDB_STORE);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+      const merged = { ...local };
+      rows.forEach(row => {
+        if (row && row.pageKey && !merged[row.pageKey]) {
+          merged[row.pageKey] = row;
+        }
+      });
+      return merged;
+    } catch (e) {
+      return local;
+    }
+  }
+
+  async savePageEntry(entry) {
+    const storeMap = this.loadExtractedStoreSync();
+    storeMap[entry.pageKey] = entry;
+    try {
+      localStorage.setItem(STORAGE_KEY_EXTRACTED, JSON.stringify(storeMap));
+    } catch (e) {
+      // localStorage quota full on very large multi-book batches; IndexedDB below handles overflow cleanly
+    }
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).put(entry);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+    return storeMap;
+  }
+
+  async clearAllExtractedPages() {
+    try {
+      localStorage.removeItem(STORAGE_KEY_EXTRACTED);
+    } catch (e) {}
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+  }
+
+  async renderPdfPageToBase64Png(pdfDoc, pageNumber, scale = 3.0) {
+    const safePage = Math.max(1, Math.min(pageNumber, pdfDoc.numPages || pageNumber));
+    const pdfPage = await pdfDoc.getPage(safePage);
+    const viewport = pdfPage.getViewport({ scale });
+
+    const offCanvas = document.createElement("canvas");
+    offCanvas.width = Math.floor(viewport.width);
+    offCanvas.height = Math.floor(viewport.height);
+    const ctx = offCanvas.getContext("2d", { alpha: false });
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+    await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+    const dataUrl = offCanvas.toDataURL("image/png");
+
+    // Free backing store promptly between batch pages
+    offCanvas.width = 0;
+    offCanvas.height = 0;
+
+    return dataUrl.replace(/^data:image\/png;base64,/, "");
+  }
+
+  async callGeminiVision(base64Png, apiKey, contextHint = "") {
+    if (!apiKey) {
+      throw new Error("Missing Gemini API key. Click the key icon to save your API key.");
+    }
+
+    const userPrompt = contextHint
+      ? `Extract every numbered/titled guitar exercise on this page (${contextHint}). Verify duration math sums per measure against the time signature.`
+      : "Extract every numbered/titled guitar exercise on this page. Verify duration math sums per measure against the time signature.";
+
+    const payload = {
+      systemInstruction: {
+        parts: [{ text: OMR_SYSTEM_INSTRUCTION }]
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: userPrompt },
+            {
+              inlineData: {
+                mimeType: "image/png",
+                data: base64Png
+              }
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.1,
+        responseMimeType: "application/json",
+        responseSchema: OMR_RESPONSE_SCHEMA
+      }
+    };
+
+    const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      let errMsg = `Gemini API error (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson && errJson.error && errJson.error.message) {
+          errMsg = errJson.error.message;
+        }
+      } catch (e) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    const textPart =
+      data &&
+      data.candidates &&
+      data.candidates[0] &&
+      data.candidates[0].content &&
+      Array.isArray(data.candidates[0].content.parts)
+        ? data.candidates[0].content.parts.map(p => p.text || "").join("").trim()
+        : "";
+
+    if (!textPart) {
+      throw new Error("Gemini returned an empty response for this page.");
+    }
+
+    const cleanedJson = textPart
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    return JSON.parse(cleanedJson);
+  }
+
+  normalizeExtractedPage({ omrJson, bookCategory, rawPdfPage, bookPage }) {
+    const rawList = Array.isArray(omrJson && omrJson.exercises) ? omrJson.exercises : [];
+    const mathWarnings = [];
+
+    const exercises = rawList.map((rawEx, idx) => {
+      const tsStr = /^\d+\/\d+$/.test(String(rawEx.timeSignature || "").trim())
+        ? String(rawEx.timeSignature).trim()
+        : "4/4";
+      const [tsNum, tsDen] = tsStr.split("/").map(n => parseInt(n, 10) || 4);
+      const expectedMeasureBeats = tsNum * (4 / tsDen);
+      const clef = rawEx.hasTabStaff === false ? "treble" : "treble";
+      const notationMode = "standard";
+
+      const measures = [];
+      const tabData = [];
+
+      (rawEx.measures || []).forEach((rawM, mIdx) => {
+        const mNum = rawM.measureNumber || (mIdx + 1);
+        const chordName = rawM.chord && String(rawM.chord).trim() ? String(rawM.chord).trim() : null;
+        const events = [];
+        const legacyBeats = [];
+        let beatCursor = 1;
+        let runningOffset = 0;
+        let barBeatSum = 0;
+
+        (rawM.events || []).forEach((rawEv, evIdx) => {
+          const codeKey = String(rawEv.durationCode || "q").trim().toLowerCase();
+          const durSpec = DUR_MAP[codeKey] || DUR_MAP.q;
+          const durationBeats = Number(rawEv.durationBeats) > 0 ? Number(rawEv.durationBeats) : durSpec.beats;
+          barBeatSum += durationBeats;
+
+          const isRest = Boolean(rawEv.isRest || /^R(EST)?$/i.test(String(rawEv.pitch || "").trim()));
+          if (isRest) {
+            const restKey = durSpec.vexDur === "w" ? "d/5" : "b/4";
+            const evObj = {
+              beat: beatCursor,
+              isRest: true,
+              type: "rest",
+              note: "REST",
+              concertPitch: null,
+              vexKey: restKey,
+              accidental: null,
+              duration: durSpec.vexDur,
+              isDotted: durSpec.isDotted,
+              vexDuration: `${durSpec.vexDur}r`,
+              durationBeats,
+              symbol: "REST",
+              string: null,
+              fret: null,
+              finger: null,
+              pick: "-",
+              positions: [],
+              chordChange: rawEv.chordChange || null,
+              tip: `Rest (${durationBeats} ${durationBeats === 1 ? "Beat" : "Beats"})`
+            };
+            events.push(evObj);
+            legacyBeats.push({
+              beat: runningOffset + 1,
+              eventIndex: evIdx,
+              note: "REST",
+              symbol: "REST",
+              type: "rest",
+              string: null,
+              fret: null,
+              finger: null,
+              pick: "-",
+              duration: durationBeats,
+              isDotted: durSpec.isDotted,
+              isStart: true,
+              isSustain: false,
+              chordChange: rawEv.chordChange || null,
+              tip: evObj.tip
+            });
+            const wholePads = Math.floor(durationBeats) - 1;
+            for (let p = 1; p <= wholePads; p++) {
+              legacyBeats.push({
+                beat: runningOffset + 1 + p,
+                eventIndex: evIdx,
+                note: "REST",
+                symbol: "REST",
+                type: "rest",
+                string: null,
+                fret: null,
+                finger: null,
+                pick: "-",
+                duration: 1,
+                isDotted: durSpec.isDotted,
+                isStart: false,
+                isSustain: true,
+                tip: "Rest"
+              });
+            }
+          } else {
+            const resolved = resolveEventPitchAndPosition(rawEv);
+            const isTieCont = Boolean(rawEv.tieFromPrev);
+            const pick = isTieCont ? "-" : (rawEv.pick || "Down");
+            const evObj = {
+              beat: beatCursor,
+              isRest: false,
+              isChord: false,
+              type: "play",
+              note: resolved.displayName,
+              concertPitch: resolved.concertPitch,
+              vexKey: resolved.vexKey,
+              accidental: resolved.accidental,
+              duration: durSpec.vexDur,
+              isDotted: durSpec.isDotted,
+              vexDuration: durSpec.vexDur,
+              durationBeats,
+              symbol: durSpec.symbol,
+              string: resolved.string,
+              fret: resolved.fret,
+              finger: resolved.finger,
+              pick,
+              positions: [{ str: resolved.string, fret: resolved.fret }],
+              tieToNext: Boolean(rawEv.tieToNext),
+              tieFromPrev: isTieCont,
+              chordChange: rawEv.chordChange || null,
+              tip: `String ${resolved.string}, Fret ${resolved.fret}`
+            };
+            events.push(evObj);
+            legacyBeats.push({
+              beat: runningOffset + 1,
+              eventIndex: evIdx,
+              note: resolved.displayName,
+              concertPitch: resolved.concertPitch,
+              vexKey: resolved.vexKey,
+              symbol: durSpec.symbol,
+              type: "play",
+              string: resolved.string,
+              fret: resolved.fret,
+              finger: resolved.finger,
+              pick,
+              duration: durationBeats,
+              isDotted: durSpec.isDotted,
+              tieFromPrev: isTieCont,
+              tieToNext: Boolean(rawEv.tieToNext),
+              isTieContinuation: isTieCont,
+              isStart: true,
+              isSustain: false,
+              chordChange: rawEv.chordChange || null,
+              tip: isTieCont ? "Keep Holding (Tied)" : evObj.tip
+            });
+            const wholePads = Math.floor(durationBeats) - 1;
+            for (let p = 1; p <= wholePads; p++) {
+              legacyBeats.push({
+                beat: runningOffset + 1 + p,
+                eventIndex: evIdx,
+                note: resolved.displayName,
+                concertPitch: resolved.concertPitch,
+                vexKey: resolved.vexKey,
+                symbol: durSpec.symbol,
+                type: "sustain",
+                string: resolved.string,
+                fret: resolved.fret,
+                finger: resolved.finger,
+                pick: "-",
+                duration: durationBeats,
+                isDotted: durSpec.isDotted,
+                isStart: false,
+                isSustain: true,
+                tip: "Keep Holding"
+              });
+            }
+          }
+          beatCursor += durationBeats;
+          runningOffset += durationBeats;
+        });
+
+        if (Math.abs(barBeatSum - expectedMeasureBeats) > 0.05) {
+          mathWarnings.push(`Ex ${idx + 1} Bar ${mNum}: ${barBeatSum}/${expectedMeasureBeats} beats`);
+        }
+
+        measures.push({
+          measure: mNum,
+          clef,
+          notationMode,
+          timeSignature: tsStr,
+          chordName,
+          events
+        });
+
+        tabData.push({
+          measure: mNum,
+          chordName,
+          beats: legacyBeats
+        });
+      });
+
+      const prefix = bookCategory === "bonusWorkshop" ? "bw" : "lb";
+      const safeId = `${prefix}-ai-p${bookPage}-ex${idx + 1}`;
+      const barCount = measures.length;
+
+      return {
+        id: safeId,
+        title: rawEx.title || `Exercise ${idx + 1} (p. ${bookPage})`,
+        description: rawEx.description || `Extracted from Book p. ${bookPage} via Gemini 2.5 Pro Vision OMR.`,
+        timeSignature: [tsNum, tsDen],
+        defaultBpm: Number(rawEx.defaultBpm) >= 30 && Number(rawEx.defaultBpm) <= 240 ? Number(rawEx.defaultBpm) : 65,
+        pdfPage: bookPage,
+        pdfRawPage: rawPdfPage,
+        verificationStatus: "pdf-verified",
+        aiExtracted: true,
+        notationMode,
+        concepts: [`Book p. ${bookPage}`, `${barCount} Bars`, "AI Extracted"],
+        measures,
+        tabData
+      };
+    });
+
+    const pageKey = `${bookCategory}_p${rawPdfPage}`;
+    return {
+      pageKey,
+      bookCategory,
+      rawPdfPage,
+      bookPage,
+      pageTitle: (omrJson && omrJson.pageTitle) ? String(omrJson.pageTitle).trim() : `Book Page ${bookPage}`,
+      extractedAt: new Date().toISOString(),
+      mathWarnings,
+      exercises
+    };
+  }
+}
+
+
 
 
 
@@ -15261,8 +16124,11 @@ class GuitarMasterApp {
     if (typeof mergeVerifiedCurriculumIntoCourses === "function") {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
+    this.pdfAiExtractor = new PdfAiExtractor();
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
+    // Apply any persisted AI-extracted pages synchronously before flattening catalog
+    this.applyAllSavedAiExtractions(this.pdfAiExtractor.loadExtractedStoreSync(), true);
     this.allExercises = this.buildFlatExerciseList();
     this.currentExercise = this.findExerciseById("lb-s2-str1-ex1") || this.allExercises[0];
     this.currentExerciseIndex = this.allExercises.findIndex(e => e.id === this.currentExercise.id);
@@ -15328,6 +16194,7 @@ class GuitarMasterApp {
 
     // Restore state from URL Hash / LocalStorage
     this.restoreState();
+    this.hydrateIndexedDbExtractions();
   }
 
   ensureStorageVersion() {
@@ -15365,7 +16232,13 @@ class GuitarMasterApp {
         }
 
         // Remove incompatible legacy v1 app state object & obsolete keys
-        const preservedKeys = new Set(["lmgs_app_version", "guitar_completed_exercises", "guitar_checked_goals"]);
+        const preservedKeys = new Set([
+          "lmgs_app_version",
+          "guitar_completed_exercises",
+          "guitar_checked_goals",
+          "lmgs_gemini_api_key",
+          "lmgs_ai_extracted_pages_v1"
+        ]);
         Object.keys(localStorage).forEach(k => {
           if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
             localStorage.removeItem(k);
@@ -15587,6 +16460,32 @@ class GuitarMasterApp {
     this.pdfMobileLoading = document.getElementById("pdf-mobile-loading");
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
+
+    // PDF AI Extractor Toolbar & Drawers
+    this.btnGeminiApiKey = document.getElementById("btn-gemini-api-key");
+    this.aiKeyDot = document.getElementById("ai-key-dot");
+    this.geminiKeyBar = document.getElementById("gemini-key-bar");
+    this.geminiApiKeyInput = document.getElementById("gemini-api-key-input");
+    this.btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
+    this.btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
+    this.btnCloseGeminiKey = document.getElementById("btn-close-gemini-key");
+    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
+    this.btnBatchExtractToggle = document.getElementById("btn-batch-extract-toggle");
+    this.btnExportCurriculumJson = document.getElementById("btn-export-curriculum-json");
+    this.pdfBatchBar = document.getElementById("pdf-batch-bar");
+    this.batchFromPageInput = document.getElementById("batch-from-page");
+    this.batchToPageInput = document.getElementById("batch-to-page");
+    this.btnStartBatchExtract = document.getElementById("btn-start-batch-extract");
+    this.btnCancelBatchExtract = document.getElementById("btn-cancel-batch-extract");
+    this.btnCloseBatchExtract = document.getElementById("btn-close-batch-extract");
+    this.aiExtractProgressWrap = document.getElementById("ai-extract-progress-wrap");
+    this.aiExtractProgressFill = document.getElementById("ai-extract-progress-fill");
+    this.aiExtractProgressPct = document.getElementById("ai-extract-progress-pct");
+    this.aiExtractStatusBar = document.getElementById("ai-extract-status-bar");
+    this.aiExtractStatusText = document.getElementById("ai-extract-status-text");
+    this.btnClearAiPages = document.getElementById("btn-clear-ai-pages");
+    this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
+    this.syncGeminiKeyUI();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -16228,7 +17127,7 @@ class GuitarMasterApp {
     const bookPage = this.extractPageNumberFromExercise(ex);
     this.pdfBookPage = bookPage;
     this.pdfCurrentPage = this.bookPageToPdfPage(bookPage, this.pdfBookCategory);
-    const pdfHref = `${this.resolveAssetUrl(this.getPdfFilename(this.pdfBookCategory))}#page=${Math.max(1, this.pdfCurrentPage)}&view=FitH`;
+    const pdfHref = `${this.resolveAssetUrl(this.getPdfFilename(this.pdfBookCategory))}#page=${Math.max(1, this.pdfCurrentPage)}&view=FitH&navpanes=0`;
     if (this.pdfOpenNewTab) {
       this.pdfOpenNewTab.href = pdfHref;
     }
@@ -16354,7 +17253,7 @@ class GuitarMasterApp {
     const customUrl = this.customPdfUrls[this.pdfBookCategory];
     const baseSrc = customUrl || this.resolveAssetUrl(filename);
     const page = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
-    const fullUrl = `${baseSrc}#page=${page}&view=FitH`;
+    const fullUrl = `${baseSrc}#page=${page}&view=FitH&navpanes=0`;
 
     if (this.pdfOpenNewTab) this.pdfOpenNewTab.href = fullUrl;
     if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = displayFilename;
@@ -16405,6 +17304,369 @@ class GuitarMasterApp {
     } else {
       this.pdfViewerFrame.src = fullUrl;
     }
+  }
+
+  pdfPageToBookPage(pdfPage, bookCategory = "lessonBook") {
+    const raw = Math.max(1, parseInt(pdfPage, 10) || 1);
+    if (this.customPdfUrls && this.customPdfUrls[bookCategory]) return raw;
+    const offset = bookCategory === "bonusWorkshop" ? 2 : 3;
+    return raw > offset ? (raw - offset) : raw;
+  }
+
+  syncGeminiKeyUI() {
+    const hasKey = Boolean(this.pdfAiExtractor && this.pdfAiExtractor.getApiKey());
+    if (this.aiKeyDot) {
+      this.aiKeyDot.classList.toggle("is-saved", hasKey);
+    }
+    if (this.btnGeminiApiKey) {
+      this.btnGeminiApiKey.classList.toggle("has-key", hasKey);
+      this.btnGeminiApiKey.title = hasKey
+        ? "Gemini API Key saved locally (click to view/update)"
+        : "Set Gemini API Key for PDF OMR Extraction";
+    }
+    if (this.geminiApiKeyInput && hasKey && document.activeElement !== this.geminiApiKeyInput) {
+      this.geminiApiKeyInput.value = this.pdfAiExtractor.getApiKey();
+    }
+  }
+
+  setAiExtractStatus(msg, variant = "info") {
+    if (!this.aiExtractStatusBar || !this.aiExtractStatusText) return;
+    this.aiExtractStatusBar.hidden = false;
+    this.aiExtractStatusBar.dataset.variant = variant;
+    this.aiExtractStatusText.textContent = msg;
+  }
+
+  _extractTopicPageSpan(topic, sessionFallback = 1) {
+    const nums = [];
+    if (typeof topic.pdfPage === "number") nums.push(topic.pdfPage);
+    const titleStr = String(topic.topicTitle || "");
+    const rangeMatch = titleStr.match(/p\.\s*(\d+)\s*[-–]\s*(\d+)/i);
+    if (rangeMatch) {
+      return { min: parseInt(rangeMatch[1], 10), max: parseInt(rangeMatch[2], 10) };
+    }
+    const singleMatch = titleStr.match(/p\.\s*(\d+)/i);
+    if (singleMatch) {
+      const p = parseInt(singleMatch[1], 10);
+      return { min: p, max: p };
+    }
+    (topic.exercises || []).forEach(ex => {
+      if (typeof ex.pdfPage === "number") nums.push(ex.pdfPage);
+    });
+    if (nums.length > 0) {
+      return { min: Math.min(...nums), max: Math.max(...nums) };
+    }
+    return { min: sessionFallback, max: sessionFallback };
+  }
+
+  applyExtractedEntryToCourses(entry) {
+    if (!entry || !Array.isArray(entry.exercises) || entry.exercises.length === 0) return null;
+    const bookCat = entry.bookCategory === "bonusWorkshop" ? "bonusWorkshop" : "lessonBook";
+    const sessions = bookCat === "bonusWorkshop" ? GUITAR_COURSES.bonusWorkshop : GUITAR_COURSES.lessonBook;
+    if (!Array.isArray(sessions) || sessions.length === 0) return null;
+
+    const targetBookPage = entry.bookPage || entry.rawPdfPage || 1;
+    let matchedSession = null;
+    let matchedTopic = null;
+
+    // 1. Exact/range topic match for that book page
+    for (const session of sessions) {
+      for (const topic of (session.topics || [])) {
+        if (topic.topicId === `${bookCat}_ai_p${entry.rawPdfPage}`) {
+          matchedSession = session;
+          matchedTopic = topic;
+          break;
+        }
+        const span = this._extractTopicPageSpan(topic, -1);
+        if (span.min > 0 && targetBookPage >= span.min && targetBookPage <= span.max) {
+          matchedSession = session;
+          matchedTopic = topic;
+          break;
+        }
+      }
+      if (matchedTopic) break;
+    }
+
+    if (matchedTopic) {
+      matchedTopic.exercises = entry.exercises.map(ex => ({ ...ex }));
+      matchedTopic.pdfPage = targetBookPage;
+      matchedTopic.aiExtracted = true;
+      return {
+        bookCategory: bookCat,
+        sessionNumber: matchedSession.sessionNumber,
+        firstExerciseId: entry.exercises[0].id
+      };
+    }
+
+    // 2. Fallback: attach new topic under nearest preceding session by printed page
+    let fallbackSession = sessions[0];
+    let bestStartPage = -1;
+    for (const session of sessions) {
+      const m = String(session.sessionSubtitle || "").match(/p\.\s*(\d+)/i);
+      const sStart = m ? parseInt(m[1], 10) : 1;
+      if (sStart <= targetBookPage && sStart >= bestStartPage) {
+        bestStartPage = sStart;
+        fallbackSession = session;
+      }
+    }
+
+    const newTopic = {
+      topicId: `${bookCat}_ai_p${entry.rawPdfPage}`,
+      topicTitle: `${entry.pageTitle || "Extracted Lesson"} (p. ${targetBookPage})`,
+      pdfPage: targetBookPage,
+      aiExtracted: true,
+      exercises: entry.exercises.map(ex => ({ ...ex }))
+    };
+    fallbackSession.topics = fallbackSession.topics || [];
+    fallbackSession.topics.push(newTopic);
+    return {
+      bookCategory: bookCat,
+      sessionNumber: fallbackSession.sessionNumber,
+      firstExerciseId: entry.exercises[0].id
+    };
+  }
+
+  applyAllSavedAiExtractions(storeMap, skipUiRefresh = false) {
+    if (!storeMap || typeof storeMap !== "object") return 0;
+    const entries = Object.values(storeMap).sort((a, b) => (a.rawPdfPage || 0) - (b.rawPdfPage || 0));
+    let count = 0;
+    entries.forEach(entry => {
+      if (this.applyExtractedEntryToCourses(entry)) count++;
+    });
+    if (count > 0 && !skipUiRefresh) {
+      this.allExercises = this.buildFlatExerciseList();
+      this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+      if (this.currentExercise) {
+        const refreshed = this.findExerciseById(this.currentExercise.id);
+        if (refreshed) {
+          this.loadExercise(refreshed.id, true, { forceTopicRebuild: true, noScroll: true, noPdfReload: true });
+        }
+      }
+    }
+    return count;
+  }
+
+  async hydrateIndexedDbExtractions() {
+    if (!this.pdfAiExtractor) return;
+    try {
+      const localKeys = new Set(Object.keys(this.pdfAiExtractor.loadExtractedStoreSync()));
+      const fullStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
+      const idbOnly = {};
+      Object.entries(fullStore).forEach(([k, v]) => {
+        if (!localKeys.has(k)) idbOnly[k] = v;
+      });
+      if (Object.keys(idbOnly).length > 0) {
+        this.applyAllSavedAiExtractions(idbOnly, false);
+      }
+    } catch (e) {}
+  }
+
+  async getPdfDocumentForExtraction() {
+    const pdfjsLib = await this.ensurePdfJsLoaded();
+    const filename = this.getPdfFilename(this.pdfBookCategory);
+    const customUrl = this.customPdfUrls[this.pdfBookCategory];
+    const baseSrc = customUrl || this.resolveAssetUrl(filename);
+    let pdfDoc = this._pdfDocCache.get(baseSrc);
+    if (!pdfDoc) {
+      pdfDoc = await pdfjsLib.getDocument(baseSrc).promise;
+      this._pdfDocCache.set(baseSrc, pdfDoc);
+    }
+    return { pdfDoc, baseSrc };
+  }
+
+  async extractSinglePdfPage(rawPdfPage, { switchExercise = true } = {}) {
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      if (this.geminiKeyBar) {
+        this.geminiKeyBar.hidden = false;
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+      }
+      this.setAiExtractStatus("Enter and save your Gemini API key first (key icon in toolbar).", "error");
+      return null;
+    }
+
+    const pageNum = Math.max(1, parseInt(rawPdfPage, 10) || 1);
+    const bookCat = this.pdfBookCategory || "lessonBook";
+    const bookPage = this.pdfPageToBookPage(pageNum, bookCat);
+
+    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 3.0x high-DPI...`, "busy");
+    const { pdfDoc } = await this.getPdfDocumentForExtraction();
+    const clampedPage = Math.max(1, Math.min(pageNum, pdfDoc.numPages || pageNum));
+    const base64Png = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 3.0);
+
+    this.setAiExtractStatus(`Calling Gemini 2.5 Pro Vision OMR for PDF p. ${clampedPage} (Book p. ${bookPage})...`, "busy");
+    const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+    const omrJson = await this.pdfAiExtractor.callGeminiVision(
+      base64Png,
+      apiKey,
+      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`
+    );
+
+    const entry = this.pdfAiExtractor.normalizeExtractedPage({
+      omrJson,
+      bookCategory: bookCat,
+      rawPdfPage: clampedPage,
+      bookPage
+    });
+
+    if (!entry.exercises || entry.exercises.length === 0) {
+      this.setAiExtractStatus(`No musical exercises detected on PDF p. ${clampedPage}.`, "warn");
+      return entry;
+    }
+
+    await this.pdfAiExtractor.savePageEntry(entry);
+    const applied = this.applyExtractedEntryToCourses(entry);
+    this.allExercises = this.buildFlatExerciseList();
+
+    if (applied) {
+      this.currentBookCategory = applied.bookCategory;
+      this.expandedSessions.add(`${applied.bookCategory}_${applied.sessionNumber}`);
+      this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+      if (switchExercise) {
+        if (this.paneMode === "pdf") {
+          this.setPaneMode("split");
+        }
+        this.loadExercise(applied.firstExerciseId, false, {
+          forceTopicRebuild: true,
+          scrollTopicTop: true,
+          noPdfReload: true
+        });
+      }
+    }
+
+    const warnNote = entry.mathWarnings && entry.mathWarnings.length > 0
+      ? ` (Note: ${entry.mathWarnings.slice(0, 2).join("; ")})`
+      : "";
+    this.setAiExtractStatus(
+      `Extracted ${entry.exercises.length} exercise${entry.exercises.length === 1 ? "" : "s"} from PDF p. ${clampedPage} (Book p. ${bookPage}) — saved & updated live!${warnNote}`,
+      entry.mathWarnings && entry.mathWarnings.length > 0 ? "warn" : "success"
+    );
+    return entry;
+  }
+
+  async extractCurrentPdfPage() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    this.pdfAiExtractor._isBusy = true;
+    if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
+    try {
+      await this.extractSinglePdfPage(rawPage, { switchExercise: true });
+    } catch (err) {
+      this.setAiExtractStatus(`Extraction failed: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = false;
+    }
+  }
+
+  async runBatchPdfExtract() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      if (this.geminiKeyBar) {
+        this.geminiKeyBar.hidden = false;
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+      }
+      this.setAiExtractStatus("Enter and save your Gemini API key before starting Batch Extract.", "error");
+      return;
+    }
+
+    const fromRaw = Math.max(1, parseInt(this.batchFromPageInput && this.batchFromPageInput.value, 10) || 1);
+    const toRaw = Math.max(fromRaw, parseInt(this.batchToPageInput && this.batchToPageInput.value, 10) || fromRaw);
+    const total = toRaw - fromRaw + 1;
+
+    this.pdfAiExtractor._isBusy = true;
+    this.pdfAiExtractor._batchCancelled = false;
+    if (this.btnStartBatchExtract) this.btnStartBatchExtract.disabled = true;
+    if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
+    if (this.btnCancelBatchExtract) this.btnCancelBatchExtract.hidden = false;
+    if (this.aiExtractProgressWrap) this.aiExtractProgressWrap.hidden = false;
+
+    let completedPages = 0;
+    let totalExercises = 0;
+    let firstAppliedId = null;
+
+    try {
+      for (let p = fromRaw; p <= toRaw; p++) {
+        if (this.pdfAiExtractor._batchCancelled) {
+          this.setAiExtractStatus(`Batch stopped after ${completedPages}/${total} pages (${totalExercises} exercises saved).`, "warn");
+          break;
+        }
+        const pctBefore = Math.round(((p - fromRaw) / total) * 100);
+        if (this.aiExtractProgressFill) this.aiExtractProgressFill.style.width = `${pctBefore}%`;
+        if (this.aiExtractProgressPct) this.aiExtractProgressPct.textContent = `${p - fromRaw}/${total}`;
+
+        this.pdfCurrentPage = p;
+        if (this.pdfPageInput) this.pdfPageInput.value = p;
+        const entry = await this.extractSinglePdfPage(p, { switchExercise: false });
+        completedPages++;
+        if (entry && Array.isArray(entry.exercises) && entry.exercises.length > 0) {
+          totalExercises += entry.exercises.length;
+          if (!firstAppliedId) firstAppliedId = entry.exercises[0].id;
+        }
+
+        const pctAfter = Math.round((completedPages / total) * 100);
+        if (this.aiExtractProgressFill) this.aiExtractProgressFill.style.width = `${pctAfter}%`;
+        if (this.aiExtractProgressPct) this.aiExtractProgressPct.textContent = `${completedPages}/${total}`;
+      }
+
+      if (!this.pdfAiExtractor._batchCancelled) {
+        if (firstAppliedId) {
+          if (this.paneMode === "pdf") this.setPaneMode("split");
+          this.loadExercise(firstAppliedId, false, {
+            forceTopicRebuild: true,
+            scrollTopicTop: true,
+            noPdfReload: true
+          });
+        }
+        this.setAiExtractStatus(
+          `Batch complete: ${completedPages} pages processed, ${totalExercises} exercises extracted & saved!`,
+          "success"
+        );
+      }
+    } catch (err) {
+      this.setAiExtractStatus(`Batch stopped on error: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnStartBatchExtract) this.btnStartBatchExtract.disabled = false;
+      if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = false;
+      if (this.btnCancelBatchExtract) this.btnCancelBatchExtract.hidden = true;
+    }
+  }
+
+  async exportCurriculumJson() {
+    const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+    const pageList = Object.values(store).sort((a, b) => (a.rawPdfPage || 0) - (b.rawPdfPage || 0));
+    const exportPayload = {
+      schemaVersion: "2.0.0",
+      exportedAt: new Date().toISOString(),
+      model: "gemini-2.5-pro",
+      extractedPageCount: pageList.length,
+      extractedPages: pageList,
+      courses: {
+        lessonBook: GUITAR_COURSES.lessonBook,
+        bonusWorkshop: GUITAR_COURSES.bonusWorkshop
+      }
+    };
+    const jsonStr = JSON.stringify(exportPayload, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lmgs-curriculum-${pageList.length > 0 ? `${pageList.length}-extracted-pages` : "snapshot"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.setAiExtractStatus(
+      `Exported JSON (${pageList.length} AI-extracted PDF page${pageList.length === 1 ? "" : "s"} + full curriculum).`,
+      "success"
+    );
+  }
+
+  async clearAiExtractedData() {
+    await this.pdfAiExtractor.clearAllExtractedPages();
+    this.setAiExtractStatus("Cleared all saved AI-extracted pages. Reloading built-in curriculum...", "info");
+    setTimeout(() => window.location.reload(), 450);
   }
 
   switchView(viewName) {
@@ -16954,6 +18216,7 @@ class GuitarMasterApp {
       }
     } else {
       const needsTopicRebuild = (
+        Boolean(uiOpts && uiOpts.forceTopicRebuild) ||
         prevTopicId !== found.topicId ||
         this.activeTopicRenderers.size === 0 ||
         !this.activeTopicRenderers.has(found.id)
@@ -16977,7 +18240,7 @@ class GuitarMasterApp {
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    if (!isFreeMet) {
+    if (!isFreeMet && !(uiOpts && uiOpts.noPdfReload)) {
       this.syncPdfToExercise(found);
     }
     this.saveState();
@@ -18364,6 +19627,93 @@ class GuitarMasterApp {
         this.pdfCurrentPage = (parseInt(this.pdfCurrentPage, 10) || 1) + 1;
         if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
         this.loadPdfFrame();
+      });
+    }
+
+    // PDF AI OMR Extractor Controls
+    if (this.btnGeminiApiKey && this.geminiKeyBar) {
+      this.btnGeminiApiKey.addEventListener("click", () => {
+        const nextHidden = !this.geminiKeyBar.hidden;
+        this.geminiKeyBar.hidden = nextHidden;
+        if (!nextHidden) {
+          if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
+          this.syncGeminiKeyUI();
+          if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+        }
+      });
+    }
+    if (this.btnCloseGeminiKey && this.geminiKeyBar) {
+      this.btnCloseGeminiKey.addEventListener("click", () => {
+        this.geminiKeyBar.hidden = true;
+      });
+    }
+    if (this.btnSaveGeminiKey) {
+      this.btnSaveGeminiKey.addEventListener("click", () => {
+        const val = this.geminiApiKeyInput ? this.geminiApiKeyInput.value : "";
+        const saved = this.pdfAiExtractor.saveApiKey(val);
+        this.syncGeminiKeyUI();
+        if (saved) {
+          if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+          this.setAiExtractStatus("Gemini API Key saved in browser localStorage.", "success");
+        } else {
+          this.setAiExtractStatus("API Key cleared.", "info");
+        }
+      });
+    }
+    if (this.btnClearGeminiKey) {
+      this.btnClearGeminiKey.addEventListener("click", () => {
+        this.pdfAiExtractor.saveApiKey("");
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.value = "";
+        this.syncGeminiKeyUI();
+        this.setAiExtractStatus("Gemini API Key removed.", "info");
+      });
+    }
+    if (this.btnExtractPdfPage) {
+      this.btnExtractPdfPage.addEventListener("click", () => {
+        this.extractCurrentPdfPage();
+      });
+    }
+    if (this.btnBatchExtractToggle && this.pdfBatchBar) {
+      this.btnBatchExtractToggle.addEventListener("click", () => {
+        const nextHidden = !this.pdfBatchBar.hidden;
+        this.pdfBatchBar.hidden = nextHidden;
+        if (!nextHidden) {
+          if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+          const cur = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+          if (this.batchFromPageInput) this.batchFromPageInput.value = cur;
+          if (this.batchToPageInput) this.batchToPageInput.value = cur + 4;
+        }
+      });
+    }
+    if (this.btnCloseBatchExtract && this.pdfBatchBar) {
+      this.btnCloseBatchExtract.addEventListener("click", () => {
+        this.pdfBatchBar.hidden = true;
+      });
+    }
+    if (this.btnStartBatchExtract) {
+      this.btnStartBatchExtract.addEventListener("click", () => {
+        this.runBatchPdfExtract();
+      });
+    }
+    if (this.btnCancelBatchExtract) {
+      this.btnCancelBatchExtract.addEventListener("click", () => {
+        this.pdfAiExtractor._batchCancelled = true;
+        this.setAiExtractStatus("Stopping batch after current page...", "warn");
+      });
+    }
+    if (this.btnExportCurriculumJson) {
+      this.btnExportCurriculumJson.addEventListener("click", () => {
+        this.exportCurriculumJson();
+      });
+    }
+    if (this.btnClearAiPages) {
+      this.btnClearAiPages.addEventListener("click", () => {
+        this.clearAiExtractedData();
+      });
+    }
+    if (this.btnDismissAiStatus && this.aiExtractStatusBar) {
+      this.btnDismissAiStatus.addEventListener("click", () => {
+        this.aiExtractStatusBar.hidden = true;
       });
     }
 

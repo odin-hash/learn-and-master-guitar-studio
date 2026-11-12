@@ -5,14 +5,18 @@ import { GuitarSpeedDial } from "./dial.js";
 import { FretboardVisualizer } from "./fretboard.js";
 import { FoundationsPrimer } from "./src/components/FoundationsPrimer.js";
 import { ScoreRenderer } from "./src/components/ScoreRenderer.js";
+import { PdfAiExtractor } from "./src/components/PdfAiExtractor.js";
 
 export class GuitarMasterApp {
   constructor() {
     if (typeof mergeVerifiedCurriculumIntoCourses === "function") {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
+    this.pdfAiExtractor = new PdfAiExtractor();
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
+    // Apply any persisted AI-extracted pages synchronously before flattening catalog
+    this.applyAllSavedAiExtractions(this.pdfAiExtractor.loadExtractedStoreSync(), true);
     this.allExercises = this.buildFlatExerciseList();
     this.currentExercise = this.findExerciseById("lb-s2-str1-ex1") || this.allExercises[0];
     this.currentExerciseIndex = this.allExercises.findIndex(e => e.id === this.currentExercise.id);
@@ -78,6 +82,7 @@ export class GuitarMasterApp {
 
     // Restore state from URL Hash / LocalStorage
     this.restoreState();
+    this.hydrateIndexedDbExtractions();
   }
 
   ensureStorageVersion() {
@@ -115,7 +120,13 @@ export class GuitarMasterApp {
         }
 
         // Remove incompatible legacy v1 app state object & obsolete keys
-        const preservedKeys = new Set(["lmgs_app_version", "guitar_completed_exercises", "guitar_checked_goals"]);
+        const preservedKeys = new Set([
+          "lmgs_app_version",
+          "guitar_completed_exercises",
+          "guitar_checked_goals",
+          "lmgs_gemini_api_key",
+          "lmgs_ai_extracted_pages_v1"
+        ]);
         Object.keys(localStorage).forEach(k => {
           if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
             localStorage.removeItem(k);
@@ -337,6 +348,32 @@ export class GuitarMasterApp {
     this.pdfMobileLoading = document.getElementById("pdf-mobile-loading");
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
+
+    // PDF AI Extractor Toolbar & Drawers
+    this.btnGeminiApiKey = document.getElementById("btn-gemini-api-key");
+    this.aiKeyDot = document.getElementById("ai-key-dot");
+    this.geminiKeyBar = document.getElementById("gemini-key-bar");
+    this.geminiApiKeyInput = document.getElementById("gemini-api-key-input");
+    this.btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
+    this.btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
+    this.btnCloseGeminiKey = document.getElementById("btn-close-gemini-key");
+    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
+    this.btnBatchExtractToggle = document.getElementById("btn-batch-extract-toggle");
+    this.btnExportCurriculumJson = document.getElementById("btn-export-curriculum-json");
+    this.pdfBatchBar = document.getElementById("pdf-batch-bar");
+    this.batchFromPageInput = document.getElementById("batch-from-page");
+    this.batchToPageInput = document.getElementById("batch-to-page");
+    this.btnStartBatchExtract = document.getElementById("btn-start-batch-extract");
+    this.btnCancelBatchExtract = document.getElementById("btn-cancel-batch-extract");
+    this.btnCloseBatchExtract = document.getElementById("btn-close-batch-extract");
+    this.aiExtractProgressWrap = document.getElementById("ai-extract-progress-wrap");
+    this.aiExtractProgressFill = document.getElementById("ai-extract-progress-fill");
+    this.aiExtractProgressPct = document.getElementById("ai-extract-progress-pct");
+    this.aiExtractStatusBar = document.getElementById("ai-extract-status-bar");
+    this.aiExtractStatusText = document.getElementById("ai-extract-status-text");
+    this.btnClearAiPages = document.getElementById("btn-clear-ai-pages");
+    this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
+    this.syncGeminiKeyUI();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -978,7 +1015,7 @@ export class GuitarMasterApp {
     const bookPage = this.extractPageNumberFromExercise(ex);
     this.pdfBookPage = bookPage;
     this.pdfCurrentPage = this.bookPageToPdfPage(bookPage, this.pdfBookCategory);
-    const pdfHref = `${this.resolveAssetUrl(this.getPdfFilename(this.pdfBookCategory))}#page=${Math.max(1, this.pdfCurrentPage)}&view=FitH`;
+    const pdfHref = `${this.resolveAssetUrl(this.getPdfFilename(this.pdfBookCategory))}#page=${Math.max(1, this.pdfCurrentPage)}&view=FitH&navpanes=0`;
     if (this.pdfOpenNewTab) {
       this.pdfOpenNewTab.href = pdfHref;
     }
@@ -1104,7 +1141,7 @@ export class GuitarMasterApp {
     const customUrl = this.customPdfUrls[this.pdfBookCategory];
     const baseSrc = customUrl || this.resolveAssetUrl(filename);
     const page = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
-    const fullUrl = `${baseSrc}#page=${page}&view=FitH`;
+    const fullUrl = `${baseSrc}#page=${page}&view=FitH&navpanes=0`;
 
     if (this.pdfOpenNewTab) this.pdfOpenNewTab.href = fullUrl;
     if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = displayFilename;
@@ -1155,6 +1192,369 @@ export class GuitarMasterApp {
     } else {
       this.pdfViewerFrame.src = fullUrl;
     }
+  }
+
+  pdfPageToBookPage(pdfPage, bookCategory = "lessonBook") {
+    const raw = Math.max(1, parseInt(pdfPage, 10) || 1);
+    if (this.customPdfUrls && this.customPdfUrls[bookCategory]) return raw;
+    const offset = bookCategory === "bonusWorkshop" ? 2 : 3;
+    return raw > offset ? (raw - offset) : raw;
+  }
+
+  syncGeminiKeyUI() {
+    const hasKey = Boolean(this.pdfAiExtractor && this.pdfAiExtractor.getApiKey());
+    if (this.aiKeyDot) {
+      this.aiKeyDot.classList.toggle("is-saved", hasKey);
+    }
+    if (this.btnGeminiApiKey) {
+      this.btnGeminiApiKey.classList.toggle("has-key", hasKey);
+      this.btnGeminiApiKey.title = hasKey
+        ? "Gemini API Key saved locally (click to view/update)"
+        : "Set Gemini API Key for PDF OMR Extraction";
+    }
+    if (this.geminiApiKeyInput && hasKey && document.activeElement !== this.geminiApiKeyInput) {
+      this.geminiApiKeyInput.value = this.pdfAiExtractor.getApiKey();
+    }
+  }
+
+  setAiExtractStatus(msg, variant = "info") {
+    if (!this.aiExtractStatusBar || !this.aiExtractStatusText) return;
+    this.aiExtractStatusBar.hidden = false;
+    this.aiExtractStatusBar.dataset.variant = variant;
+    this.aiExtractStatusText.textContent = msg;
+  }
+
+  _extractTopicPageSpan(topic, sessionFallback = 1) {
+    const nums = [];
+    if (typeof topic.pdfPage === "number") nums.push(topic.pdfPage);
+    const titleStr = String(topic.topicTitle || "");
+    const rangeMatch = titleStr.match(/p\.\s*(\d+)\s*[-–]\s*(\d+)/i);
+    if (rangeMatch) {
+      return { min: parseInt(rangeMatch[1], 10), max: parseInt(rangeMatch[2], 10) };
+    }
+    const singleMatch = titleStr.match(/p\.\s*(\d+)/i);
+    if (singleMatch) {
+      const p = parseInt(singleMatch[1], 10);
+      return { min: p, max: p };
+    }
+    (topic.exercises || []).forEach(ex => {
+      if (typeof ex.pdfPage === "number") nums.push(ex.pdfPage);
+    });
+    if (nums.length > 0) {
+      return { min: Math.min(...nums), max: Math.max(...nums) };
+    }
+    return { min: sessionFallback, max: sessionFallback };
+  }
+
+  applyExtractedEntryToCourses(entry) {
+    if (!entry || !Array.isArray(entry.exercises) || entry.exercises.length === 0) return null;
+    const bookCat = entry.bookCategory === "bonusWorkshop" ? "bonusWorkshop" : "lessonBook";
+    const sessions = bookCat === "bonusWorkshop" ? GUITAR_COURSES.bonusWorkshop : GUITAR_COURSES.lessonBook;
+    if (!Array.isArray(sessions) || sessions.length === 0) return null;
+
+    const targetBookPage = entry.bookPage || entry.rawPdfPage || 1;
+    let matchedSession = null;
+    let matchedTopic = null;
+
+    // 1. Exact/range topic match for that book page
+    for (const session of sessions) {
+      for (const topic of (session.topics || [])) {
+        if (topic.topicId === `${bookCat}_ai_p${entry.rawPdfPage}`) {
+          matchedSession = session;
+          matchedTopic = topic;
+          break;
+        }
+        const span = this._extractTopicPageSpan(topic, -1);
+        if (span.min > 0 && targetBookPage >= span.min && targetBookPage <= span.max) {
+          matchedSession = session;
+          matchedTopic = topic;
+          break;
+        }
+      }
+      if (matchedTopic) break;
+    }
+
+    if (matchedTopic) {
+      matchedTopic.exercises = entry.exercises.map(ex => ({ ...ex }));
+      matchedTopic.pdfPage = targetBookPage;
+      matchedTopic.aiExtracted = true;
+      return {
+        bookCategory: bookCat,
+        sessionNumber: matchedSession.sessionNumber,
+        firstExerciseId: entry.exercises[0].id
+      };
+    }
+
+    // 2. Fallback: attach new topic under nearest preceding session by printed page
+    let fallbackSession = sessions[0];
+    let bestStartPage = -1;
+    for (const session of sessions) {
+      const m = String(session.sessionSubtitle || "").match(/p\.\s*(\d+)/i);
+      const sStart = m ? parseInt(m[1], 10) : 1;
+      if (sStart <= targetBookPage && sStart >= bestStartPage) {
+        bestStartPage = sStart;
+        fallbackSession = session;
+      }
+    }
+
+    const newTopic = {
+      topicId: `${bookCat}_ai_p${entry.rawPdfPage}`,
+      topicTitle: `${entry.pageTitle || "Extracted Lesson"} (p. ${targetBookPage})`,
+      pdfPage: targetBookPage,
+      aiExtracted: true,
+      exercises: entry.exercises.map(ex => ({ ...ex }))
+    };
+    fallbackSession.topics = fallbackSession.topics || [];
+    fallbackSession.topics.push(newTopic);
+    return {
+      bookCategory: bookCat,
+      sessionNumber: fallbackSession.sessionNumber,
+      firstExerciseId: entry.exercises[0].id
+    };
+  }
+
+  applyAllSavedAiExtractions(storeMap, skipUiRefresh = false) {
+    if (!storeMap || typeof storeMap !== "object") return 0;
+    const entries = Object.values(storeMap).sort((a, b) => (a.rawPdfPage || 0) - (b.rawPdfPage || 0));
+    let count = 0;
+    entries.forEach(entry => {
+      if (this.applyExtractedEntryToCourses(entry)) count++;
+    });
+    if (count > 0 && !skipUiRefresh) {
+      this.allExercises = this.buildFlatExerciseList();
+      this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+      if (this.currentExercise) {
+        const refreshed = this.findExerciseById(this.currentExercise.id);
+        if (refreshed) {
+          this.loadExercise(refreshed.id, true, { forceTopicRebuild: true, noScroll: true, noPdfReload: true });
+        }
+      }
+    }
+    return count;
+  }
+
+  async hydrateIndexedDbExtractions() {
+    if (!this.pdfAiExtractor) return;
+    try {
+      const localKeys = new Set(Object.keys(this.pdfAiExtractor.loadExtractedStoreSync()));
+      const fullStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
+      const idbOnly = {};
+      Object.entries(fullStore).forEach(([k, v]) => {
+        if (!localKeys.has(k)) idbOnly[k] = v;
+      });
+      if (Object.keys(idbOnly).length > 0) {
+        this.applyAllSavedAiExtractions(idbOnly, false);
+      }
+    } catch (e) {}
+  }
+
+  async getPdfDocumentForExtraction() {
+    const pdfjsLib = await this.ensurePdfJsLoaded();
+    const filename = this.getPdfFilename(this.pdfBookCategory);
+    const customUrl = this.customPdfUrls[this.pdfBookCategory];
+    const baseSrc = customUrl || this.resolveAssetUrl(filename);
+    let pdfDoc = this._pdfDocCache.get(baseSrc);
+    if (!pdfDoc) {
+      pdfDoc = await pdfjsLib.getDocument(baseSrc).promise;
+      this._pdfDocCache.set(baseSrc, pdfDoc);
+    }
+    return { pdfDoc, baseSrc };
+  }
+
+  async extractSinglePdfPage(rawPdfPage, { switchExercise = true } = {}) {
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      if (this.geminiKeyBar) {
+        this.geminiKeyBar.hidden = false;
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+      }
+      this.setAiExtractStatus("Enter and save your Gemini API key first (key icon in toolbar).", "error");
+      return null;
+    }
+
+    const pageNum = Math.max(1, parseInt(rawPdfPage, 10) || 1);
+    const bookCat = this.pdfBookCategory || "lessonBook";
+    const bookPage = this.pdfPageToBookPage(pageNum, bookCat);
+
+    this.setAiExtractStatus(`Rendering PDF p. ${pageNum} at 3.0x high-DPI...`, "busy");
+    const { pdfDoc } = await this.getPdfDocumentForExtraction();
+    const clampedPage = Math.max(1, Math.min(pageNum, pdfDoc.numPages || pageNum));
+    const base64Png = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 3.0);
+
+    this.setAiExtractStatus(`Calling Gemini 2.5 Pro Vision OMR for PDF p. ${clampedPage} (Book p. ${bookPage})...`, "busy");
+    const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+    const omrJson = await this.pdfAiExtractor.callGeminiVision(
+      base64Png,
+      apiKey,
+      `${bookLabel}, PDF page ${clampedPage}, Printed page ${bookPage}`
+    );
+
+    const entry = this.pdfAiExtractor.normalizeExtractedPage({
+      omrJson,
+      bookCategory: bookCat,
+      rawPdfPage: clampedPage,
+      bookPage
+    });
+
+    if (!entry.exercises || entry.exercises.length === 0) {
+      this.setAiExtractStatus(`No musical exercises detected on PDF p. ${clampedPage}.`, "warn");
+      return entry;
+    }
+
+    await this.pdfAiExtractor.savePageEntry(entry);
+    const applied = this.applyExtractedEntryToCourses(entry);
+    this.allExercises = this.buildFlatExerciseList();
+
+    if (applied) {
+      this.currentBookCategory = applied.bookCategory;
+      this.expandedSessions.add(`${applied.bookCategory}_${applied.sessionNumber}`);
+      this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+      if (switchExercise) {
+        if (this.paneMode === "pdf") {
+          this.setPaneMode("split");
+        }
+        this.loadExercise(applied.firstExerciseId, false, {
+          forceTopicRebuild: true,
+          scrollTopicTop: true,
+          noPdfReload: true
+        });
+      }
+    }
+
+    const warnNote = entry.mathWarnings && entry.mathWarnings.length > 0
+      ? ` (Note: ${entry.mathWarnings.slice(0, 2).join("; ")})`
+      : "";
+    this.setAiExtractStatus(
+      `Extracted ${entry.exercises.length} exercise${entry.exercises.length === 1 ? "" : "s"} from PDF p. ${clampedPage} (Book p. ${bookPage}) — saved & updated live!${warnNote}`,
+      entry.mathWarnings && entry.mathWarnings.length > 0 ? "warn" : "success"
+    );
+    return entry;
+  }
+
+  async extractCurrentPdfPage() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    this.pdfAiExtractor._isBusy = true;
+    if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
+    try {
+      await this.extractSinglePdfPage(rawPage, { switchExercise: true });
+    } catch (err) {
+      this.setAiExtractStatus(`Extraction failed: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = false;
+    }
+  }
+
+  async runBatchPdfExtract() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      if (this.geminiKeyBar) {
+        this.geminiKeyBar.hidden = false;
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+      }
+      this.setAiExtractStatus("Enter and save your Gemini API key before starting Batch Extract.", "error");
+      return;
+    }
+
+    const fromRaw = Math.max(1, parseInt(this.batchFromPageInput && this.batchFromPageInput.value, 10) || 1);
+    const toRaw = Math.max(fromRaw, parseInt(this.batchToPageInput && this.batchToPageInput.value, 10) || fromRaw);
+    const total = toRaw - fromRaw + 1;
+
+    this.pdfAiExtractor._isBusy = true;
+    this.pdfAiExtractor._batchCancelled = false;
+    if (this.btnStartBatchExtract) this.btnStartBatchExtract.disabled = true;
+    if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
+    if (this.btnCancelBatchExtract) this.btnCancelBatchExtract.hidden = false;
+    if (this.aiExtractProgressWrap) this.aiExtractProgressWrap.hidden = false;
+
+    let completedPages = 0;
+    let totalExercises = 0;
+    let firstAppliedId = null;
+
+    try {
+      for (let p = fromRaw; p <= toRaw; p++) {
+        if (this.pdfAiExtractor._batchCancelled) {
+          this.setAiExtractStatus(`Batch stopped after ${completedPages}/${total} pages (${totalExercises} exercises saved).`, "warn");
+          break;
+        }
+        const pctBefore = Math.round(((p - fromRaw) / total) * 100);
+        if (this.aiExtractProgressFill) this.aiExtractProgressFill.style.width = `${pctBefore}%`;
+        if (this.aiExtractProgressPct) this.aiExtractProgressPct.textContent = `${p - fromRaw}/${total}`;
+
+        this.pdfCurrentPage = p;
+        if (this.pdfPageInput) this.pdfPageInput.value = p;
+        const entry = await this.extractSinglePdfPage(p, { switchExercise: false });
+        completedPages++;
+        if (entry && Array.isArray(entry.exercises) && entry.exercises.length > 0) {
+          totalExercises += entry.exercises.length;
+          if (!firstAppliedId) firstAppliedId = entry.exercises[0].id;
+        }
+
+        const pctAfter = Math.round((completedPages / total) * 100);
+        if (this.aiExtractProgressFill) this.aiExtractProgressFill.style.width = `${pctAfter}%`;
+        if (this.aiExtractProgressPct) this.aiExtractProgressPct.textContent = `${completedPages}/${total}`;
+      }
+
+      if (!this.pdfAiExtractor._batchCancelled) {
+        if (firstAppliedId) {
+          if (this.paneMode === "pdf") this.setPaneMode("split");
+          this.loadExercise(firstAppliedId, false, {
+            forceTopicRebuild: true,
+            scrollTopicTop: true,
+            noPdfReload: true
+          });
+        }
+        this.setAiExtractStatus(
+          `Batch complete: ${completedPages} pages processed, ${totalExercises} exercises extracted & saved!`,
+          "success"
+        );
+      }
+    } catch (err) {
+      this.setAiExtractStatus(`Batch stopped on error: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnStartBatchExtract) this.btnStartBatchExtract.disabled = false;
+      if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = false;
+      if (this.btnCancelBatchExtract) this.btnCancelBatchExtract.hidden = true;
+    }
+  }
+
+  async exportCurriculumJson() {
+    const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+    const pageList = Object.values(store).sort((a, b) => (a.rawPdfPage || 0) - (b.rawPdfPage || 0));
+    const exportPayload = {
+      schemaVersion: "2.0.0",
+      exportedAt: new Date().toISOString(),
+      model: "gemini-2.5-pro",
+      extractedPageCount: pageList.length,
+      extractedPages: pageList,
+      courses: {
+        lessonBook: GUITAR_COURSES.lessonBook,
+        bonusWorkshop: GUITAR_COURSES.bonusWorkshop
+      }
+    };
+    const jsonStr = JSON.stringify(exportPayload, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lmgs-curriculum-${pageList.length > 0 ? `${pageList.length}-extracted-pages` : "snapshot"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.setAiExtractStatus(
+      `Exported JSON (${pageList.length} AI-extracted PDF page${pageList.length === 1 ? "" : "s"} + full curriculum).`,
+      "success"
+    );
+  }
+
+  async clearAiExtractedData() {
+    await this.pdfAiExtractor.clearAllExtractedPages();
+    this.setAiExtractStatus("Cleared all saved AI-extracted pages. Reloading built-in curriculum...", "info");
+    setTimeout(() => window.location.reload(), 450);
   }
 
   switchView(viewName) {
@@ -1704,6 +2104,7 @@ export class GuitarMasterApp {
       }
     } else {
       const needsTopicRebuild = (
+        Boolean(uiOpts && uiOpts.forceTopicRebuild) ||
         prevTopicId !== found.topicId ||
         this.activeTopicRenderers.size === 0 ||
         !this.activeTopicRenderers.has(found.id)
@@ -1727,7 +2128,7 @@ export class GuitarMasterApp {
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    if (!isFreeMet) {
+    if (!isFreeMet && !(uiOpts && uiOpts.noPdfReload)) {
       this.syncPdfToExercise(found);
     }
     this.saveState();
@@ -3114,6 +3515,93 @@ export class GuitarMasterApp {
         this.pdfCurrentPage = (parseInt(this.pdfCurrentPage, 10) || 1) + 1;
         if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
         this.loadPdfFrame();
+      });
+    }
+
+    // PDF AI OMR Extractor Controls
+    if (this.btnGeminiApiKey && this.geminiKeyBar) {
+      this.btnGeminiApiKey.addEventListener("click", () => {
+        const nextHidden = !this.geminiKeyBar.hidden;
+        this.geminiKeyBar.hidden = nextHidden;
+        if (!nextHidden) {
+          if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
+          this.syncGeminiKeyUI();
+          if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
+        }
+      });
+    }
+    if (this.btnCloseGeminiKey && this.geminiKeyBar) {
+      this.btnCloseGeminiKey.addEventListener("click", () => {
+        this.geminiKeyBar.hidden = true;
+      });
+    }
+    if (this.btnSaveGeminiKey) {
+      this.btnSaveGeminiKey.addEventListener("click", () => {
+        const val = this.geminiApiKeyInput ? this.geminiApiKeyInput.value : "";
+        const saved = this.pdfAiExtractor.saveApiKey(val);
+        this.syncGeminiKeyUI();
+        if (saved) {
+          if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+          this.setAiExtractStatus("Gemini API Key saved in browser localStorage.", "success");
+        } else {
+          this.setAiExtractStatus("API Key cleared.", "info");
+        }
+      });
+    }
+    if (this.btnClearGeminiKey) {
+      this.btnClearGeminiKey.addEventListener("click", () => {
+        this.pdfAiExtractor.saveApiKey("");
+        if (this.geminiApiKeyInput) this.geminiApiKeyInput.value = "";
+        this.syncGeminiKeyUI();
+        this.setAiExtractStatus("Gemini API Key removed.", "info");
+      });
+    }
+    if (this.btnExtractPdfPage) {
+      this.btnExtractPdfPage.addEventListener("click", () => {
+        this.extractCurrentPdfPage();
+      });
+    }
+    if (this.btnBatchExtractToggle && this.pdfBatchBar) {
+      this.btnBatchExtractToggle.addEventListener("click", () => {
+        const nextHidden = !this.pdfBatchBar.hidden;
+        this.pdfBatchBar.hidden = nextHidden;
+        if (!nextHidden) {
+          if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
+          const cur = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+          if (this.batchFromPageInput) this.batchFromPageInput.value = cur;
+          if (this.batchToPageInput) this.batchToPageInput.value = cur + 4;
+        }
+      });
+    }
+    if (this.btnCloseBatchExtract && this.pdfBatchBar) {
+      this.btnCloseBatchExtract.addEventListener("click", () => {
+        this.pdfBatchBar.hidden = true;
+      });
+    }
+    if (this.btnStartBatchExtract) {
+      this.btnStartBatchExtract.addEventListener("click", () => {
+        this.runBatchPdfExtract();
+      });
+    }
+    if (this.btnCancelBatchExtract) {
+      this.btnCancelBatchExtract.addEventListener("click", () => {
+        this.pdfAiExtractor._batchCancelled = true;
+        this.setAiExtractStatus("Stopping batch after current page...", "warn");
+      });
+    }
+    if (this.btnExportCurriculumJson) {
+      this.btnExportCurriculumJson.addEventListener("click", () => {
+        this.exportCurriculumJson();
+      });
+    }
+    if (this.btnClearAiPages) {
+      this.btnClearAiPages.addEventListener("click", () => {
+        this.clearAiExtractedData();
+      });
+    }
+    if (this.btnDismissAiStatus && this.aiExtractStatusBar) {
+      this.btnDismissAiStatus.addEventListener("click", () => {
+        this.aiExtractStatusBar.hidden = true;
       });
     }
 

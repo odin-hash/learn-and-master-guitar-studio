@@ -2245,14 +2245,16 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .pdf-toolbar {
-  height: 40px;
+  min-height: 40px;
+  height: auto;
   background: var(--bg-canvas);
   border-bottom: 1px solid var(--border-hairline);
-  padding: 0 12px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   flex-shrink: 0;
 }
 
@@ -2260,7 +2262,8 @@ button.acc-topic-btn.is-active-topic {
 .pdf-toolbar-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .pdf-toolbar .micro-pill {
@@ -2271,6 +2274,162 @@ button.acc-topic-btn.is-active-topic {
 .pdf-toolbar .micro-pill.active {
   background: var(--bg-surface);
   border-color: var(--border-strong);
+}
+
+.pdf-ai-key-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px !important;
+}
+
+.ai-key-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D4D4D8;
+  transition: background-color 0.15s ease;
+}
+
+.ai-key-dot.is-saved {
+  background: #16A34A;
+}
+
+.pdf-ai-extract-btn {
+  background: #18181B !important;
+  border-color: #18181B !important;
+  color: #FFFEFC !important;
+  font-weight: 600;
+}
+
+.pdf-ai-extract-btn:hover:not(:disabled) {
+  background: #C2410C !important;
+  border-color: #C2410C !important;
+}
+
+.pdf-ai-extract-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.pdf-ai-drawer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #F4F3EE;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-shrink: 0;
+}
+
+.pdf-ai-drawer[hidden],
+.pdf-ai-status-bar[hidden],
+.pdf-ai-progress-wrap[hidden] {
+  display: none !important;
+}
+
+.pdf-ai-drawer-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-key-input {
+  flex: 1 1 180px;
+  min-width: 140px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.pdf-ai-key-input:focus {
+  border-color: var(--text-primary);
+}
+
+.pdf-ai-primary-sm {
+  background: #18181B !important;
+  border-color: #18181B !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.pdf-batch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.pdf-ai-progress-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #E4E4E7;
+  overflow: hidden;
+}
+
+.pdf-ai-progress-fill {
+  height: 100%;
+  background: #C2410C;
+  transition: width 0.2s ease;
+}
+
+.pdf-ai-progress-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pdf-ai-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  border-bottom: 1px solid var(--border-hairline);
+  background: #FAF9F5;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.pdf-ai-status-bar[data-variant="success"] {
+  background: #F0FDF4;
+  color: #166534;
+}
+
+.pdf-ai-status-bar[data-variant="warn"] {
+  background: #FFFBEB;
+  color: #92400E;
+}
+
+.pdf-ai-status-bar[data-variant="error"] {
+  background: #FEF2F2;
+  color: #991B1B;
+}
+
+.pdf-ai-status-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
 }
 
 .pdf-page-group {
