@@ -17,8 +17,8 @@ export class GuitarMasterApp {
     this.adminMode = false;
     this.editingExerciseId = null;
     this.notationEditor = new NotationEditor({
-      onCommitExercise: (updatedEx, mIdx, tabBeatIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx),
-      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest)
+      onCommitExercise: (updatedEx, mIdx, tabBeatIdx, evIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx),
+      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx)
     });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
@@ -1335,11 +1335,50 @@ export class GuitarMasterApp {
     this.allExercises = this.buildFlatExerciseList();
   }
 
-  handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx) {
+  _buildFeedbackBeatFromMeasureEvent(ex, mIdx, tabBeatIdx, evIdx = null) {
+    if (!ex) return null;
+    const m = Array.isArray(ex.measures) ? ex.measures[mIdx] : null;
+    const evs = m && Array.isArray(m.events) ? m.events : null;
+    let ev = (evs && evIdx !== null && evIdx !== undefined) ? evs[evIdx] : null;
+    if (!ev && evs) {
+      ev = evs.find(x => x.tabBeatIndex === tabBeatIdx) || evs[0] || null;
+    }
+    const legM = ex.tabData && ex.tabData[mIdx];
+    const legBeat = legM && legM.beats ? (legM.beats[tabBeatIdx] || legM.beats[0]) : null;
+    if (!ev) {
+      return legBeat ? { beatObj: legBeat, beatNum: tabBeatIdx + 1, isRest: legBeat.type === "rest", chordName: legM && legM.chordName } : null;
+    }
+    const isRest = Boolean(ev.isRest);
+    const beatObj = {
+      beat: ev.beat || (tabBeatIdx + 1),
+      note: isRest ? "REST" : ev.note,
+      concertPitch: ev.concertPitch || null,
+      symbol: isRest ? "REST" : (ev.symbol || "1/4"),
+      type: isRest ? "rest" : "play",
+      string: isRest ? null : ev.string,
+      fret: isRest ? null : ev.fret,
+      finger: isRest ? null : ev.finger,
+      pick: isRest ? "-" : (ev.pick || "Down"),
+      duration: ev.durationBeats || 1,
+      isDotted: Boolean(ev.isDotted),
+      tip: ev.tip || (isRest ? "Silence strings cleanly" : `String ${ev.string}, Fret ${ev.fret}`)
+    };
+    const rawBeat = Number(ev.beat || 1);
+    const beatNum = Number.isInteger(rawBeat) ? rawBeat : Number(rawBeat.toFixed(1));
+    return {
+      beatObj,
+      beatNum,
+      isRest,
+      chordName: (m && m.chordName) || (legM && legM.chordName) || null
+    };
+  }
+
+  handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx = null) {
     if (!updatedEx) return;
-    // Refresh currentExercise & renderer immediately for snappy visual editing
-    if (this.currentExercise && this.currentExercise.id === updatedEx.id) {
-      this.currentExercise = JSON.parse(JSON.stringify(updatedEx));
+    this.currentExercise = updatedEx;
+    const slot = this._findCourseSlotForExercise(updatedEx.id);
+    if (slot && slot.topic) {
+      slot.topic.exercises[slot.exIdx] = updatedEx;
     }
     const entry = this.activeTopicRenderers.get(updatedEx.id);
     if (entry && entry.renderer) {
@@ -1350,18 +1389,19 @@ export class GuitarMasterApp {
         showCoachBanner: this.showCoachBanner
       });
       if (mIdx !== null && tabBeatIdx !== null) {
-        const beatObj = updatedEx.tabData && updatedEx.tabData[mIdx] && updatedEx.tabData[mIdx].beats[tabBeatIdx];
-        entry.renderer.highlightBeat(mIdx, tabBeatIdx, Boolean(beatObj && beatObj.type === "rest"));
-        if (beatObj) {
-          this.updateCard(beatObj, beatObj.type === "rest", mIdx + 1, updatedEx.tabData[mIdx].chordName);
-          this.fretboard.update(beatObj, beatObj.type === "rest", updatedEx.tabData[mIdx].chordName);
+        const fb = this._buildFeedbackBeatFromMeasureEvent(updatedEx, mIdx, tabBeatIdx, evIdx);
+        const isRest = fb ? fb.isRest : false;
+        entry.renderer.highlightBeat(mIdx, tabBeatIdx, isRest, null, evIdx);
+        if (fb && fb.beatObj) {
+          this.updateCard(fb.beatObj, fb.isRest, fb.beatNum, fb.chordName);
+          this.fretboard.update(fb.beatObj, fb.isRest, fb.chordName);
         }
       }
     }
     this.persistEditedTopicOrExercise(updatedEx);
   }
 
-  handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest) {
+  handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx = null) {
     if (!this.editingExerciseId) return;
     const entry = this.activeTopicRenderers.get(this.editingExerciseId);
     if (!entry || !entry.renderer) return;
@@ -1371,13 +1411,12 @@ export class GuitarMasterApp {
       document.querySelectorAll(".topic-ex-edit-btn").forEach(b => b.classList.remove("is-active"));
       return;
     }
-    entry.renderer.highlightBeat(mIdx, tabBeatIdx, isRest);
-    if (this.currentExercise && this.currentExercise.tabData && this.currentExercise.tabData[mIdx]) {
-      const beatObj = this.currentExercise.tabData[mIdx].beats[tabBeatIdx];
-      if (beatObj) {
-        this.updateCard(beatObj, isRest, mIdx + 1, this.currentExercise.tabData[mIdx].chordName);
-        this.fretboard.update(beatObj, isRest, this.currentExercise.tabData[mIdx].chordName);
-      }
+    const fb = this._buildFeedbackBeatFromMeasureEvent(this.currentExercise, mIdx, tabBeatIdx, evIdx);
+    const actualRest = fb ? fb.isRest : Boolean(isRest);
+    entry.renderer.highlightBeat(mIdx, tabBeatIdx, actualRest, null, evIdx);
+    if (fb && fb.beatObj) {
+      this.updateCard(fb.beatObj, actualRest, fb.beatNum, fb.chordName);
+      this.fretboard.update(fb.beatObj, actualRest, fb.chordName);
     }
   }
 
@@ -2218,8 +2257,12 @@ export class GuitarMasterApp {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
           if (this.adminMode && this.notationEditor && this.editingExerciseId === ex.id) {
+            if (document.activeElement && document.activeElement.tagName === "INPUT" && document.activeElement.id !== "ne-shorthand-input") {
+              document.activeElement.blur();
+            }
             this.notationEditor.selectNote(mIdx, bIdx, evIdx);
-            this.handleEditorNoteFeedback(mIdx, bIdx, false);
+            const activeEv = this.notationEditor.getActiveEvent();
+            this.handleEditorNoteFeedback(mIdx, bIdx, Boolean(activeEv && activeEv.isRest), evIdx);
             return;
           }
           this.seekToMeasureBeat(mIdx, bIdx);
@@ -2236,6 +2279,9 @@ export class GuitarMasterApp {
         editBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           if (!this.adminMode) return;
+          if (document.activeElement && typeof document.activeElement.blur === "function") {
+            document.activeElement.blur();
+          }
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -2251,7 +2297,20 @@ export class GuitarMasterApp {
             const liveEx = this.findExerciseById(ex.id) || ex;
             this.currentExercise = JSON.parse(JSON.stringify(liveEx));
             this.notationEditor.open(this.currentExercise, editorSlot, 0, 0);
-            if (renderer) renderer.highlightBeat(0, 0, false);
+            const fb0 = this._buildFeedbackBeatFromMeasureEvent(this.currentExercise, 0, 0, 0);
+            if (renderer) {
+              renderer.loadExercise(this.currentExercise, {
+                noteNameMode: this.noteNameMode,
+                tabVisibilityMode: this.tabVisibilityMode,
+                showRhythmGuide: this.showRhythmGuide,
+                showCoachBanner: this.showCoachBanner
+              });
+              renderer.highlightBeat(0, 0, Boolean(fb0 && fb0.isRest), null, 0);
+            }
+            if (fb0 && fb0.beatObj) {
+              this.updateCard(fb0.beatObj, fb0.isRest, fb0.beatNum, fb0.chordName);
+              this.fretboard.update(fb0.beatObj, fb0.isRest, fb0.chordName);
+            }
           }
         });
       }
@@ -2259,7 +2318,8 @@ export class GuitarMasterApp {
       if (this.adminMode && this.editingExerciseId === ex.id && editorSlot) {
         const liveEx = (this.currentExercise && this.currentExercise.id === ex.id) ? this.currentExercise : ex;
         this.notationEditor.open(liveEx, editorSlot, 0, 0);
-        if (renderer) renderer.highlightBeat(0, 0, false);
+        const fb0 = this._buildFeedbackBeatFromMeasureEvent(liveEx, 0, 0, 0);
+        if (renderer) renderer.highlightBeat(0, 0, Boolean(fb0 && fb0.isRest), null, 0);
       }
 
       if (headEl) {

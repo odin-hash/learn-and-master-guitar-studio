@@ -6,6 +6,43 @@
  * 6-String TabStave + synchronized playback cursor.
  */
 
+export const GUITAR_OPEN_MIDI = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
+export const GUITAR_SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+export const GUITAR_FLAT_NAMES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+export const GUITAR_BLACK_KEY_PCS = new Set([1, 3, 6, 8, 10]);
+
+/**
+ * Single source of truth deriving exact pitch, accidental, written VexFlow key,
+ * and display name strictly from guitar string (1-6) and fret (0-24).
+ */
+export function deriveGuitarNoteFromPosition(strVal, fretVal, preferFlat = false) {
+  const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
+  const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
+  const midi = (GUITAR_OPEN_MIDI[str] || 64) + fret;
+  const oct = Math.floor(midi / 12) - 1;
+  const pc = ((midi % 12) + 12) % 12;
+  const isBlackKey = GUITAR_BLACK_KEY_PCS.has(pc);
+  const useFlat = isBlackKey && Boolean(preferFlat);
+  const name = (useFlat ? GUITAR_FLAT_NAMES : GUITAR_SHARP_NAMES)[pc];
+  const acc = isBlackKey ? (useFlat ? "b" : "#") : null;
+  const letter = name[0];
+  let displayName = name;
+  if (name === "E" && oct >= 4) displayName = "High E";
+  if (name === "E" && oct <= 2) displayName = "Low E";
+  return {
+    string: str,
+    fret,
+    midi,
+    oct,
+    isBlackKey,
+    preferFlat: useFlat,
+    concertPitch: `${name}${oct}`,
+    vexKey: `${letter.toLowerCase()}${acc || ""}/${oct + 1}`,
+    accidental: acc,
+    displayName
+  };
+}
+
 export class ScoreRenderer {
   constructor(containerElement, onBeatClick = null, onTabPeekToggle = null) {
     this.container = containerElement;
@@ -358,14 +395,16 @@ export class ScoreRenderer {
         let accidental = null;
         let positions = [];
         let isChord = false;
+        let noteName = b.note || "";
+        let preferFlat = Boolean(b.preferFlat) || /^[A-G]b\d?$/i.test(String(noteName).trim());
 
         if (typeof b.string === "number" && b.fret !== null && b.fret !== undefined) {
-          const midi = (openMidi[b.string] || 64) + b.fret + 12;
-          const oct = Math.floor(midi / 12) - 1;
-          const p = pitchNames[midi % 12];
-          if (p.includes("#")) accidental = "#";
-          vexKey = `${p}/${oct}`;
-          positions = [{ str: b.string, fret: b.fret }];
+          const derived = deriveGuitarNoteFromPosition(b.string, b.fret, preferFlat);
+          vexKey = derived.vexKey;
+          accidental = derived.accidental;
+          preferFlat = derived.preferFlat;
+          positions = [{ str: derived.string, fret: derived.fret }];
+          noteName = derived.displayName;
         } else {
           isChord = true;
           positions = [{ str: 3, fret: 0 }, { str: 2, fret: 1 }, { str: 1, fret: 0 }];
@@ -376,7 +415,8 @@ export class ScoreRenderer {
           tabBeatIndex: bIdx,
           isRest: false,
           isChord,
-          note: b.note || "",
+          note: noteName,
+          preferFlat,
           vexKey,
           accidental,
           duration: vexDur,
@@ -723,9 +763,14 @@ export class ScoreRenderer {
             let sn = null;
             let tn = null;
 
+            const posDerived = (!ev.isRest && !ev.isChord && typeof ev.string === "number" && ev.fret !== null && ev.fret !== undefined)
+              ? deriveGuitarNoteFromPosition(ev.string, ev.fret, Boolean(ev.preferFlat))
+              : null;
+
             if (showTreble) {
-              let keys = [ev.vexKey || (safeDur === "w" && ev.isRest ? "d/5" : "b/4")];
+              let keys = [posDerived ? posDerived.vexKey : (ev.vexKey || (safeDur === "w" && ev.isRest ? "d/5" : "b/4"))];
               let alignCenter = false;
+              const derivedAcc = posDerived ? posDerived.accidental : ev.accidental;
 
               if (ev.isRest) {
                 keys = safeDur === "w" ? ["d/5"] : ["b/4"];
@@ -745,8 +790,8 @@ export class ScoreRenderer {
               if (ev.isDotted) {
                 VF.Dot.buildAndAttach([sn], { all: true });
               }
-              if (ev.accidental && ev.accidental !== "n" && !ev.isRest) {
-                sn.addModifier(new VF.Accidental(ev.accidental), 0);
+              if (derivedAcc && derivedAcc !== "n" && !ev.isRest) {
+                sn.addModifier(new VF.Accidental(derivedAcc), 0);
               }
               if (ev.isRest) {
                 sn.setStyle({ fillStyle: "#DC2626", strokeStyle: "#DC2626" });
@@ -760,9 +805,11 @@ export class ScoreRenderer {
               if (ev.isRest) {
                 tn = new VF.GhostNote({ duration: safeDur });
               } else {
-                const pos = (ev.positions && ev.positions.length > 0)
-                  ? ev.positions.map(p => ({ str: p.str, fret: String(p.fret) }))
-                  : [{ str: 1, fret: "0" }];
+                const pos = posDerived
+                  ? [{ str: posDerived.string, fret: String(posDerived.fret) }]
+                  : ((ev.positions && ev.positions.length > 0)
+                      ? ev.positions.map(p => ({ str: p.str, fret: String(p.fret) }))
+                      : [{ str: 1, fret: "0" }]);
                 tn = new VF.TabNote({
                   positions: pos,
                   duration: safeDur
@@ -951,7 +998,10 @@ export class ScoreRenderer {
 
             const textEls = [];
             const noteEls = [];
-            const shortPitch = (ev.note || "").replace(/^High\s+/i, "").replace(/^Low\s+/i, "").trim();
+            const labelSrc = (!ev.isRest && !ev.isChord && typeof ev.string === "number" && ev.fret !== null && ev.fret !== undefined)
+              ? deriveGuitarNoteFromPosition(ev.string, ev.fret, Boolean(ev.preferFlat)).displayName
+              : (ev.note || "");
+            const shortPitch = String(labelSrc).replace(/^High\s+/i, "").replace(/^Low\s+/i, "").trim();
 
             if (showTreble && !ev.isRest && !ev.isChord && shortPitch) {
               if (this.noteNameMode === "above") {
@@ -1240,28 +1290,30 @@ export class ScoreRenderer {
     }
   }
 
-  highlightBeat(measureIdx, beatIdx, isRest, coachMeta = null) {
+  highlightBeat(measureIdx, beatIdx, isRest, coachMeta = null, explicitEvIdx = null) {
     if (!this.container) return;
     this._lastActiveArgs = { mIdx: measureIdx, bIdx: beatIdx, isRest };
     if (coachMeta !== undefined) this._lastCoachArgs = coachMeta;
 
-    let evIdx = beatIdx;
+    let evIdx = (explicitEvIdx !== null && explicitEvIdx !== undefined) ? explicitEvIdx : beatIdx;
     const legacyM = this.exercise && this.exercise.tabData && this.exercise.tabData[measureIdx];
     const beatObj = legacyM && legacyM.beats && legacyM.beats[beatIdx];
-    if (beatObj && beatObj.eventIndex !== undefined) {
-      evIdx = beatObj.eventIndex;
-    } else if (legacyM && legacyM.beats) {
-      let walk = beatIdx;
-      while (walk > 0 && (legacyM.beats[walk].isSustain || legacyM.beats[walk].type === "sustain")) {
-        walk--;
+    if (explicitEvIdx === null || explicitEvIdx === undefined) {
+      if (beatObj && beatObj.eventIndex !== undefined) {
+        evIdx = beatObj.eventIndex;
+      } else if (legacyM && legacyM.beats) {
+        let walk = beatIdx;
+        while (walk > 0 && (legacyM.beats[walk].isSustain || legacyM.beats[walk].type === "sustain")) {
+          walk--;
+        }
+        let evCounter = 0;
+        for (let i = 0; i < walk; i++) {
+          const b = legacyM.beats[i];
+          const isLeadingTie = i === 0 && measureIdx > 0 && (b.isSustain || b.type === "sustain") && b.type !== "rest";
+          if ((!b.isSustain && b.type !== "sustain") || isLeadingTie) evCounter++;
+        }
+        evIdx = evCounter;
       }
-      let evCounter = 0;
-      for (let i = 0; i < walk; i++) {
-        const b = legacyM.beats[i];
-        const isLeadingTie = i === 0 && measureIdx > 0 && (b.isSustain || b.type === "sustain") && b.type !== "rest";
-        if ((!b.isSustain && b.type !== "sustain") || isLeadingTie) evCounter++;
-      }
-      evIdx = evCounter;
     }
 
     const key = `${measureIdx}-${evIdx}`;

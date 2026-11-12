@@ -7,9 +7,7 @@
  * 100% synchronized, immediately re-rendering ScoreRenderer and auto-saving.
  */
 
-const EDITOR_OPEN_MIDI = { 1: 64, 2: 59, 3: 55, 4: 50, 5: 45, 6: 40 };
-const EDITOR_SHARP_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const EDITOR_NOTE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+import { GUITAR_OPEN_MIDI, deriveGuitarNoteFromPosition } from "./ScoreRenderer.js";
 
 const EDITOR_DURATIONS = [
   { code: "w", vexDur: "w", beats: 4, symbol: "1/1", label: "Whole", glyph: "&#119133;" },
@@ -18,69 +16,6 @@ const EDITOR_DURATIONS = [
   { code: "e", vexDur: "8", beats: 0.5, symbol: "1/8", label: "Eighth", glyph: "&#119136;" },
   { code: "16", vexDur: "16", beats: 0.25, symbol: "1/16", label: "16th", glyph: "&#119137;" }
 ];
-
-function editorMidiToInfo(midi, forcedAccidental = null, forcedLetterOct = null) {
-  const clamped = Math.max(40, Math.min(88, Math.round(midi)));
-  if (forcedLetterOct) {
-    const { letter, oct, acc } = forcedLetterOct;
-    const displayName = letter === "E" && !acc && oct >= 4
-      ? "High E"
-      : (letter === "E" && !acc && oct <= 2 ? "Low E" : `${letter}${acc || ""}`);
-    return {
-      concertPitch: `${letter}${acc || ""}${oct}`,
-      vexKey: `${letter.toLowerCase()}${acc || ""}/${oct + 1}`,
-      accidental: acc || null,
-      displayName
-    };
-  }
-  const oct = Math.floor(clamped / 12) - 1;
-  const name = EDITOR_SHARP_NAMES[clamped % 12];
-  const acc = name.includes("#") ? "#" : (forcedAccidental === "n" ? "n" : null);
-  const letter = name[0];
-  let displayName = name;
-  if (name === "E" && oct >= 4) displayName = "High E";
-  if (name === "E" && oct <= 2) displayName = "Low E";
-  return {
-    concertPitch: `${name}${oct}`,
-    vexKey: `${letter.toLowerCase()}${acc && acc !== "n" ? acc : ""}/${oct + 1}`,
-    accidental: acc,
-    displayName
-  };
-}
-
-function editorPitchToMidi(concertPitch) {
-  const m = String(concertPitch || "").trim().match(/^([A-Ga-g])(#|b|n)?(\d)$/);
-  if (!m) return 64;
-  const base = EDITOR_NOTE_SEMITONES[m[1].toUpperCase()];
-  if (base === undefined) return 64;
-  const acc = m[2] === "#" ? 1 : (m[2] === "b" ? -1 : 0);
-  const oct = parseInt(m[3], 10);
-  return (oct + 1) * 12 + base + acc;
-}
-
-function findBestPositionForMidi(midi, preferredString = null) {
-  if (preferredString >= 1 && preferredString <= 6) {
-    const f = midi - EDITOR_OPEN_MIDI[preferredString];
-    if (f >= 0 && f <= 12) {
-      return { string: preferredString, fret: f };
-    }
-  }
-  // Prefer open position (frets 0..4) across strings 1..6 cleanly
-  for (let s = 1; s <= 6; s++) {
-    const f = midi - EDITOR_OPEN_MIDI[s];
-    if (f >= 0 && f <= 4) {
-      return { string: s, fret: f };
-    }
-  }
-  let best = { string: 1, fret: 0, dist: 999 };
-  for (let s = 1; s <= 6; s++) {
-    const f = midi - EDITOR_OPEN_MIDI[s];
-    if (f >= 0 && f <= 20 && f < best.dist) {
-      best = { string: s, fret: f, dist: f };
-    }
-  }
-  return { string: best.string, fret: best.fret };
-}
 
 function editorDurSpec(codeOrDur, isDotted = false) {
   const norm = String(codeOrDur || "q").toLowerCase();
@@ -158,28 +93,83 @@ export class NotationEditor {
     this.renderPalette();
   }
 
+  syncEventFromSource(ev) {
+    if (!ev) return ev;
+    const durCode = ev.duration || "q";
+    const isDotted = Boolean(ev.isDotted);
+    const { spec, durationBeats, symbol } = editorDurSpec(durCode, isDotted);
+    ev.duration = spec.vexDur;
+    ev.isDotted = isDotted;
+    ev.durationBeats = durationBeats;
+
+    if (ev.isRest) {
+      ev.type = "rest";
+      ev.note = "REST";
+      ev.concertPitch = null;
+      ev.accidental = null;
+      ev.preferFlat = false;
+      ev.vexKey = spec.vexDur === "w" ? "d/5" : "b/4";
+      ev.vexDuration = `${spec.vexDur}r`;
+      ev.symbol = "REST";
+      ev.string = null;
+      ev.fret = null;
+      ev.finger = null;
+      ev.pick = "-";
+      ev.positions = [];
+      ev.tip = `Rest (${durationBeats} ${durationBeats === 1 ? "Beat" : "Beats"})`;
+      return ev;
+    }
+
+    if (ev.isChord) {
+      ev.type = "play";
+      ev.vexDuration = spec.vexDur;
+      ev.symbol = symbol;
+      return ev;
+    }
+
+    // Single source of truth: string (1-6), fret (0-24), and preferFlat
+    let srcStr = typeof ev.string === "number" ? ev.string : null;
+    let srcFret = typeof ev.fret === "number" ? ev.fret : null;
+    if ((srcStr === null || srcFret === null) && Array.isArray(ev.positions) && ev.positions[0]) {
+      srcStr = parseInt(ev.positions[0].str, 10);
+      srcFret = parseInt(ev.positions[0].fret, 10);
+    }
+    if (srcStr === null || isNaN(srcStr)) srcStr = 1;
+    if (srcFret === null || isNaN(srcFret)) srcFret = 0;
+
+    if (ev.preferFlat === undefined) {
+      const hint = String(ev.concertPitch || ev.note || "").trim();
+      ev.preferFlat = /^[A-G]b\d?$/i.test(hint) || ev.accidental === "b";
+    }
+
+    const derived = deriveGuitarNoteFromPosition(srcStr, srcFret, Boolean(ev.preferFlat));
+    ev.type = "play";
+    ev.isChord = false;
+    ev.string = derived.string;
+    ev.fret = derived.fret;
+    ev.preferFlat = derived.preferFlat;
+    ev.concertPitch = derived.concertPitch;
+    ev.vexKey = derived.vexKey;
+    ev.accidental = derived.accidental;
+    ev.note = derived.displayName;
+    ev.vexDuration = spec.vexDur;
+    ev.symbol = symbol;
+    ev.positions = [{ str: derived.string, fret: derived.fret }];
+    ev.pick = ev.pick && ev.pick !== "-" ? ev.pick : "Down";
+    if (ev.finger === null || ev.finger === undefined) {
+      ev.finger = derived.fret === 0 ? 0 : Math.min(4, derived.fret);
+    }
+    ev.tip = `String ${derived.string}, Fret ${derived.fret}`;
+    return ev;
+  }
+
   ensureCanonicalMeasures(ex) {
     if (!ex) return;
     if (Array.isArray(ex.measures) && ex.measures.length > 0) {
       ex.measures.forEach((m, idx) => {
         if (!m.measure) m.measure = idx + 1;
         if (!Array.isArray(m.events)) m.events = [];
-        m.events.forEach(ev => {
-          if (ev.isRest) {
-            ev.vexDuration = ev.vexDuration || `${ev.duration || "q"}r`;
-          } else {
-            if (typeof ev.string === "number" && (ev.fret === null || ev.fret === undefined)) ev.fret = 0;
-            if (typeof ev.string === "number" && !ev.concertPitch) {
-              const info = editorMidiToInfo(EDITOR_OPEN_MIDI[ev.string] + (ev.fret || 0));
-              ev.concertPitch = info.concertPitch;
-              ev.vexKey = ev.vexKey || info.vexKey;
-              ev.note = ev.note || info.displayName;
-            }
-            if (!Array.isArray(ev.positions) || ev.positions.length === 0) {
-              ev.positions = typeof ev.string === "number" ? [{ str: ev.string, fret: ev.fret || 0 }] : [];
-            }
-          }
-        });
+        m.events.forEach(ev => this.syncEventFromSource(ev));
       });
       this.syncMeasuresToTabData(ex);
       return;
@@ -195,6 +185,7 @@ export class NotationEditor {
         const isLeadingTie = bIdx === 0 && idx > 0 && (b.isSustain || b.type === "sustain") && b.type !== "rest";
         if ((b.isSustain || b.type === "sustain") && !isLeadingTie) return;
 
+        // Read this beat's own duration inside its own measure without pulling notes across bars
         let durBeats = b.duration || 1;
         if (isLeadingTie) {
           let tieSpan = 1;
@@ -214,56 +205,33 @@ export class NotationEditor {
         else if (sym === "1/8" || durBeats === 0.5) code = "e";
         else if (sym === "1/16" || durBeats === 0.25) code = "16";
 
-        const { spec, durationBeats, symbol } = editorDurSpec(code, dotted);
+        const { spec } = editorDurSpec(code, dotted);
         if (b.type === "rest") {
-          events.push({
+          events.push(this.syncEventFromSource({
             beat: b.beat || (bIdx + 1),
             tabBeatIndex: bIdx,
             isRest: true,
-            type: "rest",
-            note: "REST",
-            concertPitch: null,
-            vexKey: spec.vexDur === "w" ? "d/5" : "b/4",
-            accidental: null,
             duration: spec.vexDur,
-            isDotted: dotted,
-            vexDuration: `${spec.vexDur}r`,
-            durationBeats,
-            symbol: "REST",
-            string: null,
-            fret: null,
-            finger: null,
-            pick: "-",
-            positions: []
-          });
+            isDotted: dotted
+          }));
         } else {
           const str = typeof b.string === "number" ? b.string : 1;
           const fret = typeof b.fret === "number" ? b.fret : 0;
-          const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
-          events.push({
+          const preferFlat = Boolean(b.preferFlat) || /^[A-G]b\d?$/i.test(String(b.note || b.concertPitch || "").trim());
+          events.push(this.syncEventFromSource({
             beat: b.beat || (bIdx + 1),
             tabBeatIndex: bIdx,
             isRest: false,
-            isChord: false,
-            type: "play",
-            note: b.note || info.displayName,
-            concertPitch: b.concertPitch || info.concertPitch,
-            vexKey: b.vexKey || info.vexKey,
-            accidental: info.accidental,
             duration: spec.vexDur,
             isDotted: dotted,
-            vexDuration: spec.vexDur,
-            durationBeats,
-            symbol,
             string: str,
             fret,
+            preferFlat,
             finger: b.finger !== undefined && b.finger !== null ? b.finger : (fret === 0 ? 0 : Math.min(4, fret)),
             pick: isLeadingTie ? "-" : (b.pick || "Down"),
-            positions: [{ str, fret }],
             tieFromPrev: isLeadingTie || Boolean(b.tieFromPrev),
-            tieToNext: Boolean(b.tieToNext),
-            tip: `String ${str}, Fret ${fret}`
-          });
+            tieToNext: Boolean(b.tieToNext)
+          }));
         }
       });
 
@@ -479,33 +447,23 @@ export class NotationEditor {
         return;
       }
 
-      const sf = head.match(/^([1-6]):(\d{1,2})$/);
+      const sf = head.match(/^([1-6]):(\d{1,2})(b|#)?$/);
       const str = sf ? parseInt(sf[1], 10) : 1;
-      const fret = sf ? Math.max(0, Math.min(22, parseInt(sf[2], 10))) : 0;
-      const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
-      newEvents.push({
+      const fret = sf ? Math.max(0, Math.min(24, parseInt(sf[2], 10))) : 0;
+      const preferFlat = Boolean(sf && sf[3] === "b");
+      const ev = this.syncEventFromSource({
         beat: 1,
         isRest: false,
-        isChord: false,
-        type: "play",
-        note: info.displayName,
-        concertPitch: info.concertPitch,
-        vexKey: info.vexKey,
-        accidental: info.accidental,
         duration: spec.vexDur,
         isDotted,
-        vexDuration: spec.vexDur,
-        durationBeats,
-        symbol,
         string: str,
         fret,
-        finger: fret === 0 ? 0 : Math.min(4, fret),
+        preferFlat,
         pick,
-        positions: [{ str, fret }],
         tieToNext,
-        tieFromPrev: false,
-        tip: `String ${str}, Fret ${fret}`
+        tieFromPrev: false
       });
+      newEvents.push(ev);
     });
     return newEvents;
   }
@@ -576,7 +534,7 @@ export class NotationEditor {
     clearTimeout(this._fretDigitTimer);
     let nextBuffer = `${this._fretDigitBuffer}${digitChar}`;
     let parsed = parseInt(nextBuffer, 10);
-    if (isNaN(parsed) || parsed > 15) {
+    if (isNaN(parsed) || parsed > 24) {
       nextBuffer = digitChar;
       parsed = parseInt(nextBuffer, 10);
     }
@@ -589,51 +547,89 @@ export class NotationEditor {
     return true;
   }
 
+  _adjustMeasureRestsOnDurationChange(m, evIdx, oldBeats, newBeats, prevMeasureBeats) {
+    if (!m || !Array.isArray(m.events)) return;
+    const ts = (this.exercise && this.exercise.timeSignature) || [4, 4];
+    const expectedBeats = (ts[0] || 4) * (4 / (ts[1] || 4));
+    const delta = Number((oldBeats - newBeats).toFixed(3));
+
+    if (delta > 0.05 && prevMeasureBeats <= expectedBeats + 0.05) {
+      // Measure stayed <= full before shortening: fill gap inside THIS measure only (zero cross-bar impact)
+      let rem = delta;
+      const denoms = [
+        { beats: 4, code: "w", dotted: false },
+        { beats: 3, code: "h", dotted: true },
+        { beats: 2, code: "h", dotted: false },
+        { beats: 1.5, code: "q", dotted: true },
+        { beats: 1, code: "q", dotted: false },
+        { beats: 0.5, code: "e", dotted: false },
+        { beats: 0.25, code: "16", dotted: false }
+      ];
+      const fillEvents = [];
+      for (const d of denoms) {
+        while (rem >= d.beats - 0.01) {
+          fillEvents.push(this.syncEventFromSource({
+            beat: 1,
+            isRest: true,
+            isAutoFillRest: true,
+            duration: d.code,
+            isDotted: d.dotted
+          }));
+          rem = Number((rem - d.beats).toFixed(3));
+        }
+      }
+      if (fillEvents.length > 0) {
+        m.events.splice(evIdx + 1, 0, ...fillEvents);
+      }
+    } else if (delta < -0.05) {
+      // If lengthening a note directly next to an auto-fill rest inside THIS measure, absorb only that rest
+      const needed = Math.abs(delta);
+      const nextEv = m.events[evIdx + 1];
+      if (nextEv && nextEv.isRest && nextEv.isAutoFillRest && Math.abs((Number(nextEv.durationBeats) || 1) - needed) < 0.05) {
+        m.events.splice(evIdx + 1, 1);
+      }
+    }
+  }
+
   setDurationCode(code) {
-    this.mutateActiveEvent(ev => {
-      const { spec, durationBeats, symbol } = editorDurSpec(code, Boolean(ev.isDotted));
-      ev.duration = spec.vexDur;
-      ev.durationBeats = durationBeats;
-      ev.symbol = ev.isRest ? "REST" : symbol;
-      ev.vexDuration = ev.isRest ? `${spec.vexDur}r` : spec.vexDur;
-    });
+    const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
+    const ev = this.getActiveEvent();
+    if (!m || !ev) return;
+    const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
+    const oldBeats = Number(ev.durationBeats) || 1;
+    const { spec } = editorDurSpec(code, Boolean(ev.isDotted));
+    ev.duration = spec.vexDur;
+    ev.isAutoFillRest = false;
+    this.syncEventFromSource(ev);
+    const newBeats = Number(ev.durationBeats) || 1;
+    this._adjustMeasureRestsOnDurationChange(m, this.selectedEventIdx, oldBeats, newBeats, prevBeatsSum);
+    this.commitChanges();
   }
 
   toggleRest() {
     this.mutateActiveEvent(ev => {
       ev.isRest = !ev.isRest;
-      if (ev.isRest) {
-        ev.note = "REST";
-        ev.vexDuration = `${ev.duration || "q"}r`;
-        ev.symbol = "REST";
-        ev.positions = [];
-      } else {
-        const str = typeof ev.string === "number" ? ev.string : 1;
-        const fret = typeof ev.fret === "number" ? ev.fret : 0;
-        const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
-        ev.string = str;
-        ev.fret = fret;
-        ev.finger = fret === 0 ? 0 : Math.min(4, fret);
-        ev.concertPitch = info.concertPitch;
-        ev.vexKey = info.vexKey;
-        ev.accidental = info.accidental;
-        ev.note = info.displayName;
-        ev.vexDuration = ev.duration || "q";
-        ev.pick = ev.pick && ev.pick !== "-" ? ev.pick : "Down";
-        ev.positions = [{ str, fret }];
-        const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
-        ev.symbol = symbol;
+      ev.isAutoFillRest = false;
+      if (!ev.isRest && typeof ev.string !== "number") {
+        ev.string = 1;
+        ev.fret = 0;
       }
+      this.syncEventFromSource(ev);
     });
   }
 
   toggleDotted() {
-    this.mutateActiveEvent(ev => {
-      ev.isDotted = !ev.isDotted;
-      const { durationBeats, symbol } = editorDurSpec(ev.duration || "q", ev.isDotted);
-      ev.durationBeats = durationBeats;
-      ev.symbol = ev.isRest ? "REST" : symbol;
-    });
+    const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
+    const ev = this.getActiveEvent();
+    if (!m || !ev) return;
+    const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
+    const oldBeats = Number(ev.durationBeats) || 1;
+    ev.isDotted = !ev.isDotted;
+    ev.isAutoFillRest = false;
+    this.syncEventFromSource(ev);
+    const newBeats = Number(ev.durationBeats) || 1;
+    this._adjustMeasureRestsOnDurationChange(m, this.selectedEventIdx, oldBeats, newBeats, prevBeatsSum);
+    this.commitChanges();
   }
 
   toggleTieToNext() {
@@ -653,72 +649,54 @@ export class NotationEditor {
     this.commitChanges();
   }
 
-  applyAccidental(accType) {
+  setEnharmonicFlat(useFlat) {
     this.mutateActiveEvent(ev => {
-      if (ev.isRest) ev.isRest = false;
-      const m = String(ev.concertPitch || "E4").match(/^([A-Ga-g])(#|b|n)?(\d)$/);
-      const letter = m ? m[1].toUpperCase() : "E";
-      const oct = m ? parseInt(m[3], 10) : 4;
-      const baseMidi = (oct + 1) * 12 + (EDITOR_NOTE_SEMITONES[letter] || 0);
-      const offset = accType === "#" ? 1 : (accType === "b" ? -1 : 0);
-      const newMidi = Math.max(40, Math.min(84, baseMidi + offset));
-      const pos = findBestPositionForMidi(newMidi, ev.string);
-      const acc = accType === "#" || accType === "b" ? accType : null;
-      const info = editorMidiToInfo(newMidi, accType, { letter, oct, acc: accType === "n" ? "n" : acc });
-      ev.string = pos.string;
-      ev.fret = pos.fret;
-      ev.finger = pos.fret === 0 ? 0 : Math.min(4, pos.fret);
-      ev.concertPitch = `${letter}${acc || ""}${oct}`;
-      ev.vexKey = info.vexKey;
-      ev.accidental = accType === "n" ? "n" : acc;
-      ev.note = info.displayName;
-      ev.positions = [{ str: pos.string, fret: pos.fret }];
+      if (ev.isRest) return;
+      ev.preferFlat = Boolean(useFlat);
+      this.syncEventFromSource(ev);
     });
   }
 
   setStringAndFret(strVal, fretVal) {
     this.mutateActiveEvent(ev => {
       const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
-      const fret = Math.max(0, Math.min(22, parseInt(fretVal, 10) || 0));
-      const midi = EDITOR_OPEN_MIDI[str] + fret;
-      const info = editorMidiToInfo(midi);
+      const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
       ev.isRest = false;
+      ev.isAutoFillRest = false;
       ev.string = str;
       ev.fret = fret;
       ev.finger = fret === 0 ? 0 : Math.min(4, fret);
-      ev.concertPitch = info.concertPitch;
-      ev.vexKey = info.vexKey;
-      ev.accidental = info.accidental;
-      ev.note = info.displayName;
-      ev.vexDuration = ev.duration || "q";
-      ev.pick = ev.pick && ev.pick !== "-" ? ev.pick : "Down";
-      ev.positions = [{ str, fret }];
-      const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
-      ev.symbol = symbol;
+      this.syncEventFromSource(ev);
     });
   }
 
+  stepFret(delta) {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    const str = typeof ev.string === "number" ? ev.string : 1;
+    const curFret = ev.isRest || typeof ev.fret !== "number" ? 0 : ev.fret;
+    const nextFret = Math.max(0, Math.min(24, curFret + delta));
+    this.setStringAndFret(str, nextFret);
+  }
+
   stepPitch(deltaSemitones) {
-    this.mutateActiveEvent(ev => {
-      if (ev.isRest) ev.isRest = false;
-      const curMidi = (typeof ev.string === "number" && typeof ev.fret === "number")
-        ? (EDITOR_OPEN_MIDI[ev.string] + ev.fret)
-        : editorPitchToMidi(ev.concertPitch);
-      const nextMidi = Math.max(40, Math.min(84, curMidi + deltaSemitones));
-      const pos = findBestPositionForMidi(nextMidi, ev.string);
-      const info = editorMidiToInfo(nextMidi);
-      ev.string = pos.string;
-      ev.fret = pos.fret;
-      ev.finger = pos.fret === 0 ? 0 : Math.min(4, pos.fret);
-      ev.concertPitch = info.concertPitch;
-      ev.vexKey = info.vexKey;
-      ev.accidental = info.accidental;
-      ev.note = info.displayName;
-      ev.vexDuration = ev.duration || "q";
-      ev.positions = [{ str: pos.string, fret: pos.fret }];
-      const { symbol } = editorDurSpec(ev.duration || "q", Boolean(ev.isDotted));
-      ev.symbol = symbol;
-    });
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    let str = typeof ev.string === "number" ? ev.string : 1;
+    let curFret = ev.isRest || typeof ev.fret !== "number" ? 0 : ev.fret;
+    let nextFret = curFret + deltaSemitones;
+    if (nextFret < 0 && str < 6) {
+      const targetMidi = (GUITAR_OPEN_MIDI[str] || 64) + nextFret;
+      str = str + 1;
+      nextFret = Math.max(0, targetMidi - (GUITAR_OPEN_MIDI[str] || 40));
+    } else if (nextFret > 24 && str > 1) {
+      const targetMidi = (GUITAR_OPEN_MIDI[str] || 64) + nextFret;
+      str = str - 1;
+      nextFret = Math.max(0, Math.min(24, targetMidi - (GUITAR_OPEN_MIDI[str] || 64)));
+    } else {
+      nextFret = Math.max(0, Math.min(24, nextFret));
+    }
+    this.setStringAndFret(str, nextFret);
   }
 
   addNoteAfterSelected() {
@@ -728,32 +706,20 @@ export class NotationEditor {
     const cur = this.getActiveEvent();
     const str = cur && typeof cur.string === "number" ? cur.string : 1;
     const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
-    const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
-    const { spec, durationBeats, symbol } = editorDurSpec(cur ? cur.duration : "q", false);
+    const { spec } = editorDurSpec(cur ? cur.duration : "q", false);
 
-    const newEv = {
+    const newEv = this.syncEventFromSource({
       beat: 1,
       isRest: false,
-      isChord: false,
-      type: "play",
-      note: info.displayName,
-      concertPitch: info.concertPitch,
-      vexKey: info.vexKey,
-      accidental: info.accidental,
       duration: spec.vexDur,
       isDotted: false,
-      vexDuration: spec.vexDur,
-      durationBeats,
-      symbol,
       string: str,
       fret,
-      finger: fret === 0 ? 0 : Math.min(4, fret),
+      preferFlat: Boolean(cur && cur.preferFlat),
       pick: cur && cur.pick === "Down" ? "Up" : "Down",
-      positions: [{ str, fret }],
       tieToNext: false,
-      tieFromPrev: false,
-      tip: `String ${str}, Fret ${fret}`
-    };
+      tieFromPrev: false
+    });
 
     const insertIdx = Math.min(m.events.length, this.selectedEventIdx + 1);
     m.events.splice(insertIdx, 0, newEv);
@@ -766,15 +732,13 @@ export class NotationEditor {
     const m = this.exercise.measures[this.selectedMeasureIdx];
     if (!m || !Array.isArray(m.events)) return;
     if (m.events.length <= 1) {
-      // Turn single remaining slot into a Whole Rest so the measure remains valid
       const ev = m.events[0];
       if (ev) {
         ev.isRest = true;
+        ev.isAutoFillRest = false;
         ev.duration = "w";
-        ev.durationBeats = 4;
         ev.isDotted = false;
-        ev.vexDuration = "wr";
-        ev.symbol = "REST";
+        this.syncEventFromSource(ev);
       }
       this.selectedEventIdx = 0;
     } else {
@@ -794,34 +758,22 @@ export class NotationEditor {
     const cur = this.getActiveEvent();
     const str = cur && typeof cur.string === "number" ? cur.string : 1;
     const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
-    const info = editorMidiToInfo(EDITOR_OPEN_MIDI[str] + fret);
 
     const quarterCount = Math.max(1, Math.round(beatsPerBar));
     const events = [];
     for (let i = 0; i < quarterCount; i++) {
-      events.push({
+      events.push(this.syncEventFromSource({
         beat: i + 1,
         isRest: false,
-        isChord: false,
-        type: "play",
-        note: info.displayName,
-        concertPitch: info.concertPitch,
-        vexKey: info.vexKey,
-        accidental: info.accidental,
         duration: "q",
         isDotted: false,
-        vexDuration: "q",
-        durationBeats: 1,
-        symbol: "1/4",
         string: str,
         fret,
-        finger: fret === 0 ? 0 : Math.min(4, fret),
+        preferFlat: Boolean(cur && cur.preferFlat),
         pick: i % 2 === 0 ? "Down" : "Up",
-        positions: [{ str, fret }],
         tieToNext: false,
-        tieFromPrev: false,
-        tip: `String ${str}, Fret ${fret}`
-      });
+        tieFromPrev: false
+      }));
     }
 
     this.exercise.measures.push({
@@ -868,13 +820,17 @@ export class NotationEditor {
     const isRest = Boolean(ev && ev.isRest);
     const isDotted = Boolean(ev && ev.isDotted);
     const isTied = Boolean(ev && ev.tieToNext);
-    const curAcc = ev ? ev.accidental : null;
     const curStr = ev && typeof ev.string === "number" ? ev.string : 1;
     const curFret = ev && typeof ev.fret === "number" ? ev.fret : 0;
+    const derived = (!isRest && ev)
+      ? deriveGuitarNoteFromPosition(curStr, curFret, Boolean(ev.preferFlat))
+      : null;
+    const isBlackKey = Boolean(derived && derived.isBlackKey);
+    const preferFlat = Boolean(derived && derived.preferFlat);
     const curPick = ev && ev.pick === "Up" ? "Up" : "Down";
     const curFinger = ev && ev.finger !== null && ev.finger !== undefined ? ev.finger : 0;
     const pitchSummary = ev
-      ? (ev.isRest ? "Rest" : `${ev.concertPitch || ev.note} · S${curStr} F${curFret}`)
+      ? (isRest ? "Rest" : `${derived.concertPitch} (${derived.displayName}) · S${derived.string} F${derived.fret}`)
       : "No Selection";
 
     this.paletteEl.innerHTML = `
@@ -905,13 +861,13 @@ export class NotationEditor {
           `).join("")}
         </div>
 
-        <div class="ne-group" role="group" aria-label="Rests, Dots, Ties and Accidentals">
+        <div class="ne-group" role="group" aria-label="Rests, Dots, Ties and Enharmonic Spelling">
           <button type="button" class="ne-sym-btn ${isRest ? "active" : ""}" id="ne-btn-rest" title="Toggle Rest">&#119101; Rest</button>
           <button type="button" class="ne-sym-btn ${isDotted ? "active" : ""}" id="ne-btn-dot" title="Toggle Dotted Note">&bull; Dot</button>
           <button type="button" class="ne-sym-btn ${isTied ? "active" : ""}" id="ne-btn-tie" title="Tie to Next Note">&#8255; Tie</button>
-          <button type="button" class="ne-sym-btn ${curAcc === "#" ? "active" : ""}" data-ne-acc="#" title="Sharp">&#9839;</button>
-          <button type="button" class="ne-sym-btn ${curAcc === "b" ? "active" : ""}" data-ne-acc="b" title="Flat">&#9837;</button>
-          <button type="button" class="ne-sym-btn ${curAcc === "n" ? "active" : ""}" data-ne-acc="n" title="Natural">&#9838;</button>
+          <span class="ne-lbl" style="margin-left:4px;">Spell</span>
+          <button type="button" class="ne-sym-btn ${isBlackKey && !preferFlat ? "active" : ""}" id="ne-spell-sharp" data-ne-spell="sharp" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Sharp (♯)" : "Natural fret — never takes sharp or flat"}">&#9839;</button>
+          <button type="button" class="ne-sym-btn ${isBlackKey && preferFlat ? "active" : ""}" id="ne-spell-flat" data-ne-spell="flat" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Flat (♭)" : "Natural fret — never takes sharp or flat"}">&#9837;</button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Bar Actions">
@@ -932,9 +888,9 @@ export class NotationEditor {
 
         <div class="ne-group" role="group" aria-label="Fret Stepper">
           <span class="ne-lbl">Fret</span>
-          <button type="button" class="ne-num-btn" id="ne-fret-dec" title="Decrease Fret">&minus;</button>
-          <span class="ne-fret-val" id="ne-fret-val" title="Use 0-15 keyboard number keys while editor is open">${isRest ? "-" : curFret}</span>
-          <button type="button" class="ne-num-btn" id="ne-fret-inc" title="Increase Fret">+</button>
+          <button type="button" class="ne-num-btn" id="ne-fret-dec" title="Decrease Fret (same string)">&minus;</button>
+          <span class="ne-fret-val" id="ne-fret-val" title="Use 0-9 number keys while note is selected">${isRest ? "-" : curFret}</span>
+          <button type="button" class="ne-num-btn" id="ne-fret-inc" title="Increase Fret (same string)">+</button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Staff Pitch Step">
@@ -976,7 +932,12 @@ export class NotationEditor {
         this.selectNote(b, 0, 0);
         if (typeof this.onSelectNoteForFeedback === "function") {
           const ev = this.getActiveEvent();
-          this.onSelectNoteForFeedback(this.selectedMeasureIdx, ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0, Boolean(ev && ev.isRest));
+          this.onSelectNoteForFeedback(
+            this.selectedMeasureIdx,
+            ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0,
+            Boolean(ev && ev.isRest),
+            this.selectedEventIdx
+          );
         }
       });
     });
@@ -994,8 +955,8 @@ export class NotationEditor {
     const btnTie = this.paletteEl.querySelector("#ne-btn-tie");
     if (btnTie) btnTie.addEventListener("click", () => this.toggleTieToNext());
 
-    this.paletteEl.querySelectorAll("[data-ne-acc]").forEach(btn => {
-      btn.addEventListener("click", () => this.applyAccidental(btn.dataset.neAcc));
+    this.paletteEl.querySelectorAll("[data-ne-spell]").forEach(btn => {
+      btn.addEventListener("click", () => this.setEnharmonicFlat(btn.dataset.neSpell === "flat"));
     });
 
     this.paletteEl.querySelectorAll("[data-ne-str]").forEach(btn => {
@@ -1008,22 +969,12 @@ export class NotationEditor {
 
     const btnFretDec = this.paletteEl.querySelector("#ne-fret-dec");
     if (btnFretDec) {
-      btnFretDec.addEventListener("click", () => {
-        const ev = this.getActiveEvent();
-        const s = ev && typeof ev.string === "number" ? ev.string : 1;
-        const f = ev && typeof ev.fret === "number" ? ev.fret : 0;
-        this.setStringAndFret(s, Math.max(0, f - 1));
-      });
+      btnFretDec.addEventListener("click", () => this.stepFret(-1));
     }
 
     const btnFretInc = this.paletteEl.querySelector("#ne-fret-inc");
     if (btnFretInc) {
-      btnFretInc.addEventListener("click", () => {
-        const ev = this.getActiveEvent();
-        const s = ev && typeof ev.string === "number" ? ev.string : 1;
-        const f = ev && typeof ev.fret === "number" ? ev.fret : 0;
-        this.setStringAndFret(s, Math.min(22, f + 1));
-      });
+      btnFretInc.addEventListener("click", () => this.stepFret(1));
     }
 
     const btnPitchUp = this.paletteEl.querySelector("#ne-pitch-up");

@@ -4391,11 +4391,18 @@ body:not([data-admin-mode="true"]) .admin-only-control {
   font-size: 11px;
 }
 
-.ne-sym-btn:hover,
-.ne-num-btn:hover,
+.ne-sym-btn:hover:not(:disabled),
+.ne-num-btn:hover:not(:disabled),
 .ne-action-btn:hover:not(:disabled) {
   background: #F3F2EE;
   border-color: var(--border-hairline);
+}
+
+.ne-sym-btn:disabled,
+.ne-num-btn:disabled,
+.ne-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .ne-sym-btn.active,
