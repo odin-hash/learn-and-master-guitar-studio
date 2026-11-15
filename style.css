@@ -1712,7 +1712,8 @@ button.acc-topic-btn.is-active-topic {
   font-size: 10.5px;
 }
 
-.vf-pick-label {
+.vf-pick-label,
+.vf-finger-label {
   font-family: var(--font-mono);
   font-size: 11.5px;
   fill: #71717A;
@@ -1757,7 +1758,8 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .vf-note-label.is-active,
-.vf-pick-label.is-active {
+.vf-pick-label.is-active,
+.vf-finger-label.is-active {
   fill: var(--accent) !important;
   font-weight: 700;
 }

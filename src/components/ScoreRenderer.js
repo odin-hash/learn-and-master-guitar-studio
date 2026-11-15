@@ -57,6 +57,7 @@ export class ScoreRenderer {
     this.showCoachBanner = true;
     this.showNoteNames = true;
     this.showTabNumbers = true;
+    this.showFingerNumbers = false;
     this._tabPeeked = false;
     this.loopMeasureIndex = null;
     this.activeKey = null;
@@ -1076,6 +1077,17 @@ export class ScoreRenderer {
               textEls.push(pkText);
             }
 
+            if ((this.showFingerNumbers || ev.showFinger) && !ev.isRest && ev.finger !== null && ev.finger !== undefined) {
+              const fgText = document.createElementNS(SVG_NS, "text");
+              fgText.setAttribute("class", "vf-finger-label");
+              fgText.setAttribute("x", String(headX));
+              fgText.setAttribute("y", String(botLineY + (ev.pick && ev.pick !== "-" ? 28 : 17)));
+              fgText.setAttribute("text-anchor", "middle");
+              fgText.textContent = String(ev.finger);
+              overlayLayer.appendChild(fgText);
+              textEls.push(fgText);
+            }
+
             // Rhythm & Counting Guide beneath each measure
             const beatDisplayNum = runningBeatPos + 1;
             const isHalfBeatOff = Math.abs((runningBeatPos % 1) - 0.5) < 0.08;
@@ -1243,6 +1255,18 @@ export class ScoreRenderer {
               if (el) {
                 el.classList.add("vf-tracked-tabnote");
                 noteEls.push(el);
+
+                // Align TAB fret numbers and cutout backdrops directly onto headX axis
+                const tabTexts = el.querySelectorAll("text");
+                const tabRects = el.querySelectorAll("rect");
+                tabTexts.forEach(t => {
+                  t.setAttribute("x", String(headX));
+                  t.setAttribute("text-anchor", "middle");
+                });
+                tabRects.forEach(r => {
+                  const w = parseFloat(r.getAttribute("width")) || 8;
+                  r.setAttribute("x", String(headX - (w / 2)));
+                });
               }
             }
 
