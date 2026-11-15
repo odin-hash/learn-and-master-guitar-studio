@@ -9,12 +9,26 @@
 
 import { GUITAR_OPEN_MIDI, deriveGuitarNoteFromPosition } from "./ScoreRenderer.js";
 
+const SVG_NOTE_WHOLE = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" class="ne-svg-glyph" aria-hidden="true"><ellipse cx="8" cy="8" rx="6" ry="4" transform="rotate(-20 8 8)"/></svg>`;
+const SVG_NOTE_HALF = `<svg width="14" height="16" viewBox="0 0 16 18" fill="none" stroke="currentColor" stroke-width="1.8" class="ne-svg-glyph" aria-hidden="true"><ellipse cx="6" cy="12" rx="4.5" ry="3" transform="rotate(-20 6 12)" stroke-width="2"/><line x1="10" y1="12" x2="10" y2="2" stroke-linecap="round"/></svg>`;
+const SVG_NOTE_QUARTER = `<svg width="14" height="16" viewBox="0 0 16 18" fill="currentColor" class="ne-svg-glyph" aria-hidden="true"><ellipse cx="6" cy="12" rx="4.5" ry="3" transform="rotate(-20 6 12)"/><line x1="10" y1="12" x2="10" y2="2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const SVG_NOTE_EIGHTH = `<svg width="14" height="16" viewBox="0 0 16 18" fill="currentColor" class="ne-svg-glyph" aria-hidden="true"><ellipse cx="6" cy="12" rx="4.5" ry="3" transform="rotate(-20 6 12)"/><line x1="10" y1="12" x2="10" y2="2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 2 Q 13 4 14 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const SVG_NOTE_SIXTEENTH = `<svg width="14" height="16" viewBox="0 0 16 18" fill="currentColor" class="ne-svg-glyph" aria-hidden="true"><ellipse cx="6" cy="12" rx="4.5" ry="3" transform="rotate(-20 6 12)"/><line x1="10" y1="12" x2="10" y2="2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 2 Q 13 4 14 7 M10 5.5 Q 13 7.5 14 10.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
+const SVG_REST = `<svg width="12" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ne-svg-glyph" aria-hidden="true"><path d="M6 3 L10 6 L6 9 L9 11 A2 2 0 1 1 7 13"/></svg>`;
+const SVG_DOT = `<svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" class="ne-svg-glyph" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>`;
+const SVG_TIE = `<svg width="14" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="ne-svg-glyph" aria-hidden="true"><path d="M2 4 Q 8 11 14 4"/></svg>`;
+const SVG_MINUS = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="ne-svg-glyph" aria-hidden="true"><line x1="3" y1="8" x2="13" y2="8"/></svg>`;
+const SVG_PLUS = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="ne-svg-glyph" aria-hidden="true"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>`;
+const SVG_ARROW_DOWN = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ne-svg-glyph" aria-hidden="true"><line x1="8" y1="3" x2="8" y2="13"/><polyline points="4 9 8 13 12 9"/></svg>`;
+const SVG_ARROW_UP = `<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ne-svg-glyph" aria-hidden="true"><line x1="8" y1="13" x2="8" y2="3"/><polyline points="4 7 8 3 12 7"/></svg>`;
+
 const EDITOR_DURATIONS = [
-  { code: "w", vexDur: "w", beats: 4, symbol: "1/1", label: "Whole", glyph: "&#119133;" },
-  { code: "h", vexDur: "h", beats: 2, symbol: "1/2", label: "Half", glyph: "&#119134;" },
-  { code: "q", vexDur: "q", beats: 1, symbol: "1/4", label: "Quarter", glyph: "&#119135;" },
-  { code: "e", vexDur: "8", beats: 0.5, symbol: "1/8", label: "Eighth", glyph: "&#119136;" },
-  { code: "16", vexDur: "16", beats: 0.25, symbol: "1/16", label: "16th", glyph: "&#119137;" }
+  { code: "w", vexDur: "w", beats: 4, symbol: "1/1", label: "Whole", glyph: SVG_NOTE_WHOLE },
+  { code: "h", vexDur: "h", beats: 2, symbol: "1/2", label: "Half", glyph: SVG_NOTE_HALF },
+  { code: "q", vexDur: "q", beats: 1, symbol: "1/4", label: "Quarter", glyph: SVG_NOTE_QUARTER },
+  { code: "e", vexDur: "8", beats: 0.5, symbol: "1/8", label: "Eighth", glyph: SVG_NOTE_EIGHTH },
+  { code: "16", vexDur: "16", beats: 0.25, symbol: "1/16", label: "16th", glyph: SVG_NOTE_SIXTEENTH }
 ];
 
 function editorDurSpec(codeOrDur, isDotted = false) {
@@ -1005,9 +1019,9 @@ export class NotationEditor {
         </div>
 
         <div class="ne-group" role="group" aria-label="Rests, Dots, Ties and Enharmonic Spelling">
-          <button type="button" class="ne-sym-btn ${isRest ? "active" : ""}" id="ne-btn-rest" title="Toggle Rest">&#119101; Rest</button>
-          <button type="button" class="ne-sym-btn ${isDotted ? "active" : ""}" id="ne-btn-dot" title="Toggle Dotted Note">&bull; Dot</button>
-          <button type="button" class="ne-sym-btn ${isTied ? "active" : ""}" id="ne-btn-tie" title="Tie to Next Note">&#8255; Tie</button>
+          <button type="button" class="ne-sym-btn ${isRest ? "active" : ""}" id="ne-btn-rest" title="Toggle Rest">${SVG_REST} <span>Rest</span></button>
+          <button type="button" class="ne-sym-btn ${isDotted ? "active" : ""}" id="ne-btn-dot" title="Toggle Dotted Note">${SVG_DOT} <span>Dot</span></button>
+          <button type="button" class="ne-sym-btn ${isTied ? "active" : ""}" id="ne-btn-tie" title="Tie to Next Note">${SVG_TIE} <span>Tie</span></button>
           <span class="ne-lbl" style="margin-left:4px;">Spell</span>
           <button type="button" class="ne-sym-btn ${isBlackKey && !preferFlat ? "active" : ""}" id="ne-spell-sharp" data-ne-spell="sharp" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Sharp (♯)" : "Natural fret — never takes sharp or flat"}">&#9839;</button>
           <button type="button" class="ne-sym-btn ${isBlackKey && preferFlat ? "active" : ""}" id="ne-spell-flat" data-ne-spell="flat" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Flat (♭)" : "Natural fret — never takes sharp or flat"}">&#9837;</button>
@@ -1037,21 +1051,21 @@ export class NotationEditor {
 
         <div class="ne-group" role="group" aria-label="Fret Stepper">
           <span class="ne-lbl">Fret</span>
-          <button type="button" class="ne-num-btn" id="ne-fret-dec" title="Decrease Fret (same string)">&minus;</button>
+          <button type="button" class="ne-num-btn" id="ne-fret-dec" title="Decrease Fret (same string)">${SVG_MINUS}</button>
           <span class="ne-fret-val" id="ne-fret-val" title="Use 0-9 number keys while note is selected">${isRest ? "-" : curFret}</span>
-          <button type="button" class="ne-num-btn" id="ne-fret-inc" title="Increase Fret (same string)">+</button>
+          <button type="button" class="ne-num-btn" id="ne-fret-inc" title="Increase Fret (same string)">${SVG_PLUS}</button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Staff Pitch Step">
           <span class="ne-lbl">Pitch</span>
-          <button type="button" class="ne-num-btn" id="ne-pitch-down" title="Step Pitch Down (&darr;)">&darr;</button>
-          <button type="button" class="ne-num-btn" id="ne-pitch-up" title="Step Pitch Up (&uarr;)">&uarr;</button>
+          <button type="button" class="ne-num-btn" id="ne-pitch-down" title="Step Pitch Down (↓)">${SVG_ARROW_DOWN}</button>
+          <button type="button" class="ne-num-btn" id="ne-pitch-up" title="Step Pitch Up (↑)">${SVG_ARROW_UP}</button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Pick Stroke">
           <span class="ne-lbl">Pick</span>
-          <button type="button" class="ne-sym-btn ${curPick === "Down" ? "active" : ""}" data-ne-pick="Down">&darr; Down</button>
-          <button type="button" class="ne-sym-btn ${curPick === "Up" ? "active" : ""}" data-ne-pick="Up">&uarr; Up</button>
+          <button type="button" class="ne-sym-btn ${curPick === "Down" ? "active" : ""}" data-ne-pick="Down">${SVG_ARROW_DOWN} <span>Down</span></button>
+          <button type="button" class="ne-sym-btn ${curPick === "Up" ? "active" : ""}" data-ne-pick="Up">${SVG_ARROW_UP} <span>Up</span></button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Left Hand Finger">

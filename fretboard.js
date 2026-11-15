@@ -23,10 +23,10 @@ export class FretboardVisualizer {
     const inlayFrets = new Set([3, 5, 7, 9, 12]);
     this.container.innerHTML = `
       <div class="fretboard-card">
-        <div class="fretboard-header-row" style="grid-template-columns: 82px repeat(${this.frets.length}, minmax(28px, 1fr));">
+        <div class="fretboard-header-row" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
           <div class="string-header-blank">String</div>
-          ${this.frets.map(f => {
-            if (f === 0) return `<div class="fret-col-title nut-title">Open</div>`;
+          <div class="fret-col-title nut-title">Open</div>
+          ${this.frets.filter(f => f > 0).map(f => {
             if (f === 12) return `<div class="fret-col-title fret-inlay">${f} &bull;&bull;</div>`;
             if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f} &bull;</div>`;
             return `<div class="fret-col-title">${f}</div>`;
@@ -34,10 +34,13 @@ export class FretboardVisualizer {
         </div>
         <div class="fretboard-neck-board" id="fretboard-neck-board">
           ${this.strings.map(s => `
-            <div class="fret-string-row" data-string="${s.num}" style="grid-template-columns: 82px repeat(${this.frets.length}, minmax(28px, 1fr));">
+            <div class="fret-string-row" data-string="${s.num}" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
               <div class="string-title">${s.label}</div>
-              ${this.frets.map(f => `
-                <div class="fret-space ${f === 0 ? 'nut-space' : ''}" data-string="${s.num}" data-fret="${f}">
+              <div class="fret-space nut-space" data-string="${s.num}" data-fret="0">
+                <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
+              </div>
+              ${this.frets.filter(f => f > 0).map(f => `
+                <div class="fret-space" data-string="${s.num}" data-fret="${f}">
                   <div class="finger-marker" id="fret-dot-${s.num}-${f}"></div>
                 </div>
               `).join("")}

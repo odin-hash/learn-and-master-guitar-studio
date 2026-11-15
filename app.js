@@ -30,6 +30,10 @@ export class GuitarMasterApp {
     });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
+    this.activeCurriculumBook = "lessonBook";
+    this.activeCurriculumExId = "lb-s2-str1-ex1";
+    this.lastLessonBookCategory = "lessonBook";
+    this.lastLessonExId = "lb-s2-str1-ex1";
     // Apply any persisted AI-extracted pages synchronously before flattening catalog
     this.applyAllSavedAiExtractions(this.pdfAiExtractor.loadExtractedStoreSync(), true);
     this.applyDeletionsToCourses(GUITAR_COURSES);
@@ -945,17 +949,21 @@ export class GuitarMasterApp {
 
     if (mode === "metronome") {
       if (this.currentExercise && this.currentExercise.id !== "free-metronome" && this.currentExercise.bookCategory !== "freeMetronome") {
+        this.activeCurriculumExId = this.currentExercise.id;
+        this.activeCurriculumBook = this.currentBookCategory || "lessonBook";
         this.lastLessonExId = this.currentExercise.id;
         this.lastLessonBookCategory = this.currentBookCategory || "lessonBook";
       }
-      this.setBookCategory("freeMetronome");
+      this.currentBookCategory = "freeMetronome";
       this.loadExercise("free-metronome");
       this.setDrawerOpen(false);
-    } else if (mode === "studio" && prevMode === "metronome") {
-      const targetCat = this.lastLessonBookCategory || "lessonBook";
-      const targetId = this.lastLessonExId || "lb-s2-str1-ex1";
+    } else if (mode === "studio") {
+      const targetCat = this.activeCurriculumBook || this.lastLessonBookCategory || "lessonBook";
+      const targetId = this.activeCurriculumExId || this.lastLessonExId || "lb-s2-str1-ex1";
       this.setBookCategory(targetCat);
-      this.loadExercise(targetId);
+      if (!this.currentExercise || this.currentExercise.id !== targetId || this.currentExercise.id === "free-metronome") {
+        this.loadExercise(targetId);
+      }
     }
 
     if (typeof document !== "undefined" && document.body) {
@@ -3281,6 +3289,13 @@ export class GuitarMasterApp {
               this.updateCard(fb0.beatObj, fb0.isRest, fb0.beatNum, fb0.chordName);
               this.fretboard.update(fb0.beatObj, fb0.isRest, fb0.chordName);
             }
+            if (editorSlot) {
+              const deckEl = document.querySelector(".studio-pinned-deck");
+              const deckHeight = deckEl ? deckEl.getBoundingClientRect().height : 120;
+              const slotRect = editorSlot.getBoundingClientRect();
+              const targetY = window.pageYOffset + slotRect.top - deckHeight - 20;
+              window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+            }
           }
         });
       }
@@ -3502,8 +3517,10 @@ export class GuitarMasterApp {
         }
       }
     } else {
+      this.activeCurriculumExId = found.id;
+      this.activeCurriculumBook = found.bookCategory || this.currentBookCategory || "lessonBook";
       this.lastLessonExId = found.id;
-      this.lastLessonBookCategory = found.bookCategory;
+      this.lastLessonBookCategory = found.bookCategory || this.currentBookCategory || "lessonBook";
       if (this.appMode === "metronome") {
         this.appMode = "studio";
         if (typeof document !== "undefined" && document.body) {
@@ -4656,13 +4673,19 @@ export class GuitarMasterApp {
 
   saveState() {
     if (this.isRestoring) return;
+    const isFreeMet = this.currentBookCategory === "freeMetronome" || (this.currentExercise && this.currentExercise.id === "free-metronome");
+    const targetBook = isFreeMet ? (this.activeCurriculumBook || "lessonBook") : (this.currentBookCategory || "lessonBook");
+    const targetExId = (this.currentExercise && this.currentExercise.id !== "free-metronome") ? this.currentExercise.id : (this.activeCurriculumExId || "lb-s2-str1-ex1");
+
     const state = {
       appMode: this.appMode || "primer",
       paneMode: this.paneMode || "score",
       drawerOpen: !!this.drawerOpen,
       loopMode: this.loopMode || "all",
-      book: this.currentBookCategory,
-      exId: this.currentExercise ? this.currentExercise.id : "lb-s2-str1-ex1",
+      book: this.appMode === "metronome" ? "freeMetronome" : targetBook,
+      exId: this.appMode === "metronome" ? "free-metronome" : targetExId,
+      curriculumBook: this.activeCurriculumBook || targetBook,
+      curriculumExId: this.activeCurriculumExId || targetExId,
       bpm: this.bpm,
       soundType: this.audio.soundType,
       soundOnRest: this.audio.soundOnRest,
@@ -4808,13 +4831,25 @@ export class GuitarMasterApp {
       this.freeMetSubdivision = Number(state.freeMetSubdiv);
     }
 
+    const savedCurriculumBook = state.curriculumBook || (state.book && state.book !== "freeMetronome" && state.book !== "freeMode" ? state.book : "lessonBook") || "lessonBook";
+    const savedCurriculumExId = state.curriculumExId || (state.exId && state.exId !== "free-metronome" ? state.exId : "lb-s2-str1-ex1") || "lb-s2-str1-ex1";
+    this.activeCurriculumBook = savedCurriculumBook;
+    this.activeCurriculumExId = savedCurriculumExId;
+    this.lastLessonBookCategory = savedCurriculumBook;
+    this.lastLessonExId = savedCurriculumExId;
+
     const initialDrawerOpen = window.innerWidth <= 1024
       ? false
       : (typeof state.drawerOpen === "boolean" ? state.drawerOpen : true);
     this.setDrawerOpen(initialDrawerOpen);
-    this.setBookCategory(state.book || "lessonBook");
 
-    this.loadExercise(state.exId || "lb-s2-str1-ex1", true);
+    if (state.appMode === "metronome") {
+      this.currentBookCategory = "freeMetronome";
+      this.loadExercise("free-metronome", true);
+    } else {
+      this.setBookCategory(savedCurriculumBook);
+      this.loadExercise(savedCurriculumExId, true);
+    }
 
     if (state.bpm) {
       this.setBpm(state.bpm);
@@ -4828,6 +4863,10 @@ export class GuitarMasterApp {
 
   setBookCategory(cat) {
     this.currentBookCategory = cat;
+    if (cat === "lessonBook" || cat === "bonusWorkshop") {
+      this.activeCurriculumBook = cat;
+      this.lastLessonBookCategory = cat;
+    }
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
     const activeSidebarEl = this.sessionsAccordion

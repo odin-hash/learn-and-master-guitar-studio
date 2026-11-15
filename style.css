@@ -314,7 +314,7 @@ button, input, select {
 
 .drawer-book-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
   background: var(--bg-hover, #F3F2EE);
   border: 1px solid var(--border-hairline, #E4E4E7);
@@ -785,9 +785,14 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
-  padding-bottom: 10px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 0 0 1px 0;
   border-bottom: 1px solid var(--border-hairline);
 }
 
@@ -796,6 +801,9 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .telemetry-glyph {
@@ -817,10 +825,13 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-text {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   min-width: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .telemetry-primary {
@@ -828,6 +839,7 @@ button.acc-topic-btn.is-active-topic {
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .telemetry-inline.mode-rest .telemetry-primary {
@@ -836,11 +848,15 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-sep {
   color: var(--border-strong);
+  flex-shrink: 0;
 }
 
 .telemetry-secondary {
   font-size: 12px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .telemetry-pick-badge {
@@ -853,6 +869,11 @@ button.acc-topic-btn.is-active-topic {
   padding: 2px 8px;
   border-radius: 5px;
   white-space: nowrap;
+  flex-shrink: 0;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .telemetry-inline.mode-rest .telemetry-pick-badge {
@@ -949,8 +970,10 @@ button.acc-topic-btn.is-active-topic {
 .fretboard-header-row {
   display: grid;
   align-items: center;
+  height: 22px;
   margin-bottom: 4px;
-  min-width: 580px;
+  min-width: 684px;
+  box-sizing: border-box;
 }
 
 .string-header-blank {
@@ -958,7 +981,7 @@ button.acc-topic-btn.is-active-topic {
   font-weight: 500;
   color: var(--text-muted);
   text-align: left;
-  padding-left: 4px;
+  padding-left: 8px;
 }
 
 .fret-col-title {
@@ -967,6 +990,9 @@ button.acc-topic-btn.is-active-topic {
   font-weight: 500;
   color: var(--text-muted);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fret-col-title.nut-title {
@@ -981,11 +1007,12 @@ button.acc-topic-btn.is-active-topic {
 
 .fretboard-neck-board {
   position: relative;
-  min-width: 580px;
+  min-width: 684px;
   background: var(--bg-sidebar);
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .fretboard-neck-board.is-muted-state {
@@ -995,17 +1022,21 @@ button.acc-topic-btn.is-active-topic {
 .fret-string-row {
   display: grid;
   align-items: center;
-  height: 20px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  box-sizing: border-box;
   position: relative;
 }
 
-/* Realistic crisp acoustic string hairline */
+/* Realistic crisp acoustic string hairline vertically centered at 50% */
 .fret-string-row::before {
   content: "";
   position: absolute;
-  left: 82px;
+  left: 96px;
   right: 0;
   top: 50%;
+  transform: translateY(-50%);
   height: 1px;
   background: rgba(24, 24, 27, 0.2);
   pointer-events: none;
@@ -1029,10 +1060,14 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .fret-space {
-  height: 100%;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  box-sizing: border-box;
   border-right: 1px solid var(--border-hairline);
   display: flex;
   align-items: center;
@@ -1047,38 +1082,45 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .finger-marker {
-  width: 17px;
-  height: 17px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  padding: 0;
+  box-sizing: border-box;
   opacity: 0;
-  transform: scale(0.8);
   transition: opacity 0.08s ease, transform 0.08s ease;
 }
 
 .finger-marker.active-play-dot {
   opacity: 1;
-  transform: scale(1);
+  transform: translate(-50%, -50%) scale(1);
   background: var(--accent);
   color: #FFFFFF;
 }
 
 .finger-marker.ghost-chord-dot {
   opacity: 1;
-  transform: scale(0.92);
+  transform: translate(-50%, -50%) scale(0.92);
   background: var(--bg-surface);
-  border: 1px dashed var(--accent-border);
+  border: 1.5px dashed var(--accent-border);
   color: var(--accent);
 }
 
 .finger-marker.muted-string-x {
   opacity: 1;
-  transform: scale(1);
+  transform: translate(-50%, -50%) scale(1);
   background: var(--color-rest-soft);
   border: 1px solid rgba(220, 38, 38, 0.35);
   color: var(--color-rest);
@@ -1922,11 +1964,17 @@ button.acc-topic-btn.is-active-topic {
   padding: 14px 16px 12px;
   background: var(--bg-book-page, #FFFEFC);
   transition: border-color 0.14s ease, background-color 0.14s ease;
-  overflow: hidden;
+  overflow: visible !important;
   box-sizing: border-box;
   position: relative;
   width: 100%;
   max-width: 100%;
+}
+
+.topic-editor-slot {
+  position: relative;
+  z-index: 5;
+  margin-top: 6px;
 }
 
 .topic-exercise-block:hover {
@@ -4428,15 +4476,17 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 }
 
 .notation-editor-palette {
-  margin: 8px 0 10px;
-  padding: 10px 12px;
+  position: relative;
+  z-index: 10;
+  margin: 10px 0 14px;
+  padding: 12px 14px;
   background: #FAF9F5;
   border: 1px solid #D4D4D8;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 8px rgba(24, 24, 27, 0.05);
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(24, 24, 27, 0.08);
 }
 
 .ne-header-row {
@@ -4445,7 +4495,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border-hairline);
 }
 
@@ -4466,14 +4516,20 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 }
 
 .ne-bar-pill {
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 4px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  line-height: 1 !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  padding: 0 10px;
+  border-radius: 6px;
   border: 1px solid var(--border-hairline);
   background: #FFFFFF;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -4548,25 +4604,28 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 .ne-sym-btn,
 .ne-num-btn,
 .ne-action-btn {
-  height: 26px;
-  padding: 0 7px;
-  border-radius: 4px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  line-height: 1 !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  padding: 0 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
   color: #18181B;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
   cursor: pointer;
 }
 
 .ne-num-btn {
-  min-width: 24px;
-  justify-content: center;
+  min-width: 32px !important;
+  padding: 0 8px !important;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
 }
 
 .ne-sym-btn:hover:not(:disabled),
@@ -4592,8 +4651,16 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 }
 
 .ne-glyph {
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+
+.ne-svg-glyph {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .ne-sub {
@@ -4603,12 +4670,23 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 }
 
 .ne-fret-val {
-  min-width: 24px;
-  text-align: center;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  border-radius: 50% !important;
+  background: rgba(194, 65, 12, 0.12) !important;
+  border: 1px solid rgba(194, 65, 12, 0.35) !important;
+  color: #C2410C !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
-  color: #C2410C;
 }
 
 .ne-action-btn.is-danger {
@@ -5191,7 +5269,16 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 .save-live-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  width: 112px !important;
+  min-width: 112px !important;
+  max-width: 112px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  margin-left: auto;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
   font-weight: 600;
   transition: all 0.15s ease;
 }
