@@ -526,9 +526,10 @@ button.acc-topic-btn.is-active-topic {
 
 .acc-ex-item.is-active {
   background: var(--bg-surface);
-  color: var(--text-primary);
+  color: var(--accent, #C2410C);
   font-weight: 600;
-  border: 1px solid var(--border-hairline);
+  border: 1px solid rgba(194, 65, 12, 0.28);
+  box-shadow: inset 2.5px 0 0 var(--accent, #C2410C);
 }
 
 .acc-ex-title {
@@ -738,6 +739,9 @@ button.acc-topic-btn.is-active-topic {
   width: min(96%, 1320px);
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .studio-pinned-deck .tutor-scaffolding-bar {
@@ -912,6 +916,9 @@ button.acc-topic-btn.is-active-topic {
 .fretboard-stage {
   width: 100%;
   flex-shrink: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .fretboard-stage.is-hidden {
@@ -920,7 +927,11 @@ button.acc-topic-btn.is-active-topic {
 
 .fretboard-card {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  position: relative;
   padding: 2px 0 4px;
 }
 
@@ -1092,6 +1103,8 @@ button.acc-topic-btn.is-active-topic {
 .book-page-sheet {
   width: min(96%, 1320px);
   max-width: 1320px;
+  container-type: inline-size;
+  box-sizing: border-box;
   margin: 10px auto 24px;
   padding: 36px 44px;
   background: var(--bg-book-page, #FFFEFC);
@@ -1639,6 +1652,8 @@ button.acc-topic-btn.is-active-topic {
 
 .vf-score-sheet {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1894,6 +1909,11 @@ button.acc-topic-btn.is-active-topic {
   padding: 14px 16px 12px;
   background: var(--bg-book-page, #FFFEFC);
   transition: border-color 0.14s ease, background-color 0.14s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
 }
 
 .topic-exercise-block:hover {
@@ -1910,19 +1930,23 @@ button.acc-topic-btn.is-active-topic {
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px 14px;
-  padding-bottom: 10px;
-  margin-bottom: 4px;
+  gap: 8px 12px;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
   border-bottom: 1px solid var(--border-hairline, #E4E4E7);
   cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .topic-ex-head-left {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  min-width: 220px;
-  flex: 1 1 260px;
+  flex: 1 1 300px;
+  min-width: min(100%, 280px);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .topic-ex-badge {
@@ -1951,6 +1975,8 @@ button.acc-topic-btn.is-active-topic {
 .topic-ex-title-wrap {
   min-width: 0;
   flex: 1 1 auto;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .topic-ex-title {
@@ -1981,26 +2007,30 @@ button.acc-topic-btn.is-active-topic {
   gap: 6px;
   flex-shrink: 0;
   margin-left: auto;
+  align-self: flex-start;
+  box-sizing: border-box;
 }
 
-.workspace-body[data-pane-mode="split"] .topic-ex-head {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
+@container (max-width: 650px), .workspace-body[data-pane-mode="split"] {
+  .topic-ex-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 
-.workspace-body[data-pane-mode="split"] .topic-ex-head-left,
-.workspace-body[data-pane-mode="split"] .topic-ex-title-wrap,
-.workspace-body[data-pane-mode="split"] .topic-ex-title,
-.workspace-body[data-pane-mode="split"] .topic-ex-sub {
-  width: 100%;
-  min-width: 100%;
-}
+  .topic-ex-head-left,
+  .topic-ex-title-wrap,
+  .topic-ex-title,
+  .topic-ex-sub {
+    width: 100%;
+    min-width: 100%;
+  }
 
-.workspace-body[data-pane-mode="split"] .topic-ex-head-right {
-  width: 100%;
-  justify-content: flex-start;
-  margin-left: 0;
+  .topic-ex-head-right {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
 }
 
 .topic-ex-meta-pill {
@@ -2055,6 +2085,8 @@ button.acc-topic-btn.is-active-topic {
 .topic-ex-score-host {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 110px;
   padding-top: 2px;
   overflow-x: auto;

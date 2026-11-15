@@ -2980,9 +2980,8 @@ export class GuitarMasterApp {
           topic.exercises.some(e => (e.topicId || topic.topicId || computedTopicId) === this.currentTopicId || e.id === activeId)
         );
         const firstExId = topic.exercises[0] ? topic.exercises[0].id : "";
-        // Group AI-extracted sub-exercises cleanly under one single sidebar topic row
-        const hideExtractedSubRows = Boolean(topic.aiExtracted) && !query;
-        const exRows = hideExtractedSubRows ? "" : topic.exercises.map(ex => {
+        // Render every exercise inside the topic in the sidebar
+        const exRows = topic.exercises.map(ex => {
           const isRestDrill = ex.id.includes("rest") || ex.id.includes("tdr") || ex.title.toLowerCase().includes("rest");
           const isDone = this.completedExercises.has(ex.id);
           const isActive = ex.id === activeId;
@@ -3519,7 +3518,9 @@ export class GuitarMasterApp {
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    const activeSidebarEl = this.sessionsAccordion
+      ? (this.sessionsAccordion.querySelector('.acc-ex-item.is-active') || this.sessionsAccordion.querySelector('.acc-topic-btn.is-active-topic'))
+      : null;
     if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
       try {
         activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -4783,7 +4784,9 @@ export class GuitarMasterApp {
     this.currentBookCategory = cat;
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
-    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    const activeSidebarEl = this.sessionsAccordion
+      ? (this.sessionsAccordion.querySelector('.acc-ex-item.is-active') || this.sessionsAccordion.querySelector('.acc-topic-btn.is-active-topic'))
+      : null;
     if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
       try {
         activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
