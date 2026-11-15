@@ -77,15 +77,16 @@ export class FretboardVisualizer {
     neck.classList.remove("is-muted-state");
     overlay.style.display = "none";
 
-    if (!beatData) return;
+    // Priority 1: When user explicitly selects Full Chords, 4-Note Chords, or 3-Note Chords
+    // AND an active chord is present (or propagated forward), render that exact chord voicing!
+    if (chordName && this.chordMode !== "melody") {
+      this._highlightChord(chordName, false);
+      return;
+    }
 
-    // Priority 1: If the beat is a specific single-string note (melody or arpeggio), show the exact note!
-    // In "melody" mode, show ONLY this exact note. If the user explicitly selects Full Chords, 4-Note Chords, or 3-Note Chords,
-    // also overlay the selected chord voicing context.
-    if (typeof beatData.string === "number" && beatData.fret !== null && beatData.fret !== undefined) {
-      if (chordName && this.chordMode !== "melody") {
-        this._highlightChord(chordName, true); // ghost chord voicing only when user explicitly selected chord mode
-      }
+    // Priority 2: When Fretboard mode is "Melody Notes" (or chordName is null),
+    // render ONLY the single melody note for the current beat on the Fretboard.
+    if (beatData && typeof beatData.string === "number" && beatData.fret !== null && beatData.fret !== undefined) {
       const s = beatData.string;
       const f = beatData.fret;
       const dot = this.container.querySelector(`#fret-dot-${s}-${f}`);
@@ -96,8 +97,8 @@ export class FretboardVisualizer {
       return;
     }
 
-    // Priority 2: Full or simplified chord strumming
-    if (chordName && this.chordMode !== "melody") {
+    // Priority 3: Pure chord exercise without individual melody string coordinates
+    if (chordName) {
       this._highlightChord(chordName, false);
     }
   }
@@ -113,7 +114,14 @@ export class FretboardVisualizer {
       "G MAJOR": { notes: [[3,0,"0"],[2,0,"0"],[1,3,"3"]], muted: [6,5,4] },
       "G7": { notes: [[3,0,"0"],[2,0,"0"],[1,1,"1"]], muted: [6,5,4] },
       "AM": { notes: [[3,2,"2"],[2,1,"1"],[1,0,"0"]], muted: [6,5,4] },
-      "E": { notes: [[3,1,"1"],[2,0,"0"],[1,0,"0"]], muted: [6,5,4] }
+      "E": { notes: [[3,1,"1"],[2,0,"0"],[1,0,"0"]], muted: [6,5,4] },
+      "EM": { notes: [[3,0,"0"],[2,0,"0"],[1,0,"0"]], muted: [6,5,4] },
+      "D": { notes: [[3,2,"1"],[2,3,"3"],[1,2,"2"]], muted: [6,5,4] },
+      "D7": { notes: [[3,2,"2"],[2,1,"1"],[1,2,"3"]], muted: [6,5,4] },
+      "DM": { notes: [[3,2,"2"],[2,3,"3"],[1,1,"1"]], muted: [6,5,4] },
+      "A": { notes: [[3,2,"1"],[2,2,"2"],[1,0,"0"]], muted: [6,5,4] },
+      "A7": { notes: [[3,0,"0"],[2,2,"2"],[1,0,"0"]], muted: [6,5,4] },
+      "F": { notes: [[3,2,"2"],[2,1,"1"],[1,1,"1"]], muted: [6,5,4] }
     };
 
     const EASY4_MAP = {
@@ -123,8 +131,14 @@ export class FretboardVisualizer {
       "G7": { notes: [[4,0,"0"],[3,0,"0"],[2,0,"0"],[1,1,"1"]], muted: [6,5] },
       "AM": { notes: [[4,2,"2"],[3,2,"3"],[2,1,"1"],[1,0,"0"]], muted: [6,5] },
       "E": { notes: [[4,2,"2"],[3,1,"1"],[2,0,"0"],[1,0,"0"]], muted: [6,5] },
+      "EM": { notes: [[4,2,"2"],[3,0,"0"],[2,0,"0"],[1,0,"0"]], muted: [6,5] },
       "F": { notes: [[4,3,"3"],[3,2,"2"],[2,1,"1"],[1,1,"1"]], muted: [6,5] },
-      "F BARRE": { notes: [[4,3,"3"],[3,2,"2"],[2,1,"1"],[1,1,"1"]], muted: [6,5] }
+      "F BARRE": { notes: [[4,3,"3"],[3,2,"2"],[2,1,"1"],[1,1,"1"]], muted: [6,5] },
+      "D": { notes: [[4,0,"0"],[3,2,"1"],[2,3,"3"],[1,2,"2"]], muted: [6,5] },
+      "D7": { notes: [[4,0,"0"],[3,2,"2"],[2,1,"1"],[1,2,"3"]], muted: [6,5] },
+      "DM": { notes: [[4,0,"0"],[3,2,"2"],[2,3,"3"],[1,1,"1"]], muted: [6,5] },
+      "A": { notes: [[4,2,"1"],[3,2,"2"],[2,2,"3"],[1,0,"0"]], muted: [6,5] },
+      "A7": { notes: [[4,2,"2"],[3,0,"0"],[2,2,"3"],[1,0,"0"]], muted: [6,5] }
     };
 
     const FULL_CHORD_MAP = {
@@ -213,9 +227,26 @@ export class FretboardVisualizer {
       "C 4THS": { notes: [[4,10,"1"],[3,10,"1"]], muted: [6,5,2,1] }
     };
 
-    let shape = FULL_CHORD_MAP[c];
-    if (this.chordMode === "easy3" && EASY3_MAP[c]) shape = EASY3_MAP[c];
-    if (this.chordMode === "easy4" && EASY4_MAP[c]) shape = EASY4_MAP[c];
+    let shape = null;
+    if (this.chordMode === "easy3") {
+      shape = EASY3_MAP[c];
+      if (!shape && FULL_CHORD_MAP[c]) {
+        // Derive 3-note voicing: top 3 strings (1, 2, 3), mute strings 4, 5, 6
+        const fullShape = FULL_CHORD_MAP[c];
+        const notes = fullShape.notes.filter(([s]) => s <= 3);
+        shape = { notes, muted: [6, 5, 4] };
+      }
+    } else if (this.chordMode === "easy4") {
+      shape = EASY4_MAP[c];
+      if (!shape && FULL_CHORD_MAP[c]) {
+        // Derive 4-note voicing: top 4 strings (1, 2, 3, 4), mute strings 5, 6
+        const fullShape = FULL_CHORD_MAP[c];
+        const notes = fullShape.notes.filter(([s]) => s <= 4);
+        shape = { notes, muted: [6, 5] };
+      }
+    } else {
+      shape = FULL_CHORD_MAP[c];
+    }
 
     if (shape) {
       shape.notes.forEach(([s, f, label]) => this._activate(s, f, label, isGhost));

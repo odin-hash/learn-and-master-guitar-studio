@@ -281,9 +281,12 @@ export class GuitarMasterApp {
     this.loopMode = "all"; // "all" | "bar" | "once"
     this.loopMeasureIndex = 0;
     this.drawerOpen = window.innerWidth > 1024;
+    this.curriculumDrawerUserClosed = false;
     this._lastCompactViewport = this.isCompactFretboardViewport();
     this.fretboardVisible = !this._lastCompactViewport;
-    this.expandedSessions = new Set(["lessonBook_2"]);
+    this.openGroupId = "lessonBook_2";
+    this.lastActiveLessonBookExId = "lb-s2-str1-ex1";
+    this.lastActiveWorkshopBookExId = "bw-w2-song-london";
     this.pdfBookCategory = "lessonBook";
     this.pdfCurrentPage = 1;
     this.customPdfUrls = {};
@@ -794,7 +797,9 @@ export class GuitarMasterApp {
             const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
             if (curM) {
               const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
-              this.fretboard.update(curB, curB ? curB.type === "rest" : false, curM.chordName);
+              const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, this.currentBeatIndex);
+              this.updateCard(curB, curB ? curB.type === "rest" : false, this.currentBeatIndex + 1, activeChord);
+              this.fretboard.update(curB, curB ? curB.type === "rest" : false, activeChord);
             }
           }
         });
@@ -963,6 +968,9 @@ export class GuitarMasterApp {
       this.setBookCategory(targetCat);
       if (!this.currentExercise || this.currentExercise.id !== targetId || this.currentExercise.id === "free-metronome") {
         this.loadExercise(targetId);
+      }
+      if (window.innerWidth > 768 && !this.curriculumDrawerUserClosed) {
+        this.setDrawerOpen(true);
       }
     }
 
@@ -1431,6 +1439,75 @@ export class GuitarMasterApp {
     this.allExercises = this.buildFlatExerciseList();
   }
 
+  propagateExerciseChords(ex) {
+    if (!ex) return;
+    let runningChord = null;
+    const measures = Array.isArray(ex.measures) ? ex.measures : [];
+    const tabData = Array.isArray(ex.tabData) ? ex.tabData : [];
+    const maxBars = Math.max(measures.length, tabData.length);
+
+    for (let i = 0; i < maxBars; i++) {
+      const m = measures[i];
+      const legM = tabData[i];
+
+      const mChord = (m && m.chordName) || (legM && legM.chordName) || null;
+      if (mChord) {
+        runningChord = mChord;
+      }
+
+      if (m && Array.isArray(m.events)) {
+        m.events.forEach(ev => {
+          if (ev.chordChange) runningChord = ev.chordChange;
+          ev.activeChord = runningChord;
+        });
+      }
+
+      if (legM && Array.isArray(legM.beats)) {
+        legM.beats.forEach(b => {
+          if (b.chordChange || b.chordName) runningChord = b.chordChange || b.chordName;
+          b.activeChord = runningChord;
+        });
+      }
+
+      if (m) m.activeChord = runningChord;
+      if (legM) legM.activeChord = runningChord;
+    }
+  }
+
+  getActiveChord(ex, mIdx = 0, bIdx = 0) {
+    if (!ex) return null;
+    const tabM = ex.tabData && ex.tabData[mIdx];
+    const b = tabM && tabM.beats && tabM.beats[bIdx];
+    if (b && b.activeChord) return b.activeChord;
+    if (b && (b.chordChange || b.chordName)) return b.chordChange || b.chordName;
+    if (tabM && tabM.activeChord) return tabM.activeChord;
+    if (tabM && tabM.chordName) return tabM.chordName;
+
+    const m = ex.measures && ex.measures[mIdx];
+    const ev = m && Array.isArray(m.events) ? m.events[bIdx] : null;
+    if (ev && ev.activeChord) return ev.activeChord;
+    if (ev && ev.chordChange) return ev.chordChange;
+    if (m && m.activeChord) return m.activeChord;
+    if (m && m.chordName) return m.chordName;
+
+    // Backward search if chords were not pre-propagated
+    if (Array.isArray(ex.tabData)) {
+      for (let i = mIdx; i >= 0; i--) {
+        const prevM = ex.tabData[i];
+        if (prevM && (prevM.chordName || prevM.activeChord)) return prevM.chordName || prevM.activeChord;
+        if (prevM && Array.isArray(prevM.beats)) {
+          for (let j = prevM.beats.length - 1; j >= 0; j--) {
+            const pb = prevM.beats[j];
+            if (pb && (pb.activeChord || pb.chordChange || pb.chordName)) {
+              return pb.activeChord || pb.chordChange || pb.chordName;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   _buildFeedbackBeatFromMeasureEvent(ex, mIdx, tabBeatIdx, evIdx = null) {
     if (!ex) return null;
     const m = Array.isArray(ex.measures) ? ex.measures[mIdx] : null;
@@ -1441,8 +1518,9 @@ export class GuitarMasterApp {
     }
     const legM = ex.tabData && ex.tabData[mIdx];
     const legBeat = legM && legM.beats ? (legM.beats[tabBeatIdx] || legM.beats[0]) : null;
+    const activeChord = this.getActiveChord(ex, mIdx, tabBeatIdx);
     if (!ev) {
-      return legBeat ? { beatObj: legBeat, beatNum: tabBeatIdx + 1, isRest: legBeat.type === "rest", chordName: legM && legM.chordName } : null;
+      return legBeat ? { beatObj: legBeat, beatNum: tabBeatIdx + 1, isRest: legBeat.type === "rest", chordName: activeChord } : null;
     }
     const isRest = Boolean(ev.isRest);
     const beatObj = {
@@ -1465,13 +1543,14 @@ export class GuitarMasterApp {
       beatObj,
       beatNum,
       isRest,
-      chordName: (m && m.chordName) || (legM && legM.chordName) || null
+      chordName: activeChord
     };
   }
 
   handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx = null) {
     if (!updatedEx) return;
     this.currentExercise = updatedEx;
+    this.propagateExerciseChords(updatedEx);
     const slot = this._findCourseSlotForExercise(updatedEx.id);
     if (slot && slot.topic) {
       slot.topic.exercises[slot.exIdx] = updatedEx;
@@ -2156,7 +2235,7 @@ export class GuitarMasterApp {
 
     if (applied) {
       this.currentBookCategory = applied.bookCategory;
-      this.expandedSessions.add(`${applied.bookCategory}_${applied.sessionNumber}`);
+      this.openGroupId = `${applied.bookCategory}_${applied.sessionNumber}`;
       this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
       if (switchExercise) {
         if (this.paneMode === "pdf") {
@@ -2994,7 +3073,7 @@ export class GuitarMasterApp {
 
       const topicsToRender = query ? matchingTopics : session.topics;
       const prefix = isWorkshop ? `W${session.sessionNumber}` : `S${session.sessionNumber}`;
-      const isOpen = !!query || containsActive || this.expandedSessions.has(sessionKey);
+      const isOpen = Boolean(query) || (this.openGroupId === sessionKey);
 
       let topicsHtml = "";
       topicsToRender.forEach((topic, tIdx) => {
@@ -3065,27 +3144,13 @@ export class GuitarMasterApp {
     this.sessionsAccordion.querySelectorAll(".acc-session-trigger").forEach(btn => {
       btn.addEventListener("click", () => {
         const parent = btn.closest(".acc-session");
-        const key = parent.dataset.sessionKey;
-        const willOpen = !parent.classList.contains("is-open");
-
-        // Collapse all other sessions
-        this.sessionsAccordion.querySelectorAll(".acc-session").forEach(other => {
-          if (other !== parent) {
-            other.classList.remove("is-open");
-            const otherTrig = other.querySelector(".acc-session-trigger");
-            if (otherTrig) otherTrig.setAttribute("aria-expanded", "false");
-            if (other.dataset.sessionKey) this.expandedSessions.delete(other.dataset.sessionKey);
-          }
-        });
-
-        parent.classList.toggle("is-open", willOpen);
-        btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        if (willOpen) {
-          this.expandedSessions.clear();
-          this.expandedSessions.add(key);
+        const key = parent ? parent.dataset.sessionKey : null;
+        if (this.openGroupId === key) {
+          this.openGroupId = null;
         } else {
-          this.expandedSessions.delete(key);
+          this.openGroupId = key;
         }
+        this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
       });
     });
 
@@ -3357,6 +3422,7 @@ export class GuitarMasterApp {
 
     const prevTopicId = this.currentTopicId;
     this.currentExercise = JSON.parse(JSON.stringify(found));
+    this.propagateExerciseChords(this.currentExercise);
     this.currentExerciseIndex = this.allExercises.findIndex(e => e.id === found.id);
     this.currentBookCategory = found.bookCategory;
     this.selectedSpiderString = 1;
@@ -3431,8 +3497,12 @@ export class GuitarMasterApp {
     this.renderActiveSessionChecklist(found);
 
     if (found.sessionNumber) {
-      this.expandedSessions.clear();
-      this.expandedSessions.add(`${found.bookCategory}_${found.sessionNumber}`);
+      this.openGroupId = `${found.bookCategory}_${found.sessionNumber}`;
+    }
+    if (found.bookCategory === "lessonBook") {
+      this.lastActiveLessonBookExId = found.id;
+    } else if (found.bookCategory === "bonusWorkshop") {
+      this.lastActiveWorkshopBookExId = found.id;
     }
 
     const isFreeMet = found.bookCategory === "freeMetronome" || found.id === "free-metronome" || Boolean(found.isMetronomeOnly);
@@ -3578,9 +3648,10 @@ export class GuitarMasterApp {
     this.fretboard.reset();
 
     const firstBeat = this.currentExercise.tabData[0].beats[0];
-    this.updateCard(firstBeat, false, 1, this.currentExercise.tabData[0].chordName);
+    const firstChord = this.getActiveChord(this.currentExercise, 0, 0);
+    this.updateCard(firstBeat, false, 1, firstChord);
     if (!isFreeMet) {
-      this.fretboard.update(firstBeat, false, this.currentExercise.tabData[0].chordName);
+      this.fretboard.update(firstBeat, false, firstChord);
     }
 
     this.syncBookTabsUI();
@@ -4328,9 +4399,11 @@ export class GuitarMasterApp {
               noteDurBeats += (tiedTarget.duration || 1.0);
             }
           }
-          this.audio.playNoteEvent(noteAudioTime, item.beatData, curMeasure.chordName, noteDurBeats * secondsPerQuarterBeat);
+          const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, item.beatIndex);
+          this.audio.playNoteEvent(noteAudioTime, item.beatData, activeChord, noteDurBeats * secondsPerQuarterBeat);
         }
 
+        const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, item.beatIndex);
         this.queue.push({
           mIdx: this.currentMeasureIndex,
           bIdx: item.beatIndex,
@@ -4338,7 +4411,7 @@ export class GuitarMasterApp {
           isDownbeat: (offsetBeats < 0.05),
           beatPos: item.startOffset,
           beatData: item.beatData,
-          chordName: curMeasure.chordName,
+          chordName: activeChord,
           isRest: isRest,
           isSustain: isSustain,
           isTieCont: isTieCont,
@@ -4352,6 +4425,7 @@ export class GuitarMasterApp {
       if (isRest && typeof this.audio.dampAllStrings === "function") {
         this.audio.dampAllStrings(time);
       }
+      const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, ringingNote ? ringingNote.beatIndex : 0);
       this.queue.push({
         mIdx: this.currentMeasureIndex,
         bIdx: ringingNote ? ringingNote.beatIndex : 0,
@@ -4359,7 +4433,7 @@ export class GuitarMasterApp {
         isDownbeat: true,
         beatPos: b,
         beatData: ringingNote ? ringingNote.beatData : null,
-        chordName: curMeasure.chordName,
+        chordName: activeChord,
         isRest: isRest,
         isSustain: true,
         isTieCont: ringingNote ? Boolean(ringingNote.beatData.isTieContinuation || ringingNote.beatData.tieFromPrev) : false,
@@ -4633,7 +4707,21 @@ export class GuitarMasterApp {
       const isSustain = isTieCont || Boolean((ev && ev.isSustain) || beatData.isSustain || beatData.type === "sustain");
       const isSingleNoteMelody = typeof beatData.string === "number";
 
-      if (isSingleNoteMelody) {
+      if (this.chordMode !== "melody" && chordName) {
+        const voicingLabels = {
+          full: "Full Chords",
+          easy4: "4-Note Chords",
+          easy3: "3-Note Chords"
+        };
+        const voicingName = voicingLabels[this.chordMode] || "Full Chords";
+        this.noteHeaderBig.textContent = `Beat ${beatNumber}: ${chordName} (${voicingName})${isSustain ? " · Hold" : ""}`;
+
+        const noteName = beatData.note || "NOTE";
+        const s = beatData.string ? `String ${beatData.string}` : null;
+        const f = (beatData.fret !== null && beatData.fret !== undefined) ? `Fret ${beatData.fret}` : null;
+        const melodyHint = (s && f) ? ` · Melody: ${noteName} (${s}, ${f})` : "";
+        this.noteSubInstruction.textContent = `Voicing: ${voicingName}${melodyHint}`;
+      } else if (isSingleNoteMelody) {
         const noteName = beatData.note || "NOTE";
         const chordSuffix = chordName ? ` [${chordName}]` : "";
         const holdTag = isTieCont ? " (Tied Hold)" : (isSustain ? " (Hold)" : "");
@@ -4646,7 +4734,7 @@ export class GuitarMasterApp {
           ? `Keep holding ${[s, f].filter(Boolean).join(" • ")} across Beat ${beatNumber}`
           : ([s, f, fin].filter(Boolean).join(" • ") || (beatData.tip || "Play cleanly"));
       } else if (chordName) {
-        this.noteHeaderBig.textContent = `BEAT ${beatNumber}: ${chordName} CHORD ${isSustain ? '(Tie / Keep Hand Going!)' : ''}`;
+        this.noteHeaderBig.textContent = `Beat ${beatNumber}: ${chordName} Chord ${isSustain ? '(Tie / Keep Hand Going!)' : ''}`;
         this.noteSubInstruction.textContent = isSustain
           ? (beatData.tip || "TIE: Swing hand past strings without touching them (Keep Your Hand Going!)")
           : (beatData.tip || `Strum ${chordName} (${beatData.string === 'all' ? 'All 6 Strings' : 'Strings ' + beatData.string})`);
@@ -4902,7 +4990,11 @@ export class GuitarMasterApp {
 
     if (this.btnToggleDrawer) {
       this.btnToggleDrawer.addEventListener("click", () => {
-        this.setDrawerOpen(!this.drawerOpen);
+        const nextState = !this.drawerOpen;
+        if (this.appMode === "studio") {
+          this.curriculumDrawerUserClosed = !nextState;
+        }
+        this.setDrawerOpen(nextState);
       });
     }
 
@@ -4953,14 +5045,20 @@ export class GuitarMasterApp {
     // Zone 2: Left Drawer Book Tabs & Search
     if (this.choiceLessonBook) {
       this.choiceLessonBook.addEventListener("click", () => {
-        if (this.appMode === "metronome") this.setAppMode("studio");
-        this.setBookCategory("lessonBook");
+        if (this.appMode !== "studio") this.setAppMode("studio");
+        this.currentBookCategory = "lessonBook";
+        this.activeCurriculumBook = "lessonBook";
+        const targetId = this.lastActiveLessonBookExId || "lb-s2-str1-ex1";
+        this.loadExercise(targetId);
       });
     }
     if (this.choiceWorkshopBook) {
       this.choiceWorkshopBook.addEventListener("click", () => {
-        if (this.appMode === "metronome") this.setAppMode("studio");
-        this.setBookCategory("bonusWorkshop");
+        if (this.appMode !== "studio") this.setAppMode("studio");
+        this.currentBookCategory = "bonusWorkshop";
+        this.activeCurriculumBook = "bonusWorkshop";
+        const targetId = this.lastActiveWorkshopBookExId || "bw-w2-song-london";
+        this.loadExercise(targetId);
       });
     }
     if (this.choiceFreeMode) {
