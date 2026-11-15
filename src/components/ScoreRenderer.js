@@ -575,9 +575,11 @@ export class ScoreRenderer {
 
       const topPad = 56;
       const trebleY = topPad;
-      const tabY = showTreble ? (topPad + 122) : (topPad + 4);
-      const rhythmExtra = this.showRhythmGuide ? 38 : 0;
-      const sysH = (showTab ? (tabY + 116) : (trebleY + 112)) + rhythmExtra;
+      const tabY = showTreble ? (topPad + 128) : (topPad + 4);
+      const tabLinesH = 5 * 10.5;
+      const bottomMarkingsH = (this.showRhythmGuide ? 52 : 28) + 20;
+      const rawSysH = showTab ? (tabY + tabLinesH + bottomMarkingsH) : (trebleY + 54 + bottomMarkingsH);
+      const sysH = Math.ceil(Math.max(rawSysH, (showTreble && showTab) ? 336 : 180));
 
       const renderer = new VF.Renderer(sysEl, VF.Renderer.Backends.SVG);
       renderer.resize(renderedW, Math.ceil(sysH * SCALE));
@@ -589,6 +591,10 @@ export class ScoreRenderer {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
         svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
+        svgEl.removeAttribute("height");
+        svgEl.removeAttribute("width");
+        svgEl.style.removeProperty("height");
+        svgEl.style.removeProperty("max-height");
         if (renderedW > availW) {
           svgEl.style.width = `${renderedW}px`;
           svgEl.style.minWidth = `${renderedW}px`;
@@ -596,7 +602,9 @@ export class ScoreRenderer {
           svgEl.style.width = "100%";
           svgEl.style.minWidth = "";
         }
-        svgEl.removeAttribute("height");
+        svgEl.style.height = "auto";
+        svgEl.style.maxHeight = "none";
+        svgEl.style.overflow = "visible";
       }
 
       const backdropLayer = document.createElementNS(SVG_NS, "g");
@@ -1309,13 +1317,18 @@ export class ScoreRenderer {
     pill.hidden = false;
 
     const containerW = (this.container && this.container.clientWidth) ? this.container.clientWidth : 740;
+    const svgEl = bounds.sysEl ? bounds.sysEl.querySelector("svg") : null;
+    const svgWidth = (svgEl && svgEl.clientWidth) ? svgEl.clientWidth : containerW;
     const measureLeftPx = bounds.x * SCALE;
     const measureWidthPx = bounds.width * SCALE;
     const targetCenterX = (activeHeadX !== null && activeHeadX !== undefined)
       ? (activeHeadX * SCALE)
       : (measureLeftPx + (measureWidthPx / 2));
-    const pillW = pill.offsetWidth || 180;
-    const leftPx = Math.max(4, Math.min(containerW - pillW - 4, targetCenterX - pillW / 2));
+    const pillW = Math.max(pill.scrollWidth || 0, pill.offsetWidth || 0, 190);
+    const minX = 12;
+    const maxX = Math.max(minX, svgWidth - pillW - 12);
+    const idealLeft = targetCenterX - (pillW / 2);
+    const leftPx = Math.max(minX, Math.min(maxX, idealLeft));
     const topPx = bounds.sysEl.offsetTop + Math.max(2, Math.round(bounds.topLineY * SCALE) - 44);
 
     pill.style.left = `${Math.round(leftPx)}px`;

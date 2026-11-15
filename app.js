@@ -859,6 +859,7 @@ export class GuitarMasterApp {
     }
     if (this.fretboardWrapper) {
       this.fretboardWrapper.classList.toggle("is-hidden", !this.fretboardVisible);
+      this.fretboardWrapper.style.display = this.fretboardVisible ? "" : "none";
     }
   }
 
@@ -1239,7 +1240,7 @@ export class GuitarMasterApp {
 
       const totalPages = pdfDoc.numPages || 1;
       if (this.pdfPageIndicator) {
-        this.pdfPageIndicator.textContent = `${targetPage} / ${totalPages}`;
+        this.pdfPageIndicator.textContent = `/ ${totalPages}`;
       }
       if (this.pdfPageInput) {
         this.pdfPageInput.max = totalPages;
@@ -1294,17 +1295,12 @@ export class GuitarMasterApp {
       slot.style.width = `${Math.floor(baseCssWidth)}px`;
       slot.style.minHeight = `${baseCssHeight}px`;
 
-      const badge = document.createElement("div");
-      badge.className = "pdf-page-badge";
-      badge.textContent = `Page ${p}`;
-
       const canvas = document.createElement("canvas");
       canvas.className = "pdf-page-canvas";
       canvas.id = `pdf-page-canvas-${p}`;
       canvas.width = 1;
       canvas.height = 1;
 
-      slot.appendChild(badge);
       slot.appendChild(canvas);
       frag.appendChild(slot);
     }
@@ -1339,7 +1335,7 @@ export class GuitarMasterApp {
             this.pdfPageInput.value = p;
           }
           if (this.pdfPageIndicator) {
-            this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+            this.pdfPageIndicator.textContent = `/ ${totalPages}`;
           }
           if (this.btnPdfPrev) this.btnPdfPrev.disabled = p <= 1;
           if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
@@ -1407,7 +1403,7 @@ export class GuitarMasterApp {
       this.pdfPageInput.value = p;
     }
     if (this.pdfPageIndicator) {
-      this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+      this.pdfPageIndicator.textContent = `/ ${totalPages}`;
     }
     const slot = document.getElementById(`pdf-page-slot-${p}`);
     if (slot) {
@@ -5167,72 +5163,16 @@ export class GuitarMasterApp {
       });
     }
 
-    // Item 4: Touch-friendly Admin Mode toggle for iPad & touch devices
-    // Supports triple-tap and 1.5s long-press on top-right info icon (btnToggleGuide)
-    if (this.btnToggleGuide) {
-      let tapCount = 0;
-      let lastTapTime = 0;
-      let longPressTimer = null;
-      let longPressTriggered = false;
-
-      const triggerAdminToggle = (reason) => {
-        const nextState = !this.adminMode;
-        this.setAdminMode(nextState);
-        try {
-          if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-        } catch (e) {}
-        console.log(`[AdminMode] Toggled via ${reason} to:`, nextState);
-      };
-
-      this.btnToggleGuide.addEventListener("pointerdown", () => {
-        longPressTriggered = false;
-        clearTimeout(longPressTimer);
-        longPressTimer = setTimeout(() => {
-          longPressTriggered = true;
-          triggerAdminToggle("long-press (1.5s)");
-        }, 1500);
-      });
-
-      const clearLongPress = () => {
-        clearTimeout(longPressTimer);
-      };
-      this.btnToggleGuide.addEventListener("pointerup", clearLongPress);
-      this.btnToggleGuide.addEventListener("pointercancel", clearLongPress);
-      this.btnToggleGuide.addEventListener("pointerleave", clearLongPress);
-
-      this.btnToggleGuide.addEventListener("click", (e) => {
-        if (longPressTriggered) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return;
-        }
-
-        const now = Date.now();
-        if (now - lastTapTime < 550) {
-          tapCount++;
+    // Steve Krenz Editorial Guide drawer toggle on top-right info icon (Admin Mode is strictly triggered via Ctrl+Shift+A)
+    if (this.btnToggleGuide && this.studioGuidePanel) {
+      this.btnToggleGuide.addEventListener("click", () => {
+        const willShow = this.studioGuidePanel.hasAttribute("hidden");
+        if (willShow) {
+          this.studioGuidePanel.removeAttribute("hidden");
         } else {
-          tapCount = 1;
+          this.studioGuidePanel.setAttribute("hidden", "");
         }
-        lastTapTime = now;
-
-        if (tapCount >= 3) {
-          tapCount = 0;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          triggerAdminToggle("triple-tap");
-          return;
-        }
-
-        // Standard single click toggles Steve Krenz Notes guide drawer
-        if (this.studioGuidePanel) {
-          const willShow = this.studioGuidePanel.hasAttribute("hidden");
-          if (willShow) {
-            this.studioGuidePanel.removeAttribute("hidden");
-          } else {
-            this.studioGuidePanel.setAttribute("hidden", "");
-          }
-          this.btnToggleGuide.classList.toggle("active", willShow);
-        }
+        this.btnToggleGuide.classList.toggle("active", willShow);
       });
     }
 

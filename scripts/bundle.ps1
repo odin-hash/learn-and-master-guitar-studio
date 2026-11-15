@@ -373,20 +373,19 @@ $css
           <div class="pdf-toolbar-left">
             <button class="micro-pill active" id="btn-pdf-lesson" data-pdf-book="lessonBook">Lesson Book</button>
             <button class="micro-pill" id="btn-pdf-workshop" data-pdf-book="bonusWorkshop">Workshop Book</button>
+            <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
             <div class="pdf-page-group">
               <span>p.</span>
-              <input type="number" id="pdf-page-input" class="mono-input" min="1" max="160" value="1" aria-label="PDF Page Number">
+              <input type="number" id="pdf-page-input" class="mono-input" min="1" max="189" value="1" aria-label="PDF Page Number">
+              <span class="pdf-page-indicator" id="pdf-page-indicator">/ --</span>
             </div>
-            <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
+            <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
             <div class="pdf-nav-zoom-group">
-              <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
-              <span class="pdf-page-indicator" id="pdf-page-indicator">1 / --</span>
-              <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
-              <span class="pdf-nav-sep">|</span>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-out" title="Zoom Out (-)" aria-label="Zoom Out">&minus;</button>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-fit" title="Fit Width">Fit</button>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-in" title="Zoom In (+)" aria-label="Zoom In">+</button>
             </div>
+            <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">

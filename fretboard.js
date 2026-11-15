@@ -21,9 +21,10 @@ export class FretboardVisualizer {
 
   render() {
     const inlayFrets = new Set([3, 5, 7, 9, 12]);
+    const gridCols = "grid-template-columns: 92px 52px repeat(14, minmax(0, 1fr)); width: 100%; box-sizing: border-box;";
     this.container.innerHTML = `
-      <div class="fretboard-card">
-        <div class="fretboard-header-row" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
+      <div class="fretboard-card" style="width: 100%; box-sizing: border-box;">
+        <div class="fretboard-header-row" style="${gridCols}">
           <div class="string-header-blank">String</div>
           <div class="fret-col-title nut-title">Open</div>
           ${this.frets.filter(f => f > 0).map(f => {
@@ -32,9 +33,9 @@ export class FretboardVisualizer {
             return `<div class="fret-col-title">${f}</div>`;
           }).join("")}
         </div>
-        <div class="fretboard-neck-board" id="fretboard-neck-board">
+        <div class="fretboard-neck-board" id="fretboard-neck-board" style="width: 100%; box-sizing: border-box;">
           ${this.strings.map(s => `
-            <div class="fret-string-row" data-string="${s.num}" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
+            <div class="fret-string-row" data-string="${s.num}" style="${gridCols}">
               <div class="string-title">${s.label}</div>
               <div class="fret-space nut-space" data-string="${s.num}" data-fret="0">
                 <div class="finger-marker" id="fret-dot-${s.num}-0"></div>

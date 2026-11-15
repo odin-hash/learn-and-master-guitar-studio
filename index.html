@@ -1079,8 +1079,15 @@ button.acc-topic-btn.is-active-topic {
   position: relative;
 }
 
+#fretboard-wrapper.is-hidden,
 .fretboard-stage.is-hidden {
-  display: none;
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
 }
 
 .fretboard-card {
@@ -1098,7 +1105,7 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   height: 22px;
   margin-bottom: 4px;
-  min-width: 684px;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -1133,7 +1140,7 @@ button.acc-topic-btn.is-active-topic {
 
 .fretboard-neck-board {
   position: relative;
-  min-width: 684px;
+  width: 100%;
   background: var(--bg-sidebar);
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
@@ -1151,6 +1158,7 @@ button.acc-topic-btn.is-active-topic {
   height: 28px;
   min-height: 28px;
   max-height: 28px;
+  width: 100%;
   box-sizing: border-box;
   position: relative;
 }
@@ -1159,7 +1167,7 @@ button.acc-topic-btn.is-active-topic {
 .fret-string-row::before {
   content: "";
   position: absolute;
-  left: 96px;
+  left: 92px;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
@@ -1840,14 +1848,18 @@ button.acc-topic-btn.is-active-topic {
 
 .vf-system-block {
   width: 100%;
-  overflow: visible;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .vf-system-svg {
   display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 /* Crisp #FFFEFC paper halo behind TAB numbers so string lines break cleanly */
@@ -2297,10 +2309,10 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: 110px;
+  min-height: 0;
   padding-top: 2px;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -2520,25 +2532,35 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .pdf-toolbar {
-  min-height: 40px;
-  height: auto;
+  min-height: 38px;
+  height: auto !important;
   background: var(--bg-canvas);
   border-bottom: 1px solid var(--border-hairline);
-  padding: 6px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 6px 8px;
+  padding: 4px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 4px 6px !important;
   flex-shrink: 0;
+  overflow: visible !important;
 }
 
-.pdf-toolbar-left,
+.pdf-toolbar-left {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px 6px !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
 .pdf-toolbar-right {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  margin-left: auto !important;
 }
 
 .pdf-toolbar .micro-pill {
@@ -2862,20 +2884,7 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .pdf-page-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid var(--border-hairline);
-  pointer-events: none;
-  z-index: 2;
+  display: none !important;
 }
 
 .pdf-page-canvas {
@@ -6203,20 +6212,19 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
           <div class="pdf-toolbar-left">
             <button class="micro-pill active" id="btn-pdf-lesson" data-pdf-book="lessonBook">Lesson Book</button>
             <button class="micro-pill" id="btn-pdf-workshop" data-pdf-book="bonusWorkshop">Workshop Book</button>
+            <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
             <div class="pdf-page-group">
               <span>p.</span>
-              <input type="number" id="pdf-page-input" class="mono-input" min="1" max="160" value="1" aria-label="PDF Page Number">
+              <input type="number" id="pdf-page-input" class="mono-input" min="1" max="189" value="1" aria-label="PDF Page Number">
+              <span class="pdf-page-indicator" id="pdf-page-indicator">/ --</span>
             </div>
-            <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
+            <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
             <div class="pdf-nav-zoom-group">
-              <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
-              <span class="pdf-page-indicator" id="pdf-page-indicator">1 / --</span>
-              <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
-              <span class="pdf-nav-sep">|</span>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-out" title="Zoom Out (-)" aria-label="Zoom Out">&minus;</button>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-fit" title="Fit Width">Fit</button>
               <button type="button" class="micro-pill" id="btn-pdf-zoom-in" title="Zoom In (+)" aria-label="Zoom In">+</button>
             </div>
+            <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
@@ -12549,9 +12557,11 @@ class ScoreRenderer {
 
       const topPad = 56;
       const trebleY = topPad;
-      const tabY = showTreble ? (topPad + 122) : (topPad + 4);
-      const rhythmExtra = this.showRhythmGuide ? 38 : 0;
-      const sysH = (showTab ? (tabY + 116) : (trebleY + 112)) + rhythmExtra;
+      const tabY = showTreble ? (topPad + 128) : (topPad + 4);
+      const tabLinesH = 5 * 10.5;
+      const bottomMarkingsH = (this.showRhythmGuide ? 52 : 28) + 20;
+      const rawSysH = showTab ? (tabY + tabLinesH + bottomMarkingsH) : (trebleY + 54 + bottomMarkingsH);
+      const sysH = Math.ceil(Math.max(rawSysH, (showTreble && showTab) ? 336 : 180));
 
       const renderer = new VF.Renderer(sysEl, VF.Renderer.Backends.SVG);
       renderer.resize(renderedW, Math.ceil(sysH * SCALE));
@@ -12563,6 +12573,10 @@ class ScoreRenderer {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
         svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
+        svgEl.removeAttribute("height");
+        svgEl.removeAttribute("width");
+        svgEl.style.removeProperty("height");
+        svgEl.style.removeProperty("max-height");
         if (renderedW > availW) {
           svgEl.style.width = `${renderedW}px`;
           svgEl.style.minWidth = `${renderedW}px`;
@@ -12570,7 +12584,9 @@ class ScoreRenderer {
           svgEl.style.width = "100%";
           svgEl.style.minWidth = "";
         }
-        svgEl.removeAttribute("height");
+        svgEl.style.height = "auto";
+        svgEl.style.maxHeight = "none";
+        svgEl.style.overflow = "visible";
       }
 
       const backdropLayer = document.createElementNS(SVG_NS, "g");
@@ -13283,13 +13299,18 @@ class ScoreRenderer {
     pill.hidden = false;
 
     const containerW = (this.container && this.container.clientWidth) ? this.container.clientWidth : 740;
+    const svgEl = bounds.sysEl ? bounds.sysEl.querySelector("svg") : null;
+    const svgWidth = (svgEl && svgEl.clientWidth) ? svgEl.clientWidth : containerW;
     const measureLeftPx = bounds.x * SCALE;
     const measureWidthPx = bounds.width * SCALE;
     const targetCenterX = (activeHeadX !== null && activeHeadX !== undefined)
       ? (activeHeadX * SCALE)
       : (measureLeftPx + (measureWidthPx / 2));
-    const pillW = pill.offsetWidth || 180;
-    const leftPx = Math.max(4, Math.min(containerW - pillW - 4, targetCenterX - pillW / 2));
+    const pillW = Math.max(pill.scrollWidth || 0, pill.offsetWidth || 0, 190);
+    const minX = 12;
+    const maxX = Math.max(minX, svgWidth - pillW - 12);
+    const idealLeft = targetCenterX - (pillW / 2);
+    const leftPx = Math.max(minX, Math.min(maxX, idealLeft));
     const topPx = bounds.sysEl.offsetTop + Math.max(2, Math.round(bounds.topLineY * SCALE) - 44);
 
     pill.style.left = `${Math.round(leftPx)}px`;
@@ -14221,9 +14242,10 @@ class FretboardVisualizer {
 
   render() {
     const inlayFrets = new Set([3, 5, 7, 9, 12]);
+    const gridCols = "grid-template-columns: 92px 52px repeat(14, minmax(0, 1fr)); width: 100%; box-sizing: border-box;";
     this.container.innerHTML = `
-      <div class="fretboard-card">
-        <div class="fretboard-header-row" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
+      <div class="fretboard-card" style="width: 100%; box-sizing: border-box;">
+        <div class="fretboard-header-row" style="${gridCols}">
           <div class="string-header-blank">String</div>
           <div class="fret-col-title nut-title">Open</div>
           ${this.frets.filter(f => f > 0).map(f => {
@@ -14232,9 +14254,9 @@ class FretboardVisualizer {
             return `<div class="fret-col-title">${f}</div>`;
           }).join("")}
         </div>
-        <div class="fretboard-neck-board" id="fretboard-neck-board">
+        <div class="fretboard-neck-board" id="fretboard-neck-board" style="width: 100%; box-sizing: border-box;">
           ${this.strings.map(s => `
-            <div class="fret-string-row" data-string="${s.num}" style="grid-template-columns: 96px 56px repeat(14, minmax(38px, 1fr));">
+            <div class="fret-string-row" data-string="${s.num}" style="${gridCols}">
               <div class="string-title">${s.label}</div>
               <div class="fret-space nut-space" data-string="${s.num}" data-fret="0">
                 <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
@@ -19987,6 +20009,7 @@ class GuitarMasterApp {
     }
     if (this.fretboardWrapper) {
       this.fretboardWrapper.classList.toggle("is-hidden", !this.fretboardVisible);
+      this.fretboardWrapper.style.display = this.fretboardVisible ? "" : "none";
     }
   }
 
@@ -20367,7 +20390,7 @@ class GuitarMasterApp {
 
       const totalPages = pdfDoc.numPages || 1;
       if (this.pdfPageIndicator) {
-        this.pdfPageIndicator.textContent = `${targetPage} / ${totalPages}`;
+        this.pdfPageIndicator.textContent = `/ ${totalPages}`;
       }
       if (this.pdfPageInput) {
         this.pdfPageInput.max = totalPages;
@@ -20422,17 +20445,12 @@ class GuitarMasterApp {
       slot.style.width = `${Math.floor(baseCssWidth)}px`;
       slot.style.minHeight = `${baseCssHeight}px`;
 
-      const badge = document.createElement("div");
-      badge.className = "pdf-page-badge";
-      badge.textContent = `Page ${p}`;
-
       const canvas = document.createElement("canvas");
       canvas.className = "pdf-page-canvas";
       canvas.id = `pdf-page-canvas-${p}`;
       canvas.width = 1;
       canvas.height = 1;
 
-      slot.appendChild(badge);
       slot.appendChild(canvas);
       frag.appendChild(slot);
     }
@@ -20467,7 +20485,7 @@ class GuitarMasterApp {
             this.pdfPageInput.value = p;
           }
           if (this.pdfPageIndicator) {
-            this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+            this.pdfPageIndicator.textContent = `/ ${totalPages}`;
           }
           if (this.btnPdfPrev) this.btnPdfPrev.disabled = p <= 1;
           if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
@@ -20535,7 +20553,7 @@ class GuitarMasterApp {
       this.pdfPageInput.value = p;
     }
     if (this.pdfPageIndicator) {
-      this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+      this.pdfPageIndicator.textContent = `/ ${totalPages}`;
     }
     const slot = document.getElementById(`pdf-page-slot-${p}`);
     if (slot) {
@@ -24295,72 +24313,16 @@ class GuitarMasterApp {
       });
     }
 
-    // Item 4: Touch-friendly Admin Mode toggle for iPad & touch devices
-    // Supports triple-tap and 1.5s long-press on top-right info icon (btnToggleGuide)
-    if (this.btnToggleGuide) {
-      let tapCount = 0;
-      let lastTapTime = 0;
-      let longPressTimer = null;
-      let longPressTriggered = false;
-
-      const triggerAdminToggle = (reason) => {
-        const nextState = !this.adminMode;
-        this.setAdminMode(nextState);
-        try {
-          if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-        } catch (e) {}
-        console.log(`[AdminMode] Toggled via ${reason} to:`, nextState);
-      };
-
-      this.btnToggleGuide.addEventListener("pointerdown", () => {
-        longPressTriggered = false;
-        clearTimeout(longPressTimer);
-        longPressTimer = setTimeout(() => {
-          longPressTriggered = true;
-          triggerAdminToggle("long-press (1.5s)");
-        }, 1500);
-      });
-
-      const clearLongPress = () => {
-        clearTimeout(longPressTimer);
-      };
-      this.btnToggleGuide.addEventListener("pointerup", clearLongPress);
-      this.btnToggleGuide.addEventListener("pointercancel", clearLongPress);
-      this.btnToggleGuide.addEventListener("pointerleave", clearLongPress);
-
-      this.btnToggleGuide.addEventListener("click", (e) => {
-        if (longPressTriggered) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return;
-        }
-
-        const now = Date.now();
-        if (now - lastTapTime < 550) {
-          tapCount++;
+    // Steve Krenz Editorial Guide drawer toggle on top-right info icon (Admin Mode is strictly triggered via Ctrl+Shift+A)
+    if (this.btnToggleGuide && this.studioGuidePanel) {
+      this.btnToggleGuide.addEventListener("click", () => {
+        const willShow = this.studioGuidePanel.hasAttribute("hidden");
+        if (willShow) {
+          this.studioGuidePanel.removeAttribute("hidden");
         } else {
-          tapCount = 1;
+          this.studioGuidePanel.setAttribute("hidden", "");
         }
-        lastTapTime = now;
-
-        if (tapCount >= 3) {
-          tapCount = 0;
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          triggerAdminToggle("triple-tap");
-          return;
-        }
-
-        // Standard single click toggles Steve Krenz Notes guide drawer
-        if (this.studioGuidePanel) {
-          const willShow = this.studioGuidePanel.hasAttribute("hidden");
-          if (willShow) {
-            this.studioGuidePanel.removeAttribute("hidden");
-          } else {
-            this.studioGuidePanel.setAttribute("hidden", "");
-          }
-          this.btnToggleGuide.classList.toggle("active", willShow);
-        }
+        this.btnToggleGuide.classList.toggle("active", willShow);
       });
     }
 
