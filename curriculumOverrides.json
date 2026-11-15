@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-15T15:55:37.364Z",
+  "updatedAt": "2026-11-15T15:56:15.184Z",
   "repo": "odin-hash/learn-and-master-guitar-studio",
   "branch": "main",
   "modelPreference": "auto",
@@ -19201,14 +19201,14 @@
       "bookPage": 18,
       "targetTopicId": "lessonBook_s3_t2",
       "targetExerciseId": "lb-s3-str3-ex1",
-      "modelUsed": "gemini-3-flash-preview",
-      "pageTitle": "The Notes on the G or Third String",
-      "extractedAt": "2026-11-12T13:38:08.847Z",
+      "modelUsed": "manual-editor",
+      "pageTitle": "Third String Notes & Exercises (G - A) (Lesson Book p. 18)",
+      "extractedAt": "2026-11-15T15:56:14.125Z",
       "mathWarnings": [],
       "exercises": [
         {
           "id": "lb-s3-str3-ex1",
-          "title": "1.",
+          "title": "Exercise 1",
           "description": "Play each exercise using the correct finger for each note.",
           "timeSignature": [
             4,
@@ -19944,7 +19944,7 @@
         },
         {
           "id": "lb-s3-str3-ex1-ex2",
-          "title": "2.",
+          "title": "Exercise 2",
           "description": "Play each exercise using the correct finger for each note.",
           "timeSignature": [
             4,
@@ -21034,7 +21034,7 @@
         },
         {
           "id": "lb-s3-str3-ex1-ex3",
-          "title": "3.",
+          "title": "Exercise 3",
           "description": "Play each exercise using the correct finger for each note.",
           "timeSignature": [
             4,
@@ -22197,6 +22197,256 @@
               ]
             }
           ]
+        },
+        {
+          "id": "lb-sub-p18-ex4-nw5q",
+          "title": "Exercise 4 (p. 19)",
+          "description": "Added sub-exercise on p. 18. Edit measures visually below.",
+          "timeSignature": [
+            4,
+            4
+          ],
+          "defaultBpm": 65,
+          "pdfPage": 18,
+          "pdfRawPage": 21,
+          "verificationStatus": "pdf-verified",
+          "aiExtracted": true,
+          "tabData": [
+            {
+              "measure": 1,
+              "chordName": null,
+              "beats": [
+                {
+                  "beat": 1,
+                  "eventIndex": 0,
+                  "note": "High E",
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isDotted": false,
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "isTieContinuation": false,
+                  "isStart": true,
+                  "isSustain": false,
+                  "chordChange": null,
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 2,
+                  "eventIndex": 1,
+                  "note": "High E",
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Up",
+                  "duration": 1,
+                  "isDotted": false,
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "isTieContinuation": false,
+                  "isStart": true,
+                  "isSustain": false,
+                  "chordChange": null,
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 3,
+                  "eventIndex": 2,
+                  "note": "High E",
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isDotted": false,
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "isTieContinuation": false,
+                  "isStart": true,
+                  "isSustain": false,
+                  "chordChange": null,
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 4,
+                  "eventIndex": 3,
+                  "note": "High E",
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Up",
+                  "duration": 1,
+                  "isDotted": false,
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "isTieContinuation": false,
+                  "isStart": true,
+                  "isSustain": false,
+                  "chordChange": null,
+                  "tip": "String 1, Fret 0"
+                }
+              ]
+            }
+          ],
+          "measures": [
+            {
+              "measure": 1,
+              "clef": "treble",
+              "notationMode": "standard",
+              "timeSignature": "4/4",
+              "chordName": null,
+              "events": [
+                {
+                  "beat": 1,
+                  "tabBeatIndex": 0,
+                  "isRest": false,
+                  "duration": "q",
+                  "isDotted": false,
+                  "string": 1,
+                  "fret": 0,
+                  "preferFlat": false,
+                  "finger": 0,
+                  "pick": "Down",
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "durationBeats": 1,
+                  "type": "play",
+                  "isChord": false,
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "accidental": null,
+                  "note": "High E",
+                  "vexDuration": "q",
+                  "symbol": "1/4",
+                  "positions": [
+                    {
+                      "str": 1,
+                      "fret": 0
+                    }
+                  ],
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 2,
+                  "tabBeatIndex": 1,
+                  "isRest": false,
+                  "duration": "q",
+                  "isDotted": false,
+                  "string": 1,
+                  "fret": 0,
+                  "preferFlat": false,
+                  "finger": 0,
+                  "pick": "Up",
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "durationBeats": 1,
+                  "type": "play",
+                  "isChord": false,
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "accidental": null,
+                  "note": "High E",
+                  "vexDuration": "q",
+                  "symbol": "1/4",
+                  "positions": [
+                    {
+                      "str": 1,
+                      "fret": 0
+                    }
+                  ],
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 3,
+                  "tabBeatIndex": 2,
+                  "isRest": false,
+                  "duration": "q",
+                  "isDotted": false,
+                  "string": 1,
+                  "fret": 0,
+                  "preferFlat": false,
+                  "finger": 0,
+                  "pick": "Down",
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "durationBeats": 1,
+                  "type": "play",
+                  "isChord": false,
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "accidental": null,
+                  "note": "High E",
+                  "vexDuration": "q",
+                  "symbol": "1/4",
+                  "positions": [
+                    {
+                      "str": 1,
+                      "fret": 0
+                    }
+                  ],
+                  "tip": "String 1, Fret 0"
+                },
+                {
+                  "beat": 4,
+                  "tabBeatIndex": 3,
+                  "isRest": false,
+                  "duration": "q",
+                  "isDotted": false,
+                  "string": 1,
+                  "fret": 0,
+                  "preferFlat": false,
+                  "finger": 0,
+                  "pick": "Up",
+                  "tieFromPrev": false,
+                  "tieToNext": false,
+                  "durationBeats": 1,
+                  "type": "play",
+                  "isChord": false,
+                  "concertPitch": "E4",
+                  "vexKey": "e/5",
+                  "accidental": null,
+                  "note": "High E",
+                  "vexDuration": "q",
+                  "symbol": "1/4",
+                  "positions": [
+                    {
+                      "str": 1,
+                      "fret": 0
+                    }
+                  ],
+                  "tip": "String 1, Fret 0"
+                }
+              ]
+            }
+          ],
+          "aiEdited": true,
+          "topicId": "lessonBook_s3_t2",
+          "topicPdfPage": 18,
+          "exerciseNumberInTopic": 4,
+          "bookCategory": "lessonBook",
+          "bookName": "Lesson Book",
+          "sessionNumber": 3,
+          "sessionTitle": "Session 3: Notes on the 3rd & 4th Strings",
+          "topicTitle": "Third String Notes & Exercises (G - A) (Lesson Book p. 18)"
         }
       ]
     },
