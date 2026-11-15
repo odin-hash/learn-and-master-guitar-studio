@@ -2751,10 +2751,10 @@ export const GUITAR_COURSES = {
           ]
         },
         {
-          topicTitle: "C & G7 Chord Exercise - Full, 4-Note & 3-Note Forms (Bonus Book p. 9)",
+          topicTitle: "C & G7 Chord Exercise - Full Chords, 4-Note Chords & 3-Note Chords (Bonus Book p. 9)",
           exercises: [
             {
-  id: 'bw-w1-ch-speed', title: 'C & G7 Chord Switching Exercise (Use Full, 4-Note, or 3-Note Mode, p. 9)',
+  id: 'bw-w1-ch-speed', title: 'C & G7 Chord Switching Exercise (Use Full Chords, 4-Note Chords, or 3-Note Chords, p. 9)',
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -3107,7 +3107,7 @@ export const GUITAR_COURSES = {
   ]
 },
             {
-  id: 'bw-w4-ch-am-e', title: 'Am & E Chord Exercise (Use Full, 4-Note, or 3-Note Mode, p. 38)',
+  id: 'bw-w4-ch-am-e', title: 'Am & E Chord Exercise (Use Full Chords, 4-Note Chords, or 3-Note Chords, p. 38)',
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [

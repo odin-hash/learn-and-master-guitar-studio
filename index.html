@@ -1920,7 +1920,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   padding-bottom: 10px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--border-hairline, #E4E4E7);
@@ -1931,8 +1932,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  min-width: 0;
-  flex: 1;
+  min-width: 220px;
+  flex: 1 1 260px;
 }
 
 .topic-ex-badge {
@@ -1960,15 +1961,18 @@ button.acc-topic-btn.is-active-topic {
 
 .topic-ex-title-wrap {
   min-width: 0;
-  flex: 1;
+  flex: 1 1 auto;
 }
 
 .topic-ex-title {
   font-family: var(--font-serif);
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15.5px;
+  font-weight: 600;
   color: #18181B;
-  line-height: 1.25;
+  line-height: 1.35;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .topic-ex-sub {
@@ -1977,13 +1981,37 @@ button.acc-topic-btn.is-active-topic {
   color: var(--text-muted);
   margin-top: 3px;
   line-height: 1.4;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .topic-ex-head-right {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   flex-shrink: 0;
+  margin-left: auto;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head-left,
+.workspace-body[data-pane-mode="split"] .topic-ex-title-wrap,
+.workspace-body[data-pane-mode="split"] .topic-ex-title,
+.workspace-body[data-pane-mode="split"] .topic-ex-sub {
+  width: 100%;
+  min-width: 100%;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head-right {
+  width: 100%;
+  justify-content: flex-start;
+  margin-left: 0;
 }
 
 .topic-ex-meta-pill {
@@ -5609,9 +5637,10 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 
             <div class="notation-toggles" id="studio-trainer-bar">
               <div class="toggle-group" id="chord-mode-group" style="display:none;">
-                <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
-                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
-                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
+                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
+                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
               </div>
               <div class="toggle-group" id="string-selector-group" style="display:none;">
                 <span class="toggle-lbl">String</span>
@@ -8779,10 +8808,10 @@ const GUITAR_COURSES = {
           ]
         },
         {
-          topicTitle: "C & G7 Chord Exercise - Full, 4-Note & 3-Note Forms (Bonus Book p. 9)",
+          topicTitle: "C & G7 Chord Exercise - Full Chords, 4-Note Chords & 3-Note Chords (Bonus Book p. 9)",
           exercises: [
             {
-  id: 'bw-w1-ch-speed', title: 'C & G7 Chord Switching Exercise (Use Full, 4-Note, or 3-Note Mode, p. 9)',
+  id: 'bw-w1-ch-speed', title: 'C & G7 Chord Switching Exercise (Use Full Chords, 4-Note Chords, or 3-Note Chords, p. 9)',
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -9135,7 +9164,7 @@ const GUITAR_COURSES = {
   ]
 },
             {
-  id: 'bw-w4-ch-am-e', title: 'Am & E Chord Exercise (Use Full, 4-Note, or 3-Note Mode, p. 38)',
+  id: 'bw-w4-ch-am-e', title: 'Am & E Chord Exercise (Use Full Chords, 4-Note Chords, or 3-Note Chords, p. 38)',
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -13717,7 +13746,7 @@ class FretboardVisualizer {
   }
 
   setChordMode(mode) {
-    this.chordMode = mode || "full";
+    this.chordMode = mode || "melody";
   }
 
   render() {
@@ -13778,10 +13807,11 @@ class FretboardVisualizer {
     if (!beatData) return;
 
     // Priority 1: If the beat is a specific single-string note (melody or arpeggio), show the exact note!
-    // If chordName is also present, faintly ghost the background chord so the student sees the context.
+    // In "melody" mode, show ONLY this exact note. If the user explicitly selects Full Chords, 4-Note Chords, or 3-Note Chords,
+    // also overlay the selected chord voicing context.
     if (typeof beatData.string === "number" && beatData.fret !== null && beatData.fret !== undefined) {
-      if (chordName) {
-        this._highlightChord(chordName, true); // faint ghost chord
+      if (chordName && this.chordMode !== "melody") {
+        this._highlightChord(chordName, true); // ghost chord voicing only when user explicitly selected chord mode
       }
       const s = beatData.string;
       const f = beatData.fret;
@@ -13793,8 +13823,8 @@ class FretboardVisualizer {
       return;
     }
 
-    // Priority 2: Full chord strumming
-    if (chordName) {
+    // Priority 2: Full or simplified chord strumming
+    if (chordName && this.chordMode !== "melody") {
       this._highlightChord(chordName, false);
     }
   }
@@ -13802,7 +13832,7 @@ class FretboardVisualizer {
   _highlightChord(chord, isGhost = false) {
     const c = (chord || "").trim().toUpperCase();
 
-    // Beginner 3-Note & 4-Note simplified shapes from Bonus Workshop Book (p. 9 & p. 38)
+    // Beginner 3-Note Chords & 4-Note Chords simplified shapes from Bonus Workshop Book (p. 9 & p. 38)
     const EASY3_MAP = {
       "C": { notes: [[3,0,"0"],[2,1,"1"],[1,0,"0"]], muted: [6,5,4] },
       "C MAJOR": { notes: [[3,0,"0"],[2,1,"1"],[1,0,"0"]], muted: [6,5,4] },
@@ -17251,8 +17281,19 @@ class PdfAiExtractor {
     const fallbackNum = idx + 1;
     if (!raw) return `Exercise ${fallbackNum}`;
 
+    // If title starts with "Song:" or is already a descriptive song title, preserve it intact
+    if (/^song\b/i.test(raw)) return raw;
+
+    // Do NOT mistake CD track lists (e.g. "5, 6, 7)" or "Tracks 5, 6, 7") for an exercise title
+    if (/^(?:tracks?\s*)?#?\d+\s*,\s*\d+/i.test(raw)) {
+      return `Exercise ${fallbackNum}`;
+    }
+
     // Convert bare numbers like "1", "1.", "2)", "Ex 3.", "Exercise 4:" into clean headers
-    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]*\s*(.*)$/i);
+    // Require an explicit delimiter (. ) : - –) or explicit keyword (Ex / Exercise / Drill)
+    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]\s*(.*)$/i) ||
+                         raw.match(/^(?:ex(?:ercise)?|drill)\s*#?(\d+)\s*(.*)$/i) ||
+                         raw.match(/^#?(\d+)$/);
     if (numOnlyMatch) {
       const num = parseInt(numOnlyMatch[1], 10) || fallbackNum;
       const rest = String(numOnlyMatch[2] || "").replace(/^\(p\.\s*\d+\)$/i, "").trim();
@@ -18641,7 +18682,8 @@ class GuitarMasterApp {
     this.activeTopicRenderers = new Map();
     this.currentTopicId = null;
     this.currentTopicExercises = [];
-    this.chordMode = "full"; // "full" | "easy4" | "easy3"
+    this.chordMode = "melody"; // "melody" | "full" | "easy4" | "easy3"
+    this.userExplicitChordMode = false;
     this.selectedSpiderString = 1;
     this.freeMetTimeSignature = "4/4";
     this.freeMetSubdivision = 1; // 1 = Quarter, 2 = Eighth, 3 = Triplets
@@ -19351,11 +19393,16 @@ class GuitarMasterApp {
       trainerBar.querySelectorAll("[data-chord-mode]").forEach(btn => {
         btn.addEventListener("click", () => {
           this.chordMode = btn.dataset.chordMode;
+          this.userExplicitChordMode = true;
           trainerBar.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
           this.fretboard.setChordMode(this.chordMode);
-          const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
-          const curB = curM.beats[this.currentBeatIndex] || curM.beats[0];
-          this.fretboard.update(curB, curB.type === "rest", curM.chordName);
+          if (this.currentExercise && this.currentExercise.tabData) {
+            const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
+            if (curM) {
+              const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
+              this.fretboard.update(curB, curB ? curB.type === "rest" : false, curM.chordName);
+            }
+          }
         });
       });
 
@@ -21535,7 +21582,9 @@ class GuitarMasterApp {
       let topicsHtml = "";
       topicsToRender.forEach((topic, tIdx) => {
         const computedTopicId = topic.topicId || `${this.currentBookCategory}_s${session.sessionNumber}_t${tIdx}`;
-        const cleanTopic = topic.topicTitle.replace(/\s*\([^)]*p\.\s*[\d\u2013-]+\)/i, "");
+        const cleanTopic = topic.topicTitle
+          .replace(/\s*\((?:(?:Lesson Book|Bonus Workshop Book|Bonus Book|Book)\s+)?p\.\s*[\d\u2013-]+\)/i, "")
+          .replace(/\s*\(p\.\s*[\d\u2013-]+\)/i, "");
         const isCurrentTopic = Boolean(
           this.currentTopicId &&
           topic.exercises.some(e => (e.topicId || topic.topicId || computedTopicId) === this.currentTopicId || e.id === activeId)
@@ -21915,7 +21964,8 @@ class GuitarMasterApp {
     const topicExercises = this.allExercises.filter(e => e.topicId === found.topicId);
     const topicCount = topicExercises.length;
     const cleanTopicHeading = (found.topicTitle || found.title)
-      .replace(/\s*\([^)]*p\.\s*[\d\u2013-]+\)/i, "")
+      .replace(/\s*\((?:(?:Lesson Book|Bonus Workshop Book|Bonus Book|Book)\s+)?p\.\s*[\d\u2013-]+\)/i, "")
+      .replace(/\s*\(p\.\s*[\d\u2013-]+\)/i, "")
       .trim();
 
     // Printed Book Page header metadata
@@ -21994,11 +22044,36 @@ class GuitarMasterApp {
       strGroup.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b.dataset.str === "1"));
     }
 
-    // Toggle Chord mode selector visibility
+    // Toggle Chord mode selector visibility & options
     const chordGroup = document.getElementById("chord-mode-group");
-    const hasChords = (this.currentExercise.tabData || []).some(m => m.chordName || (m.beats && m.beats.some(b => b.string === "all" || (typeof b.string === "string" && b.string.includes("-")))));
+    const tabData = this.currentExercise.tabData || [];
+    const hasChords = tabData.some(m => Boolean(m.chordName) || (m.beats && m.beats.some(b => b.chordName || b.string === "all" || (typeof b.string === "string" && b.string.includes("-")))));
+    const hasMelodyNotes = tabData.some(m => (m.beats || []).some(b => typeof b.string === "number" && b.fret !== null && b.type !== "rest" && b.type !== "chord"));
+
     if (chordGroup) {
-      chordGroup.style.display = hasChords ? "inline-flex" : "none";
+      if (hasChords) {
+        chordGroup.style.display = "inline-flex";
+        const melodyBtn = chordGroup.querySelector('[data-chord-mode="melody"]');
+        if (melodyBtn) {
+          melodyBtn.style.display = hasMelodyNotes ? "inline-flex" : "none";
+        }
+        // When melody notes are present, default to "melody" mode so single notes are clean on the fretboard
+        if (hasMelodyNotes) {
+          if (!this.userExplicitChordMode || this.chordMode === "melody") {
+            this.chordMode = "melody";
+          }
+        } else {
+          // Dedicated chord drill (no single melody notes) -> default to full chords
+          if (this.chordMode === "melody") {
+            this.chordMode = "full";
+          }
+        }
+        chordGroup.querySelectorAll("[data-chord-mode]").forEach(b => {
+          b.classList.toggle("active", b.dataset.chordMode === this.chordMode);
+        });
+      } else {
+        chordGroup.style.display = "none";
+      }
     }
 
     if (typeof document !== "undefined" && document.body) {
@@ -23210,13 +23285,20 @@ class GuitarMasterApp {
     if (window.location.hash && window.location.hash.length > 1) {
       const params = new URLSearchParams(window.location.hash.substring(1));
       const paramMode = params.get("mode");
-      if (paramMode || params.get("pane") || params.get("view") || params.get("book") || params.get("exId")) {
+      const paramExId = params.get("exId") || params.get("ex");
+      if (paramMode || params.get("pane") || params.get("view") || params.get("book") || paramExId) {
+        let inferredBook = params.get("book") || state.book;
+        if (paramExId && !params.get("book")) {
+          if (paramExId.startsWith("bw-")) inferredBook = "bonusWorkshop";
+          else if (paramExId.startsWith("fm-") || paramExId === "free-metronome") inferredBook = "freeMetronome";
+          else if (paramExId.startsWith("lb-")) inferredBook = "lessonBook";
+        }
         state = {
           ...state,
-          appMode: paramMode || (params.get("exId") || params.get("pane") ? "studio" : state.appMode),
+          appMode: paramMode || (paramExId || params.get("pane") ? "studio" : state.appMode),
           paneMode: params.get("pane") || state.paneMode,
-          book: params.get("book") || state.book,
-          exId: params.get("exId") || state.exId
+          book: inferredBook,
+          exId: paramExId || state.exId
         };
       }
     }

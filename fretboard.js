@@ -16,7 +16,7 @@ export class FretboardVisualizer {
   }
 
   setChordMode(mode) {
-    this.chordMode = mode || "full";
+    this.chordMode = mode || "melody";
   }
 
   render() {
@@ -77,10 +77,11 @@ export class FretboardVisualizer {
     if (!beatData) return;
 
     // Priority 1: If the beat is a specific single-string note (melody or arpeggio), show the exact note!
-    // If chordName is also present, faintly ghost the background chord so the student sees the context.
+    // In "melody" mode, show ONLY this exact note. If the user explicitly selects Full Chords, 4-Note Chords, or 3-Note Chords,
+    // also overlay the selected chord voicing context.
     if (typeof beatData.string === "number" && beatData.fret !== null && beatData.fret !== undefined) {
-      if (chordName) {
-        this._highlightChord(chordName, true); // faint ghost chord
+      if (chordName && this.chordMode !== "melody") {
+        this._highlightChord(chordName, true); // ghost chord voicing only when user explicitly selected chord mode
       }
       const s = beatData.string;
       const f = beatData.fret;
@@ -92,8 +93,8 @@ export class FretboardVisualizer {
       return;
     }
 
-    // Priority 2: Full chord strumming
-    if (chordName) {
+    // Priority 2: Full or simplified chord strumming
+    if (chordName && this.chordMode !== "melody") {
       this._highlightChord(chordName, false);
     }
   }
@@ -101,7 +102,7 @@ export class FretboardVisualizer {
   _highlightChord(chord, isGhost = false) {
     const c = (chord || "").trim().toUpperCase();
 
-    // Beginner 3-Note & 4-Note simplified shapes from Bonus Workshop Book (p. 9 & p. 38)
+    // Beginner 3-Note Chords & 4-Note Chords simplified shapes from Bonus Workshop Book (p. 9 & p. 38)
     const EASY3_MAP = {
       "C": { notes: [[3,0,"0"],[2,1,"1"],[1,0,"0"]], muted: [6,5,4] },
       "C MAJOR": { notes: [[3,0,"0"],[2,1,"1"],[1,0,"0"]], muted: [6,5,4] },

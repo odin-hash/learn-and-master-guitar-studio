@@ -72,7 +72,8 @@ export class GuitarMasterApp {
     this.activeTopicRenderers = new Map();
     this.currentTopicId = null;
     this.currentTopicExercises = [];
-    this.chordMode = "full"; // "full" | "easy4" | "easy3"
+    this.chordMode = "melody"; // "melody" | "full" | "easy4" | "easy3"
+    this.userExplicitChordMode = false;
     this.selectedSpiderString = 1;
     this.freeMetTimeSignature = "4/4";
     this.freeMetSubdivision = 1; // 1 = Quarter, 2 = Eighth, 3 = Triplets
@@ -782,11 +783,16 @@ export class GuitarMasterApp {
       trainerBar.querySelectorAll("[data-chord-mode]").forEach(btn => {
         btn.addEventListener("click", () => {
           this.chordMode = btn.dataset.chordMode;
+          this.userExplicitChordMode = true;
           trainerBar.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
           this.fretboard.setChordMode(this.chordMode);
-          const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
-          const curB = curM.beats[this.currentBeatIndex] || curM.beats[0];
-          this.fretboard.update(curB, curB.type === "rest", curM.chordName);
+          if (this.currentExercise && this.currentExercise.tabData) {
+            const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
+            if (curM) {
+              const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
+              this.fretboard.update(curB, curB ? curB.type === "rest" : false, curM.chordName);
+            }
+          }
         });
       });
 
@@ -2966,7 +2972,9 @@ export class GuitarMasterApp {
       let topicsHtml = "";
       topicsToRender.forEach((topic, tIdx) => {
         const computedTopicId = topic.topicId || `${this.currentBookCategory}_s${session.sessionNumber}_t${tIdx}`;
-        const cleanTopic = topic.topicTitle.replace(/\s*\([^)]*p\.\s*[\d\u2013-]+\)/i, "");
+        const cleanTopic = topic.topicTitle
+          .replace(/\s*\((?:(?:Lesson Book|Bonus Workshop Book|Bonus Book|Book)\s+)?p\.\s*[\d\u2013-]+\)/i, "")
+          .replace(/\s*\(p\.\s*[\d\u2013-]+\)/i, "");
         const isCurrentTopic = Boolean(
           this.currentTopicId &&
           topic.exercises.some(e => (e.topicId || topic.topicId || computedTopicId) === this.currentTopicId || e.id === activeId)
@@ -3346,7 +3354,8 @@ export class GuitarMasterApp {
     const topicExercises = this.allExercises.filter(e => e.topicId === found.topicId);
     const topicCount = topicExercises.length;
     const cleanTopicHeading = (found.topicTitle || found.title)
-      .replace(/\s*\([^)]*p\.\s*[\d\u2013-]+\)/i, "")
+      .replace(/\s*\((?:(?:Lesson Book|Bonus Workshop Book|Bonus Book|Book)\s+)?p\.\s*[\d\u2013-]+\)/i, "")
+      .replace(/\s*\(p\.\s*[\d\u2013-]+\)/i, "")
       .trim();
 
     // Printed Book Page header metadata
@@ -3425,11 +3434,36 @@ export class GuitarMasterApp {
       strGroup.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b.dataset.str === "1"));
     }
 
-    // Toggle Chord mode selector visibility
+    // Toggle Chord mode selector visibility & options
     const chordGroup = document.getElementById("chord-mode-group");
-    const hasChords = (this.currentExercise.tabData || []).some(m => m.chordName || (m.beats && m.beats.some(b => b.string === "all" || (typeof b.string === "string" && b.string.includes("-")))));
+    const tabData = this.currentExercise.tabData || [];
+    const hasChords = tabData.some(m => Boolean(m.chordName) || (m.beats && m.beats.some(b => b.chordName || b.string === "all" || (typeof b.string === "string" && b.string.includes("-")))));
+    const hasMelodyNotes = tabData.some(m => (m.beats || []).some(b => typeof b.string === "number" && b.fret !== null && b.type !== "rest" && b.type !== "chord"));
+
     if (chordGroup) {
-      chordGroup.style.display = hasChords ? "inline-flex" : "none";
+      if (hasChords) {
+        chordGroup.style.display = "inline-flex";
+        const melodyBtn = chordGroup.querySelector('[data-chord-mode="melody"]');
+        if (melodyBtn) {
+          melodyBtn.style.display = hasMelodyNotes ? "inline-flex" : "none";
+        }
+        // When melody notes are present, default to "melody" mode so single notes are clean on the fretboard
+        if (hasMelodyNotes) {
+          if (!this.userExplicitChordMode || this.chordMode === "melody") {
+            this.chordMode = "melody";
+          }
+        } else {
+          // Dedicated chord drill (no single melody notes) -> default to full chords
+          if (this.chordMode === "melody") {
+            this.chordMode = "full";
+          }
+        }
+        chordGroup.querySelectorAll("[data-chord-mode]").forEach(b => {
+          b.classList.toggle("active", b.dataset.chordMode === this.chordMode);
+        });
+      } else {
+        chordGroup.style.display = "none";
+      }
     }
 
     if (typeof document !== "undefined" && document.body) {
@@ -4641,13 +4675,20 @@ export class GuitarMasterApp {
     if (window.location.hash && window.location.hash.length > 1) {
       const params = new URLSearchParams(window.location.hash.substring(1));
       const paramMode = params.get("mode");
-      if (paramMode || params.get("pane") || params.get("view") || params.get("book") || params.get("exId")) {
+      const paramExId = params.get("exId") || params.get("ex");
+      if (paramMode || params.get("pane") || params.get("view") || params.get("book") || paramExId) {
+        let inferredBook = params.get("book") || state.book;
+        if (paramExId && !params.get("book")) {
+          if (paramExId.startsWith("bw-")) inferredBook = "bonusWorkshop";
+          else if (paramExId.startsWith("fm-") || paramExId === "free-metronome") inferredBook = "freeMetronome";
+          else if (paramExId.startsWith("lb-")) inferredBook = "lessonBook";
+        }
         state = {
           ...state,
-          appMode: paramMode || (params.get("exId") || params.get("pane") ? "studio" : state.appMode),
+          appMode: paramMode || (paramExId || params.get("pane") ? "studio" : state.appMode),
           paneMode: params.get("pane") || state.paneMode,
-          book: params.get("book") || state.book,
-          exId: params.get("exId") || state.exId
+          book: inferredBook,
+          exId: paramExId || state.exId
         };
       }
     }

@@ -1909,7 +1909,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   padding-bottom: 10px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--border-hairline, #E4E4E7);
@@ -1920,8 +1921,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  min-width: 0;
-  flex: 1;
+  min-width: 220px;
+  flex: 1 1 260px;
 }
 
 .topic-ex-badge {
@@ -1949,15 +1950,18 @@ button.acc-topic-btn.is-active-topic {
 
 .topic-ex-title-wrap {
   min-width: 0;
-  flex: 1;
+  flex: 1 1 auto;
 }
 
 .topic-ex-title {
   font-family: var(--font-serif);
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15.5px;
+  font-weight: 600;
   color: #18181B;
-  line-height: 1.25;
+  line-height: 1.35;
+  word-break: normal;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .topic-ex-sub {
@@ -1966,13 +1970,37 @@ button.acc-topic-btn.is-active-topic {
   color: var(--text-muted);
   margin-top: 3px;
   line-height: 1.4;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .topic-ex-head-right {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   flex-shrink: 0;
+  margin-left: auto;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head-left,
+.workspace-body[data-pane-mode="split"] .topic-ex-title-wrap,
+.workspace-body[data-pane-mode="split"] .topic-ex-title,
+.workspace-body[data-pane-mode="split"] .topic-ex-sub {
+  width: 100%;
+  min-width: 100%;
+}
+
+.workspace-body[data-pane-mode="split"] .topic-ex-head-right {
+  width: 100%;
+  justify-content: flex-start;
+  margin-left: 0;
 }
 
 .topic-ex-meta-pill {

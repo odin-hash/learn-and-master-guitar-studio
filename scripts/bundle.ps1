@@ -223,9 +223,10 @@ $css
 
             <div class="notation-toggles" id="studio-trainer-bar">
               <div class="toggle-group" id="chord-mode-group" style="display:none;">
-                <button class="micro-pill active" data-chord-mode="full" title="Full Chord Form">Full</button>
-                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Beginner Voicing">4-Note</button>
-                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Easy Voicing">3-Note</button>
+                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
+                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
               </div>
               <div class="toggle-group" id="string-selector-group" style="display:none;">
                 <span class="toggle-lbl">String</span>

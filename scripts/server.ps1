@@ -34,7 +34,10 @@ try {
                 }
                 $bytes = [System.IO.File]::ReadAllBytes($filePath)
                 $response.ContentType = $mime
-                $response.Close($bytes, $false)
+                $response.ContentLength64 = $bytes.Length
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                $response.OutputStream.Flush()
+                $response.Close()
             } else {
                 $response.StatusCode = 404
                 $response.Close()

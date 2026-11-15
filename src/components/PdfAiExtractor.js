@@ -807,8 +807,19 @@ export class PdfAiExtractor {
     const fallbackNum = idx + 1;
     if (!raw) return `Exercise ${fallbackNum}`;
 
+    // If title starts with "Song:" or is already a descriptive song title, preserve it intact
+    if (/^song\b/i.test(raw)) return raw;
+
+    // Do NOT mistake CD track lists (e.g. "5, 6, 7)" or "Tracks 5, 6, 7") for an exercise title
+    if (/^(?:tracks?\s*)?#?\d+\s*,\s*\d+/i.test(raw)) {
+      return `Exercise ${fallbackNum}`;
+    }
+
     // Convert bare numbers like "1", "1.", "2)", "Ex 3.", "Exercise 4:" into clean headers
-    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]*\s*(.*)$/i);
+    // Require an explicit delimiter (. ) : - –) or explicit keyword (Ex / Exercise / Drill)
+    const numOnlyMatch = raw.match(/^(?:(?:ex(?:ercise)?|drill)\s*)?#?(\d+)\s*[.):\-–]\s*(.*)$/i) ||
+                         raw.match(/^(?:ex(?:ercise)?|drill)\s*#?(\d+)\s*(.*)$/i) ||
+                         raw.match(/^#?(\d+)$/);
     if (numOnlyMatch) {
       const num = parseInt(numOnlyMatch[1], 10) || fallbackNum;
       const rest = String(numOnlyMatch[2] || "").replace(/^\(p\.\s*\d+\)$/i, "").trim();
