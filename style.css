@@ -4224,6 +4224,83 @@ body:not([data-admin-mode="true"]) .admin-only-control {
   color: #FFFFFF;
 }
 
+.topic-ex-delete-btn {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(220, 38, 38, 0.08);
+  color: #DC2626;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+}
+
+.topic-ex-delete-btn:hover {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #FFFFFF;
+}
+
+/* Sidebar direct delete buttons */
+.acc-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  opacity: 0.25;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity 0.12s ease, transform 0.12s ease, background 0.12s ease;
+  user-select: none;
+}
+
+.acc-ex-item:hover .acc-delete-btn,
+.acc-topic-btn:hover .acc-delete-btn {
+  opacity: 0.75;
+}
+
+.acc-delete-btn:hover {
+  opacity: 1 !important;
+  background: rgba(220, 38, 38, 0.16);
+  transform: scale(1.18);
+}
+
+.acc-topic-meta-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Inline Editable Fields in Admin Mode */
+body[data-admin-mode="true"] [data-editable-field] {
+  cursor: text;
+  border-radius: 3px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+body[data-admin-mode="true"] [data-editable-field]:hover {
+  background-color: rgba(194, 65, 12, 0.08);
+  box-shadow: 0 0 0 1px rgba(194, 65, 12, 0.25);
+}
+
+body[data-admin-mode="true"] [data-editable-field]:focus {
+  background-color: rgba(194, 65, 12, 0.12);
+  box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.6);
+}
+
+body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
+  content: attr(placeholder);
+  color: var(--text-muted, #71717A);
+  font-style: italic;
+  opacity: 0.6;
+}
+
 .topic-add-subex-row {
   display: flex;
   justify-content: center;
@@ -5311,4 +5388,25 @@ body:not([data-admin-mode="true"]) .admin-only-control {
 
 [data-theme="dark"] .vf-chord-label {
   fill: #F4F4F5;
+}
+
+[data-theme="dark"] .topic-ex-delete-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #F87171;
+}
+
+[data-theme="dark"] .topic-ex-delete-btn:hover {
+  background: #EF4444;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] body[data-admin-mode="true"] [data-editable-field]:hover {
+  background-color: rgba(251, 146, 60, 0.15);
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.35);
+}
+
+[data-theme="dark"] body[data-admin-mode="true"] [data-editable-field]:focus {
+  background-color: rgba(251, 146, 60, 0.22);
+  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.7);
 }

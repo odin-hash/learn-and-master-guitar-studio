@@ -30,11 +30,12 @@ function editorDurSpec(codeOrDur, isDotted = false) {
 }
 
 export class NotationEditor {
-  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise, onBeforeMutate } = {}) {
+  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise, onBeforeMutate, onDeleteExercise } = {}) {
     this.onCommitExercise = onCommitExercise || null;
     this.onSelectNoteForFeedback = onSelectNoteForFeedback || null;
     this.onAddSubExercise = onAddSubExercise || null;
     this.onBeforeMutate = onBeforeMutate || null;
+    this.onDeleteExercise = onDeleteExercise || null;
 
     this.exercise = null;
     this.hostEl = null;
@@ -1072,6 +1073,7 @@ export class NotationEditor {
           <button type="button" class="ne-action-btn" id="ne-btn-insert-bar-after" title="Insert a new empty measure after active bar">+ Insert Bar After</button>
           <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">📋 Duplicate Bar</button>
           <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">🗑️ Delete Bar</button>
+          <button type="button" class="ne-action-btn is-danger ne-delete-ex-btn" id="ne-btn-delete-exercise" title="Delete entire current exercise">🗑️ Delete Exercise</button>
         </div>
       </div>
 
@@ -1213,6 +1215,18 @@ export class NotationEditor {
 
     const btnDelBar = this.paletteEl.querySelector("#ne-btn-del-bar");
     if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteSelectedMeasure());
+
+    const btnDeleteEx = this.paletteEl.querySelector("#ne-btn-delete-exercise");
+    if (btnDeleteEx) {
+      btnDeleteEx.addEventListener("click", () => {
+        if (!this.exercise) return;
+        const exId = this.exercise.id;
+        this.close(false);
+        if (typeof this.onDeleteExercise === "function") {
+          this.onDeleteExercise(exId);
+        }
+      });
+    }
 
     const btnShortToggle = this.paletteEl.querySelector("#ne-btn-shorthand");
     if (btnShortToggle) {

@@ -126,7 +126,7 @@ $css
         <nav class="breadcrumb" aria-label="Current Exercise">
           <span class="crumb-session" id="nav-crumb-session">Lesson Book &middot; S2</span>
           <span class="crumb-sep">/</span>
-          <span class="crumb-exercise" id="studio-exercise-title">First String Notes</span>
+          <span class="crumb-exercise" id="studio-exercise-title" data-editable-field="title" title="Exercise Title">First String Notes</span>
         </nav>
       </div>
     </div>
@@ -205,7 +205,7 @@ $css
               <span class="guide-title">Playing Notes &middot; <span id="studio-exercise-topic-badge">Session</span></span>
               <button class="guide-close-btn" id="btn-close-guide" aria-label="Close Notes">&times;</button>
             </div>
-            <p class="guide-body" id="studio-instruction-text">Select any exercise to view playing instructions and technique tips.</p>
+            <p class="guide-body" id="studio-instruction-text" data-editable-field="description" title="Exercise Instructions">Select any exercise to view playing instructions and technique tips.</p>
             <div class="guide-checklist" id="active-session-checklist"></div>
           </div>
 
@@ -288,10 +288,10 @@ $css
                 <span class="book-verified-pill is-verified" id="book-verification-badge">PDF Transcribed &middot; p. 9</span>
               </div>
               <div class="book-page-title-row">
-                <h1 class="book-page-title" id="book-page-title">First String Exercises</h1>
+                <h1 class="book-page-title" id="book-page-title" data-editable-field="title" title="Page / Exercise Title">First String Exercises</h1>
                 <span class="book-topic-count-pill" id="book-topic-count-pill" hidden>1 Exercise</span>
               </div>
-              <p class="book-page-desc" id="book-page-desc">Select any exercise to view playing instructions and technique tips.</p>
+              <p class="book-page-desc" id="book-page-desc" data-editable-field="description" title="Instructions">Select any exercise to view playing instructions and technique tips.</p>
             </header>
 
             <div class="book-tempo-row" id="book-tempo-marking">

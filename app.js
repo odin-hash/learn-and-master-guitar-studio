@@ -20,15 +20,19 @@ export class GuitarMasterApp {
     this.undoStack = [];
     this.redoStack = [];
     this.hasUnsavedChanges = false;
+    this.deletedExerciseIds = new Set(this.loadDeletedItems("lmgs_deleted_exercises"));
+    this.deletedTopicIds = new Set(this.loadDeletedItems("lmgs_deleted_topics"));
     this.notationEditor = new NotationEditor({
       onCommitExercise: (updatedEx, mIdx, tabBeatIdx, evIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx),
       onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx),
-      onBeforeMutate: (action) => this.pushUndo(action)
+      onBeforeMutate: (action) => this.pushUndo(action),
+      onDeleteExercise: (exId) => this.deleteExercise(exId)
     });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
     // Apply any persisted AI-extracted pages synchronously before flattening catalog
     this.applyAllSavedAiExtractions(this.pdfAiExtractor.loadExtractedStoreSync(), true);
+    this.applyDeletionsToCourses(GUITAR_COURSES);
     this.allExercises = this.buildFlatExerciseList();
     this.currentExercise = this.findExerciseById("lb-s2-str1-ex1") || this.allExercises[0];
     this.currentExerciseIndex = this.allExercises.findIndex(e => e.id === this.currentExercise.id);
@@ -145,7 +149,9 @@ export class GuitarMasterApp {
           "lmgs_github_pat",
           "lmgs_github_repo",
           "lmgs_github_branch",
-          "lmgs_github_path"
+          "lmgs_github_path",
+          "lmgs_deleted_exercises",
+          "lmgs_deleted_topics"
         ]);
         Object.keys(localStorage).forEach(k => {
           if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
@@ -1320,6 +1326,25 @@ export class GuitarMasterApp {
       if (this.adminSettingsModal) this.adminSettingsModal.hidden = true;
       document.querySelectorAll(".topic-ex-edit-btn").forEach(btn => btn.classList.remove("is-active"));
     }
+
+    if (typeof document !== "undefined") {
+      const headerEditables = [this.studioExerciseTitle, this.studioInstructionText, this.bookPageTitle, this.bookPageDesc];
+      headerEditables.forEach(el => {
+        if (!el) return;
+        if (this.adminMode) {
+          el.setAttribute("contenteditable", "true");
+          el.setAttribute("spellcheck", "false");
+        } else {
+          el.removeAttribute("contenteditable");
+          el.removeAttribute("spellcheck");
+        }
+      });
+    }
+
+    this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    if (this.currentExercise) {
+      this.renderTopicExercisesFor(this.currentExercise);
+    }
   }
 
   _findCourseSlotForExercise(exId) {
@@ -1461,6 +1486,203 @@ export class GuitarMasterApp {
     }
   }
 
+  loadDeletedItems(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveDeletedItems() {
+    try {
+      localStorage.setItem("lmgs_deleted_exercises", JSON.stringify(Array.from(this.deletedExerciseIds || [])));
+      localStorage.setItem("lmgs_deleted_topics", JSON.stringify(Array.from(this.deletedTopicIds || [])));
+    } catch (e) {}
+  }
+
+  applyDeletionsToCourses(courses = GUITAR_COURSES) {
+    if (!courses) return;
+    for (const cat of ["lessonBook", "bonusWorkshop"]) {
+      const sessions = courses[cat] || [];
+      for (const session of sessions) {
+        if (!Array.isArray(session.topics)) continue;
+        for (let tIdx = session.topics.length - 1; tIdx >= 0; tIdx--) {
+          const topic = session.topics[tIdx];
+          const computedTopicId = topic.topicId || `${cat}_s${session.sessionNumber}_t${tIdx}`;
+          if (this.deletedTopicIds.has(computedTopicId) || (topic.topicId && this.deletedTopicIds.has(topic.topicId))) {
+            session.topics.splice(tIdx, 1);
+            continue;
+          }
+          if (Array.isArray(topic.exercises)) {
+            topic.exercises = topic.exercises.filter(e => !this.deletedExerciseIds.has(e.id));
+            if (topic.exercises.length === 0) {
+              session.topics.splice(tIdx, 1);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  async deleteExercise(exId) {
+    if (!exId) return;
+    if (this.isPlaying) this.stop();
+    if (this.notationEditor && this.editingExerciseId === exId) {
+      this.notationEditor.close(false);
+      this.editingExerciseId = null;
+    }
+
+    const slot = this._findCourseSlotForExercise(exId);
+    if (!slot) return;
+    const { bookCat, session, topic, computedTopicId, exIdx } = slot;
+    const deletedEx = topic.exercises[exIdx];
+    const deletedTitle = deletedEx ? deletedEx.title : exId;
+
+    this.pushUndo(`Delete Exercise "${deletedTitle}"`);
+
+    topic.exercises.splice(exIdx, 1);
+    this.deletedExerciseIds.add(exId);
+
+    const isOnlyExercise = topic.exercises.length === 0;
+    let tIdx = -1;
+    if (isOnlyExercise) {
+      tIdx = (session.topics || []).indexOf(topic);
+      if (tIdx >= 0) {
+        session.topics.splice(tIdx, 1);
+      }
+      this.deletedTopicIds.add(computedTopicId);
+      if (topic.topicId) this.deletedTopicIds.add(topic.topicId);
+
+      const bookPage = (deletedEx && deletedEx.pdfPage) || topic.pdfPage || 1;
+      const rawPdfPage = (deletedEx && deletedEx.pdfRawPage) || this.bookPageToPdfPage(bookPage, bookCat);
+      const pageKey = `${bookCat}_p${rawPdfPage}`;
+      try {
+        await this.pdfAiExtractor.deletePageEntry(pageKey);
+      } catch (e) {}
+    } else {
+      // Re-number remaining sub-exercises
+      topic.exercises.forEach((ex, idx) => {
+        ex.exerciseNumberInTopic = idx + 1;
+        if (/^Exercise \d+:/i.test(ex.title)) {
+          ex.title = ex.title.replace(/^Exercise \d+:/i, `Exercise ${idx + 1}:`);
+        } else if (/^Workshop Drill \d+:/i.test(ex.title)) {
+          ex.title = ex.title.replace(/^Workshop Drill \d+:/i, `Workshop Drill ${idx + 1}:`);
+        } else if (/^Finger Exercise \d+:/i.test(ex.title)) {
+          ex.title = ex.title.replace(/^Finger Exercise \d+:/i, `Finger Exercise ${idx + 1}:`);
+        } else if (/^Exercise \d+/i.test(ex.title)) {
+          ex.title = ex.title.replace(/^Exercise \d+/i, `Exercise ${idx + 1}`);
+        }
+      });
+      await this.persistEditedTopicOrExercise(topic.exercises[0]);
+    }
+
+    this.saveDeletedItems();
+    this.allExercises = this.buildFlatExerciseList();
+
+    let nextEx = null;
+    if (!isOnlyExercise && topic.exercises.length > 0) {
+      const nextIdx = Math.min(exIdx, topic.exercises.length - 1);
+      nextEx = topic.exercises[nextIdx];
+    } else if (session.topics && session.topics.length > 0) {
+      const targetTopicIdx = Math.max(0, Math.min(tIdx >= 0 ? tIdx : 0, session.topics.length - 1));
+      const targetTopic = session.topics[targetTopicIdx];
+      nextEx = (targetTopic && targetTopic.exercises && targetTopic.exercises[0]) || null;
+    }
+    if (!nextEx) {
+      nextEx = this.allExercises[0];
+    }
+
+    if (nextEx) {
+      this.loadExercise(nextEx.id, false, { forceTopicRebuild: true, scrollTopicTop: true, noPdfReload: false });
+    }
+
+    this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    this.markUnsaved();
+    this.setAiExtractStatus(`Deleted "${deletedTitle}". Press Ctrl+Z to undo.`, "info");
+  }
+
+  async deleteTopic(topicId) {
+    if (!topicId) return;
+    if (this.isPlaying) this.stop();
+
+    let foundSession = null;
+    let foundTopic = null;
+    let foundBookCat = null;
+    let foundTopicIdx = -1;
+
+    for (const bookCat of ["lessonBook", "bonusWorkshop"]) {
+      const sessions = GUITAR_COURSES[bookCat] || [];
+      for (const session of sessions) {
+        for (let tIdx = 0; tIdx < (session.topics || []).length; tIdx++) {
+          const t = session.topics[tIdx];
+          const computed = t.topicId || `${bookCat}_s${session.sessionNumber}_t${tIdx}`;
+          if (computed === topicId || t.topicId === topicId) {
+            foundSession = session;
+            foundTopic = t;
+            foundBookCat = bookCat;
+            foundTopicIdx = tIdx;
+            break;
+          }
+        }
+        if (foundTopic) break;
+      }
+      if (foundTopic) break;
+    }
+
+    if (!foundSession || !foundTopic) return;
+
+    const topicTitle = foundTopic.topicTitle || "Topic";
+    this.pushUndo(`Delete Topic "${topicTitle}"`);
+
+    if (this.notationEditor && this.editingExerciseId) {
+      if ((foundTopic.exercises || []).some(e => e.id === this.editingExerciseId)) {
+        this.notationEditor.close(false);
+        this.editingExerciseId = null;
+      }
+    }
+
+    (foundTopic.exercises || []).forEach(e => {
+      this.deletedExerciseIds.add(e.id);
+    });
+    this.deletedTopicIds.add(topicId);
+    if (foundTopic.topicId) this.deletedTopicIds.add(foundTopic.topicId);
+
+    foundSession.topics.splice(foundTopicIdx, 1);
+
+    const firstEx = (foundTopic.exercises || [])[0];
+    const bookPage = (firstEx && firstEx.pdfPage) || foundTopic.pdfPage || 1;
+    const rawPdfPage = (firstEx && firstEx.pdfRawPage) || this.bookPageToPdfPage(bookPage, foundBookCat);
+    const pageKey = `${foundBookCat}_p${rawPdfPage}`;
+    try {
+      await this.pdfAiExtractor.deletePageEntry(pageKey);
+    } catch (e) {}
+
+    this.saveDeletedItems();
+    this.allExercises = this.buildFlatExerciseList();
+
+    let nextEx = null;
+    if (foundSession.topics.length > 0) {
+      const nextTopicIdx = Math.max(0, Math.min(foundTopicIdx, foundSession.topics.length - 1));
+      const nextTopic = foundSession.topics[nextTopicIdx];
+      nextEx = (nextTopic && nextTopic.exercises && nextTopic.exercises[0]) || null;
+    }
+    if (!nextEx) {
+      nextEx = this.allExercises[0];
+    }
+
+    if (nextEx) {
+      this.loadExercise(nextEx.id, false, { forceTopicRebuild: true, scrollTopicTop: true, noPdfReload: false });
+    }
+
+    this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    this.markUnsaved();
+    this.setAiExtractStatus(`Deleted topic "${topicTitle}". Press Ctrl+Z to undo.`, "info");
+  }
+
   async addSubExerciseToCurrentTopic() {
     if (!this.currentExercise) return;
     const slot = this._findCourseSlotForExercise(this.currentExercise.id);
@@ -1471,6 +1693,8 @@ export class GuitarMasterApp {
     const rawPdfPage = this.bookPageToPdfPage(bookPage, bookCat);
     const prefix = bookCat === "bonusWorkshop" ? "bw" : "lb";
     const newId = `${prefix}-sub-p${bookPage}-ex${nextNum}-${Date.now().toString(36).slice(-4)}`;
+
+    this.pushUndo(`Add Exercise to "${topic.topicTitle || 'Topic'}"`);
 
     const newEx = {
       id: newId,
@@ -1500,6 +1724,121 @@ export class GuitarMasterApp {
     await this.persistEditedTopicOrExercise(newEx);
     this.editingExerciseId = newEx.id;
     this.loadExercise(newEx.id, false, { forceTopicRebuild: true, noPdfReload: true });
+  }
+
+  setupInlineEditingListeners() {
+    document.addEventListener("focusin", (e) => {
+      const target = e.target.closest("[data-editable-field]");
+      if (!target || !this.adminMode) return;
+      this._activeEditInitialValue = target.innerText.trim();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      const target = e.target.closest("[data-editable-field]");
+      if (!target || !this.adminMode) return;
+      if (e.key === "Enter") {
+        e.preventDefault();
+        target.blur();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        if (this._activeEditInitialValue !== undefined) {
+          target.innerText = this._activeEditInitialValue;
+        }
+        this._activeEditCancelled = true;
+        target.blur();
+      }
+    });
+
+    document.addEventListener("focusout", async (e) => {
+      const target = e.target.closest("[data-editable-field]");
+      if (!target || !this.adminMode) return;
+      if (this._activeEditCancelled) {
+        this._activeEditCancelled = false;
+        this._activeEditInitialValue = undefined;
+        return;
+      }
+      const initial = this._activeEditInitialValue;
+      this._activeEditInitialValue = undefined;
+      const currentVal = target.innerText.trim();
+      if (initial !== undefined && currentVal === initial) return;
+      await this.commitInlineEdit(target, currentVal, initial);
+    });
+  }
+
+  async commitInlineEdit(el, newVal, oldVal) {
+    const field = el.dataset.editableField;
+    const exId = el.dataset.exId || (this.currentExercise && this.currentExercise.id);
+    if (!field || !exId) return;
+
+    const ex = this.findExerciseById(exId);
+    if (!ex) return;
+
+    const slot = this._findCourseSlotForExercise(ex.id);
+
+    // Special case: editing topic title on the main header when multiple sub-exercises exist
+    if (el.id === "book-page-title" && this.currentTopicExercises && this.currentTopicExercises.length > 1 && slot && slot.topic) {
+      const finalTopicTitle = newVal || oldVal || slot.topic.topicTitle;
+      this.pushUndo(`Rename Topic "${slot.topic.topicTitle || ''}" to "${finalTopicTitle}"`);
+      slot.topic.topicTitle = finalTopicTitle;
+      el.innerText = finalTopicTitle;
+      await this.persistEditedTopicOrExercise(ex);
+      this.markUnsaved();
+      this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+      this.setAiExtractStatus(`Updated topic title to "${finalTopicTitle}". Press Ctrl+Z to undo.`, "info");
+      return;
+    }
+
+    if (field === "title") {
+      const finalTitle = newVal || oldVal || ex.title;
+      this.pushUndo(`Rename Exercise "${ex.title}" to "${finalTitle}"`);
+      ex.title = finalTitle;
+      el.innerText = finalTitle;
+      if (this.currentExercise && this.currentExercise.id === ex.id) {
+        this.currentExercise.title = finalTitle;
+        if (this.studioExerciseTitle) this.studioExerciseTitle.textContent = finalTitle;
+        if (this.bookPageTitle) this.bookPageTitle.textContent = finalTitle;
+      }
+      const cardTitleEl = this.topicExercisesStack ? this.topicExercisesStack.querySelector(`#topic-ex-${ex.id} .topic-ex-title`) : null;
+      if (cardTitleEl && cardTitleEl !== el) cardTitleEl.textContent = finalTitle;
+    } else if (field === "description") {
+      this.pushUndo(`Edit Description for "${ex.title}"`);
+      ex.description = newVal;
+      el.innerText = newVal;
+      if (this.currentExercise && this.currentExercise.id === ex.id) {
+        this.currentExercise.description = newVal;
+        if (this.studioInstructionText) this.studioInstructionText.textContent = newVal;
+        if (this.bookPageDesc) this.bookPageDesc.textContent = newVal;
+      }
+      const cardSubEl = this.topicExercisesStack ? this.topicExercisesStack.querySelector(`#topic-ex-${ex.id} .topic-ex-sub`) : null;
+      if (cardSubEl && cardSubEl !== el) cardSubEl.textContent = newVal;
+    } else if (field === "page") {
+      const parsed = parseInt(newVal.replace(/\D/g, ""), 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        this.pushUndo(`Change Page for "${ex.title}" to p. ${parsed}`);
+        ex.pdfPage = parsed;
+        el.innerText = `p. ${parsed}`;
+        if (this.currentExercise && this.currentExercise.id === ex.id) {
+          this.currentExercise.pdfPage = parsed;
+          if (this.bookVerificationBadge) {
+            this.bookVerificationBadge.textContent = `PDF Transcribed · p. ${parsed}`;
+          }
+        }
+      } else {
+        el.innerText = oldVal || `p. ${ex.pdfPage || 1}`;
+        return;
+      }
+    }
+
+    if (slot && slot.exercise) {
+      if (field === "title") slot.exercise.title = ex.title;
+      if (field === "description") slot.exercise.description = ex.description;
+      if (field === "page") slot.exercise.pdfPage = ex.pdfPage;
+    }
+
+    await this.persistEditedTopicOrExercise(ex);
+    this.markUnsaved();
+    this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    this.setAiExtractStatus(`Updated ${field} for "${ex.title}". Press Ctrl+Z to undo.`, "info");
   }
 
   setAiExtractStatus(msg, variant = "info", thumbDataUrl = undefined) {
@@ -1829,12 +2168,17 @@ export class GuitarMasterApp {
   }
 
   pushUndo(actionDescription = "Edit") {
-    if (!this.currentExercise) return;
     const snapshot = {
       action: actionDescription,
-      exerciseId: this.currentExercise.id,
-      topicId: this.currentExercise.topicId,
-      exerciseClone: JSON.parse(JSON.stringify(this.currentExercise)),
+      coursesClone: {
+        lessonBook: JSON.parse(JSON.stringify(GUITAR_COURSES.lessonBook || [])),
+        bonusWorkshop: JSON.parse(JSON.stringify(GUITAR_COURSES.bonusWorkshop || []))
+      },
+      deletedExerciseIds: Array.from(this.deletedExerciseIds || []),
+      deletedTopicIds: Array.from(this.deletedTopicIds || []),
+      currentExerciseId: this.currentExercise ? this.currentExercise.id : null,
+      currentTopicId: this.currentTopicId,
+      editingExerciseId: this.editingExerciseId,
       selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
       selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
       timestamp: Date.now()
@@ -1852,9 +2196,15 @@ export class GuitarMasterApp {
     if (!this.undoStack || this.undoStack.length === 0) return;
     const currentSnapshot = {
       action: "Redo",
-      exerciseId: this.currentExercise ? this.currentExercise.id : null,
-      topicId: this.currentExercise ? this.currentExercise.topicId : null,
-      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      coursesClone: {
+        lessonBook: JSON.parse(JSON.stringify(GUITAR_COURSES.lessonBook || [])),
+        bonusWorkshop: JSON.parse(JSON.stringify(GUITAR_COURSES.bonusWorkshop || []))
+      },
+      deletedExerciseIds: Array.from(this.deletedExerciseIds || []),
+      deletedTopicIds: Array.from(this.deletedTopicIds || []),
+      currentExerciseId: this.currentExercise ? this.currentExercise.id : null,
+      currentTopicId: this.currentTopicId,
+      editingExerciseId: this.editingExerciseId,
       selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
       selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
       timestamp: Date.now()
@@ -1874,9 +2224,15 @@ export class GuitarMasterApp {
     if (!this.redoStack || this.redoStack.length === 0) return;
     const currentSnapshot = {
       action: "Undo",
-      exerciseId: this.currentExercise ? this.currentExercise.id : null,
-      topicId: this.currentExercise ? this.currentExercise.topicId : null,
-      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      coursesClone: {
+        lessonBook: JSON.parse(JSON.stringify(GUITAR_COURSES.lessonBook || [])),
+        bonusWorkshop: JSON.parse(JSON.stringify(GUITAR_COURSES.bonusWorkshop || []))
+      },
+      deletedExerciseIds: Array.from(this.deletedExerciseIds || []),
+      deletedTopicIds: Array.from(this.deletedTopicIds || []),
+      currentExerciseId: this.currentExercise ? this.currentExercise.id : null,
+      currentTopicId: this.currentTopicId,
+      editingExerciseId: this.editingExerciseId,
       selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
       selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
       timestamp: Date.now()
@@ -1893,39 +2249,43 @@ export class GuitarMasterApp {
   }
 
   applyStateSnapshot(snapshot) {
-    if (!snapshot || !snapshot.exerciseClone) return;
-    const restoredEx = JSON.parse(JSON.stringify(snapshot.exerciseClone));
-    this.notationEditor.ensureCanonicalMeasures(restoredEx);
-    this.currentExercise = restoredEx;
-
-    const slot = this._findCourseSlotForExercise(restoredEx.id);
-    if (slot && slot.topic) {
-      slot.topic.exercises[slot.exIdx] = restoredEx;
+    if (!snapshot) return;
+    if (snapshot.coursesClone) {
+      GUITAR_COURSES.lessonBook = JSON.parse(JSON.stringify(snapshot.coursesClone.lessonBook || []));
+      GUITAR_COURSES.bonusWorkshop = JSON.parse(JSON.stringify(snapshot.coursesClone.bonusWorkshop || []));
     }
+    if (Array.isArray(snapshot.deletedExerciseIds)) {
+      this.deletedExerciseIds = new Set(snapshot.deletedExerciseIds);
+    }
+    if (Array.isArray(snapshot.deletedTopicIds)) {
+      this.deletedTopicIds = new Set(snapshot.deletedTopicIds);
+    }
+    this.saveDeletedItems();
     this.allExercises = this.buildFlatExerciseList();
-    this.persistEditedTopicOrExercise(restoredEx);
+    this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
 
-    const entry = this.activeTopicRenderers.get(restoredEx.id);
-    if (entry && entry.renderer) {
-      entry.renderer.loadExercise(restoredEx, {
-        noteNameMode: this.noteNameMode,
-        tabVisibilityMode: this.tabVisibilityMode,
-        showRhythmGuide: this.showRhythmGuide,
-        showCoachBanner: this.showCoachBanner
-      });
-      const mIdx = snapshot.selectedMeasureIdx || 0;
-      const evIdx = snapshot.selectedEventIdx || 0;
-      const fb = this._buildFeedbackBeatFromMeasureEvent(restoredEx, mIdx, null, evIdx);
-      const isRest = fb ? fb.isRest : false;
-      entry.renderer.highlightBeat(mIdx, 0, isRest, null, evIdx);
-    }
-    if (this.notationEditor && this.notationEditor.isActive()) {
-      this.notationEditor.open(
-        restoredEx,
-        this.notationEditor.hostEl,
-        snapshot.selectedMeasureIdx || 0,
-        snapshot.selectedEventIdx || 0
-      );
+    const targetId = snapshot.currentExerciseId || (this.allExercises[0] ? this.allExercises[0].id : null);
+    if (targetId) {
+      const found = this.findExerciseById(targetId) || this.allExercises[0];
+      if (found) {
+        this.currentExercise = JSON.parse(JSON.stringify(found));
+        this.loadExercise(found.id, false, { forceTopicRebuild: true, noScroll: true, noPdfReload: true });
+        if (snapshot.editingExerciseId && this.adminMode && this.notationEditor) {
+          this.editingExerciseId = snapshot.editingExerciseId;
+          const blockEl = this.topicExercisesStack ? this.topicExercisesStack.querySelector(`#topic-ex-${snapshot.editingExerciseId}`) : null;
+          const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${snapshot.editingExerciseId}"]`) : null;
+          if (editorSlot) {
+            const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${snapshot.editingExerciseId}"]`) : null;
+            if (editBtn) editBtn.classList.add("is-active");
+            this.notationEditor.open(
+              this.currentExercise,
+              editorSlot,
+              snapshot.selectedMeasureIdx || 0,
+              snapshot.selectedEventIdx || 0
+            );
+          }
+        }
+      }
     }
   }
 
@@ -2063,7 +2423,9 @@ export class GuitarMasterApp {
       branch,
       modelPreference: this.pdfAiExtractor.getModelPreference(),
       extractedPageCount: Object.keys(store).length,
-      extractedPages: store
+      extractedPages: store,
+      deletedExerciseIds: Array.from(this.deletedExerciseIds || []),
+      deletedTopicIds: Array.from(this.deletedTopicIds || [])
     };
     const jsonStr = JSON.stringify(payload, null, 2);
     const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
@@ -2137,17 +2499,43 @@ export class GuitarMasterApp {
       const res = await fetch(`./curriculumOverrides.json?t=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
-      if (data && data.extractedPages && typeof data.extractedPages === "object") {
-        const pageEntries = Object.values(data.extractedPages);
-        if (pageEntries.length > 0) {
-          pageEntries.forEach(entry => {
-            this.applyExtractedEntryToCourses(entry);
+      if (data) {
+        let deletionsChanged = false;
+        if (Array.isArray(data.deletedExerciseIds)) {
+          data.deletedExerciseIds.forEach(id => {
+            if (!this.deletedExerciseIds.has(id)) {
+              this.deletedExerciseIds.add(id);
+              deletionsChanged = true;
+            }
           });
-          this.allExercises = this.buildFlatExerciseList();
-          const localStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
-          Object.assign(localStore, data.extractedPages);
-          this.pdfAiExtractor.saveExtractedStoreSync(localStore);
         }
+        if (Array.isArray(data.deletedTopicIds)) {
+          data.deletedTopicIds.forEach(id => {
+            if (!this.deletedTopicIds.has(id)) {
+              this.deletedTopicIds.add(id);
+              deletionsChanged = true;
+            }
+          });
+        }
+        if (deletionsChanged) {
+          this.saveDeletedItems();
+          this.applyDeletionsToCourses(GUITAR_COURSES);
+        }
+
+        if (data.extractedPages && typeof data.extractedPages === "object") {
+          const pageEntries = Object.values(data.extractedPages);
+          if (pageEntries.length > 0) {
+            pageEntries.forEach(entry => {
+              this.applyExtractedEntryToCourses(entry);
+            });
+            const localStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
+            Object.assign(localStore, data.extractedPages);
+            this.pdfAiExtractor.saveExtractedStoreSync(localStore);
+          }
+        }
+        this.applyDeletionsToCourses(GUITAR_COURSES);
+        this.allExercises = this.buildFlatExerciseList();
+        this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
       }
     } catch (e) {}
   }
@@ -2164,12 +2552,17 @@ export class GuitarMasterApp {
 
     const { bookCat, session, topic, computedTopicId, exIdx } = slot;
     const baselineBook = this.initialBaselineCourses && this.initialBaselineCourses[bookCat];
-    const baselineSession = baselineBook && baselineBook.find(s => s.session === session.session);
+    const baselineSession = baselineBook && baselineBook.find(s => s.sessionNumber === session.sessionNumber);
     const baselineTopic = baselineSession && baselineSession.topics && baselineSession.topics.find(t => (t.topicId || t.topicTitle) === (topic.topicId || topic.topicTitle));
 
     if (baselineTopic && Array.isArray(baselineTopic.exercises)) {
       topic.exercises = JSON.parse(JSON.stringify(baselineTopic.exercises));
       topic.aiExtracted = false;
+      // Clear deleted IDs for any restored exercises
+      baselineTopic.exercises.forEach(e => this.deletedExerciseIds.delete(e.id));
+      this.deletedTopicIds.delete(computedTopicId);
+      if (topic.topicId) this.deletedTopicIds.delete(topic.topicId);
+      this.saveDeletedItems();
     }
 
     const bookPage = activeEx.pdfPage || topic.pdfPage || 1;
@@ -2562,11 +2955,12 @@ export class GuitarMasterApp {
       const isOpen = !!query || containsActive || this.expandedSessions.has(sessionKey);
 
       let topicsHtml = "";
-      topicsToRender.forEach(topic => {
+      topicsToRender.forEach((topic, tIdx) => {
+        const computedTopicId = topic.topicId || `${this.currentBookCategory}_s${session.sessionNumber}_t${tIdx}`;
         const cleanTopic = topic.topicTitle.replace(/\s*\([^)]*p\.\s*[\d\u2013-]+\)/i, "");
         const isCurrentTopic = Boolean(
           this.currentTopicId &&
-          topic.exercises.some(e => (e.topicId || topic.topicId) === this.currentTopicId || e.id === activeId)
+          topic.exercises.some(e => (e.topicId || topic.topicId || computedTopicId) === this.currentTopicId || e.id === activeId)
         );
         const firstExId = topic.exercises[0] ? topic.exercises[0].id : "";
         // Group AI-extracted sub-exercises cleanly under one single sidebar topic row
@@ -2585,15 +2979,19 @@ export class GuitarMasterApp {
               <span class="acc-ex-meta">
                 ${isRestDrill ? '<span class="acc-rest-dot" title="Contains Rest / Damp Cue"></span>' : ''}
                 ${isDone ? '<span class="acc-done-mark" title="Completed">&#10003;</span>' : ''}
+                <span class="acc-delete-btn admin-only-control" data-delete-sidebar-ex="${ex.id}" title="Delete ${this.escapeHtml(ex.title)}" aria-label="Delete exercise">🗑️</span>
               </span>
             </button>
           `;
         }).join("");
 
         topicsHtml += `
-          <button type="button" class="acc-topic-label acc-topic-btn ${isCurrentTopic ? 'is-active-topic' : ''}" data-first-ex="${firstExId}" title="Show all exercises in ${this.escapeHtml(topic.topicTitle)}">
-            <span>${this.escapeHtml(cleanTopic)}</span>
-            ${topic.exercises.length > 1 ? `<span class="acc-topic-count">${topic.exercises.length}</span>` : ""}
+          <button type="button" class="acc-topic-label acc-topic-btn ${isCurrentTopic ? 'is-active-topic' : ''}" data-first-ex="${firstExId}" data-topic-id="${computedTopicId}" title="Show all exercises in ${this.escapeHtml(topic.topicTitle)}">
+            <span class="acc-topic-title-text">${this.escapeHtml(cleanTopic)}</span>
+            <span class="acc-topic-meta-wrap">
+              ${topic.exercises.length > 1 ? `<span class="acc-topic-count">${topic.exercises.length}</span>` : ""}
+              <span class="acc-delete-btn admin-only-control" data-delete-sidebar-topic="${computedTopicId}" title="Delete entire topic &amp; exercises" aria-label="Delete topic">🗑️</span>
+            </span>
           </button>
           ${exRows}
         `;
@@ -2635,7 +3033,8 @@ export class GuitarMasterApp {
 
     // Topic button click -> open full topic at Exercise 1
     this.sessionsAccordion.querySelectorAll(".acc-topic-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (e) => {
+        if (e.target.closest("[data-delete-sidebar-topic]")) return;
         const firstId = btn.dataset.firstEx;
         if (firstId) {
           this.loadExercise(firstId, false, { scrollTopicTop: true });
@@ -2648,11 +3047,36 @@ export class GuitarMasterApp {
 
     // Exercise click
     this.sessionsAccordion.querySelectorAll(".acc-ex-item").forEach(btn => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (e) => {
+        if (e.target.closest("[data-delete-sidebar-ex]")) return;
         const id = btn.dataset.exId;
         this.loadExercise(id);
         if (window.innerWidth <= 1024) {
           this.setDrawerOpen(false);
+        }
+      });
+    });
+
+    // Sidebar Exercise Delete button click (Admin Mode)
+    this.sessionsAccordion.querySelectorAll("[data-delete-sidebar-ex]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const exId = btn.dataset.deleteSidebarEx;
+        if (exId) {
+          this.deleteExercise(exId);
+        }
+      });
+    });
+
+    // Sidebar Topic Delete button click (Admin Mode)
+    this.sessionsAccordion.querySelectorAll("[data-delete-sidebar-topic]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const topicId = btn.dataset.deleteSidebarTopic;
+        if (topicId) {
+          this.deleteTopic(topicId);
         }
       });
     });
@@ -2714,15 +3138,16 @@ export class GuitarMasterApp {
             <div class="topic-ex-head-left">
               <span class="topic-ex-badge">${idx + 1}</span>
               <div class="topic-ex-title-wrap">
-                <div class="topic-ex-title">${this.escapeHtml(ex.title)}</div>
-                ${ex.description ? `<div class="topic-ex-sub">${this.escapeHtml(ex.description)}</div>` : ""}
+                <div class="topic-ex-title" ${this.adminMode ? `contenteditable="true" spellcheck="false" data-editable-field="title" data-ex-id="${ex.id}" title="Click to edit exercise title"` : ""}>${this.escapeHtml(ex.title)}</div>
+                ${ex.description ? `<div class="topic-ex-sub" ${this.adminMode ? `contenteditable="true" spellcheck="false" data-editable-field="description" data-ex-id="${ex.id}" title="Click to edit instructions"` : ""}>${this.escapeHtml(ex.description)}</div>` : (this.adminMode ? `<div class="topic-ex-sub is-empty" contenteditable="true" spellcheck="false" data-editable-field="description" data-ex-id="${ex.id}" placeholder="Add instructions..." title="Click to add instructions"></div>` : "")}
               </div>
             </div>
             <div class="topic-ex-head-right">
-              ${ex.bookCategory !== "freeMetronome" && exPage ? `<span class="topic-ex-meta-pill">p. ${exPage}</span>` : ""}
+              ${ex.bookCategory !== "freeMetronome" && exPage ? `<span class="topic-ex-meta-pill topic-ex-page-pill" ${this.adminMode ? `contenteditable="true" spellcheck="false" data-editable-field="page" data-ex-id="${ex.id}" title="Click to edit page number"` : ""}>p. ${exPage}</span>` : ""}
               <span class="topic-ex-meta-pill">${tsLabel}</span>
               <span class="topic-ex-meta-pill">&#9833; ${ex.defaultBpm || 60}</span>
               <button class="topic-ex-edit-btn admin-only-control ${isEditing ? "is-active" : ""}" type="button" data-edit-ex="${ex.id}" title="Open visual notation editor">Edit Exercise</button>
+              <button class="topic-ex-delete-btn admin-only-control is-danger" type="button" data-delete-ex="${ex.id}" title="Delete entire exercise card">🗑️ Delete Exercise</button>
               <button class="topic-ex-select-btn" type="button" data-select-ex="${ex.id}">${isSelected ? "Active" : "Select"}</button>
               <button class="topic-ex-play-btn" type="button" data-play-ex="${ex.id}" title="Select and play this exercise">&#9654;</button>
             </div>
@@ -2733,7 +3158,7 @@ export class GuitarMasterApp {
       `;
     }).join("") + `
       <div class="topic-add-subex-row admin-only-control">
-        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">+ Add Sub-Exercise to Page</button>
+        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">➕ Add New Exercise</button>
       </div>
     `;
 
@@ -2742,6 +3167,7 @@ export class GuitarMasterApp {
       const scoreHost = blockEl ? blockEl.querySelector(".topic-ex-score-host") : null;
       const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${ex.id}"]`) : null;
       const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${ex.id}"]`) : null;
+      const deleteBtn = blockEl ? blockEl.querySelector(`[data-delete-ex="${ex.id}"]`) : null;
       const selectBtn = blockEl ? blockEl.querySelector(`[data-select-ex="${ex.id}"]`) : null;
       const playBtn = blockEl ? blockEl.querySelector(`[data-play-ex="${ex.id}"]`) : null;
       const headEl = blockEl ? blockEl.querySelector(`[data-select-header="${ex.id}"]`) : null;
@@ -2818,9 +3244,17 @@ export class GuitarMasterApp {
         if (renderer) renderer.highlightBeat(0, 0, Boolean(fb0 && fb0.isRest), null, 0);
       }
 
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!this.adminMode) return;
+          this.deleteExercise(ex.id);
+        });
+      }
+
       if (headEl) {
         headEl.addEventListener("click", (e) => {
-          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]")) return;
+          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]") || e.target.closest("[data-delete-ex]") || e.target.closest("[contenteditable='true']")) return;
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -2837,7 +3271,7 @@ export class GuitarMasterApp {
         });
       }
 
-      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn });
+      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn, deleteBtn });
     });
 
     const addSubBtn = this.topicExercisesStack.querySelector("#btn-add-sub-exercise");
@@ -4825,7 +5259,7 @@ export class GuitarMasterApp {
         }
       }
       if (this.appMode !== "studio") return;
-      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable || e.target.closest("[contenteditable='true']")) return;
       if (this.adminMode && this.notationEditor && this.notationEditor.isActive()) {
         if (/^[0-9]$/.test(e.key)) {
           e.preventDefault();
@@ -4875,6 +5309,7 @@ export class GuitarMasterApp {
     });
 
     window.addEventListener("hashchange", () => this.restoreState());
+    this.setupInlineEditingListeners();
   }
 }
 
