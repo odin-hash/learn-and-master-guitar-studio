@@ -4605,6 +4605,7 @@ export class GuitarMasterApp {
         this.noteSubInstruction.textContent = "800 Hz Percussive Click";
         this.noteRightGuidance.textContent = "800 Hz";
       }
+      this.noteRightGuidance.style.visibility = "visible";
       return;
     }
 
@@ -4692,6 +4693,7 @@ export class GuitarMasterApp {
       this.noteHeaderBig.textContent = `Beat ${beatNumber}: Rest`;
       this.noteSubInstruction.textContent = beatData.tip || "Silence strings cleanly";
       this.noteRightGuidance.textContent = "DAMP";
+      this.noteRightGuidance.style.visibility = "visible";
     } else {
       this.noteActiveCard.className = "telemetry-inline mode-play";
       this.noteGlyphLarge.innerHTML = this.getGlyphSvg(sym, dur, false);
@@ -4700,6 +4702,7 @@ export class GuitarMasterApp {
         this.noteHeaderBig.textContent = beatNumber === 1 ? "Beat 1: Downbeat Accent" : `Beat ${beatNumber}: Metronome Pulse`;
         this.noteSubInstruction.textContent = beatNumber === 1 ? "1200 Hz Percussive Click" : "800 Hz Percussive Click";
         this.noteRightGuidance.textContent = beatNumber === 1 ? "1200 Hz" : "800 Hz";
+        this.noteRightGuidance.style.visibility = "visible";
         return;
       }
 
@@ -4746,15 +4749,27 @@ export class GuitarMasterApp {
 
       // Visual Strumming Pendulum Guidance ("Keep Your Hand Going!")
       const isUpbeat = String(beatNumber).includes("&");
+      let guidanceText = "";
       if (isSustain && chordName && !isSingleNoteMelody) {
-        this.noteRightGuidance.textContent = isUpbeat ? "↑ MISS (Ghost Up)" : "↓ MISS (Ghost Down)";
+        guidanceText = isUpbeat ? "↑ MISS (Ghost Up)" : "↓ MISS (Ghost Down)";
       } else if (isTieCont) {
-        this.noteRightGuidance.textContent = "TIED · HOLD";
+        guidanceText = "TIED · HOLD";
       } else if (beatData.pick && beatData.pick !== "-") {
-        const arrow = beatData.pick === "Up" ? "↑ Up Strum" : (beatData.pick === "Down" ? "↓ Down Strum" : `Finger: ${beatData.pick}`);
-        this.noteRightGuidance.textContent = arrow;
+        guidanceText = beatData.pick === "Up" ? "↑ Up Strum" : (beatData.pick === "Down" ? "↓ Down Strum" : `Finger: ${beatData.pick}`);
+      } else if (isSustain) {
+        guidanceText = "Hold & Ring";
+      } else if (beatData.pick === "-") {
+        guidanceText = "";
       } else {
-        this.noteRightGuidance.textContent = isSustain ? "Hold & Ring" : "↓ Down";
+        guidanceText = "↓ Down";
+      }
+
+      if (guidanceText) {
+        this.noteRightGuidance.textContent = guidanceText;
+        this.noteRightGuidance.style.visibility = "visible";
+      } else {
+        this.noteRightGuidance.textContent = "";
+        this.noteRightGuidance.style.visibility = "hidden";
       }
     }
   }

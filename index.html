@@ -797,7 +797,7 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: 12px;
   height: 44px;
   min-height: 44px;
   max-height: 44px;
@@ -810,16 +810,36 @@ button.acc-topic-btn.is-active-topic {
 .telemetry-inline {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
-  flex-shrink: 1;
-  overflow: hidden;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
 }
 
+/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 185px) */
+.telemetry-slot-pitch {
+  width: 185px !important;
+  min-width: 185px !important;
+  max-width: 185px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 34px;
-  height: 30px;
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -834,6 +854,93 @@ button.acc-topic-btn.is-active-topic {
   overflow: visible;
 }
 
+.telemetry-slot-pitch .telemetry-primary,
+.telemetry-primary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.telemetry-inline.mode-rest .telemetry-primary {
+  color: var(--color-rest);
+}
+
+/* Slot 2: String • Fret • Finger (Strict fixed width 195px) */
+.telemetry-slot-instruction {
+  width: 195px !important;
+  min-width: 195px !important;
+  max-width: 195px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.telemetry-slot-instruction .telemetry-secondary,
+.telemetry-secondary {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+}
+
+/* Slot 3: Down Strum / Up Strum Badge (Strict fixed width 115px) */
+.telemetry-slot-badge {
+  width: 115px !important;
+  min-width: 115px !important;
+  max-width: 115px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.telemetry-pick-badge {
+  width: 115px !important;
+  min-width: 115px !important;
+  max-width: 115px !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border-hairline);
+  padding: 2px 4px;
+  border-radius: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.telemetry-inline.mode-rest .telemetry-pick-badge {
+  color: var(--color-rest);
+  background: var(--color-rest-soft);
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
 .telemetry-text {
   display: flex;
   align-items: center;
@@ -845,60 +952,19 @@ button.acc-topic-btn.is-active-topic {
   text-overflow: ellipsis;
 }
 
-.telemetry-primary {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.telemetry-inline.mode-rest .telemetry-primary {
-  color: var(--color-rest);
-}
-
 .telemetry-sep {
   color: var(--border-strong);
   flex-shrink: 0;
 }
 
-.telemetry-secondary {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.telemetry-pick-badge {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg-sidebar);
-  border: 1px solid var(--border-hairline);
-  padding: 2px 8px;
-  border-radius: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-.telemetry-inline.mode-rest .telemetry-pick-badge {
-  color: var(--color-rest);
-  background: var(--color-rest-soft);
-  border-color: rgba(220, 38, 38, 0.25);
-}
-
+/* Right-side Voicing & Fretboard Controls: Pinned permanently to the right */
 .notation-toggles {
+  margin-left: auto !important;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: nowrap !important;
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
 }
 
 #chord-mode-group {
@@ -4909,15 +4975,28 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
     overflow: hidden;
   }
 
+  .telemetry-slot-pitch {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .telemetry-slot-instruction {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .telemetry-slot-badge,
+  .telemetry-pick-badge {
+    display: none !important;
+  }
+
   .telemetry-text {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .telemetry-pick-badge {
-    display: none;
   }
 
   .notation-toggles {
@@ -5808,13 +5887,16 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
           <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
           <div class="canvas-subbar">
             <div class="telemetry-inline mode-play" id="note-active-card">
-              <div class="telemetry-glyph" id="note-glyph-large"></div>
-              <div class="telemetry-text">
+              <div class="telemetry-slot-pitch" id="telemetry-slot-pitch">
+                <div class="telemetry-glyph" id="note-glyph-large"></div>
                 <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
-                <span class="telemetry-sep">&middot;</span>
+              </div>
+              <div class="telemetry-slot-instruction" id="telemetry-slot-instruction">
                 <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
               </div>
-              <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+              <div class="telemetry-slot-badge" id="telemetry-slot-badge">
+                <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+              </div>
             </div>
 
             <div class="notation-toggles" id="studio-trainer-bar">
@@ -23479,6 +23561,7 @@ class GuitarMasterApp {
         this.noteSubInstruction.textContent = "800 Hz Percussive Click";
         this.noteRightGuidance.textContent = "800 Hz";
       }
+      this.noteRightGuidance.style.visibility = "visible";
       return;
     }
 
@@ -23566,6 +23649,7 @@ class GuitarMasterApp {
       this.noteHeaderBig.textContent = `Beat ${beatNumber}: Rest`;
       this.noteSubInstruction.textContent = beatData.tip || "Silence strings cleanly";
       this.noteRightGuidance.textContent = "DAMP";
+      this.noteRightGuidance.style.visibility = "visible";
     } else {
       this.noteActiveCard.className = "telemetry-inline mode-play";
       this.noteGlyphLarge.innerHTML = this.getGlyphSvg(sym, dur, false);
@@ -23574,6 +23658,7 @@ class GuitarMasterApp {
         this.noteHeaderBig.textContent = beatNumber === 1 ? "Beat 1: Downbeat Accent" : `Beat ${beatNumber}: Metronome Pulse`;
         this.noteSubInstruction.textContent = beatNumber === 1 ? "1200 Hz Percussive Click" : "800 Hz Percussive Click";
         this.noteRightGuidance.textContent = beatNumber === 1 ? "1200 Hz" : "800 Hz";
+        this.noteRightGuidance.style.visibility = "visible";
         return;
       }
 
@@ -23620,15 +23705,27 @@ class GuitarMasterApp {
 
       // Visual Strumming Pendulum Guidance ("Keep Your Hand Going!")
       const isUpbeat = String(beatNumber).includes("&");
+      let guidanceText = "";
       if (isSustain && chordName && !isSingleNoteMelody) {
-        this.noteRightGuidance.textContent = isUpbeat ? "↑ MISS (Ghost Up)" : "↓ MISS (Ghost Down)";
+        guidanceText = isUpbeat ? "↑ MISS (Ghost Up)" : "↓ MISS (Ghost Down)";
       } else if (isTieCont) {
-        this.noteRightGuidance.textContent = "TIED · HOLD";
+        guidanceText = "TIED · HOLD";
       } else if (beatData.pick && beatData.pick !== "-") {
-        const arrow = beatData.pick === "Up" ? "↑ Up Strum" : (beatData.pick === "Down" ? "↓ Down Strum" : `Finger: ${beatData.pick}`);
-        this.noteRightGuidance.textContent = arrow;
+        guidanceText = beatData.pick === "Up" ? "↑ Up Strum" : (beatData.pick === "Down" ? "↓ Down Strum" : `Finger: ${beatData.pick}`);
+      } else if (isSustain) {
+        guidanceText = "Hold & Ring";
+      } else if (beatData.pick === "-") {
+        guidanceText = "";
       } else {
-        this.noteRightGuidance.textContent = isSustain ? "Hold & Ring" : "↓ Down";
+        guidanceText = "↓ Down";
+      }
+
+      if (guidanceText) {
+        this.noteRightGuidance.textContent = guidanceText;
+        this.noteRightGuidance.style.visibility = "visible";
+      } else {
+        this.noteRightGuidance.textContent = "";
+        this.noteRightGuidance.style.visibility = "hidden";
       }
     }
   }

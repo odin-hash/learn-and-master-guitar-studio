@@ -212,13 +212,16 @@ $css
           <!-- Subtle Inline Telemetry & Notation Toggles Bar -->
           <div class="canvas-subbar">
             <div class="telemetry-inline mode-play" id="note-active-card">
-              <div class="telemetry-glyph" id="note-glyph-large"></div>
-              <div class="telemetry-text">
+              <div class="telemetry-slot-pitch" id="telemetry-slot-pitch">
+                <div class="telemetry-glyph" id="note-glyph-large"></div>
                 <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
-                <span class="telemetry-sep">&middot;</span>
+              </div>
+              <div class="telemetry-slot-instruction" id="telemetry-slot-instruction">
                 <span class="telemetry-secondary" id="note-sub-instruction">String 1 | Open Position</span>
               </div>
-              <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+              <div class="telemetry-slot-badge" id="telemetry-slot-badge">
+                <span class="telemetry-pick-badge" id="note-right-guidance">Pick: Down | Beat 1</span>
+              </div>
             </div>
 
             <div class="notation-toggles" id="studio-trainer-bar">
