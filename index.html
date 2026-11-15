@@ -2040,6 +2040,9 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
   min-height: 110px;
   padding-top: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Note Names: Above Note vs Inside Notehead (AlphaNotes) */
@@ -5075,34 +5078,91 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
    ADMIN ACTION BAR, SETTINGS MODAL & CLOUD COMMIT STYLES
    ========================================================================== */
 
+.btn-icon {
+  display: inline-block;
+  vertical-align: -1.5px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
 .save-live-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-weight: 600;
+  transition: all 0.15s ease;
 }
 
-.save-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-  transition: background-color 0.2s ease;
+.save-live-btn[data-status="unsaved"] {
+  background: rgba(194, 65, 12, 0.12) !important;
+  border-color: rgba(194, 65, 12, 0.5) !important;
+  color: #C2410C !important;
+}
+
+.save-live-btn[data-status="unsaved"]:hover {
+  background: #C2410C !important;
+  border-color: #C2410C !important;
+  color: #FFFFFF !important;
+}
+
+.save-live-btn[data-status="unsaved"] .save-status-text {
+  color: inherit;
+  font-weight: 700;
+}
+
+.save-live-btn[data-status="syncing"] {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: #2563EB !important;
+}
+
+.save-live-btn[data-status="syncing"] .save-status-text {
+  color: inherit;
+}
+
+.save-live-btn[data-status="saved"] {
+  background: #FAF9F5;
+  border-color: rgba(24, 24, 27, 0.16);
+  color: var(--text-muted, #71717A);
+  opacity: 0.85;
+}
+
+.save-live-btn[data-status="saved"]:hover {
+  opacity: 1;
+  color: #18181B;
 }
 
 .save-status-dot.is-saved {
-  background-color: #10B981;
-  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+  width: auto;
+  height: auto;
+  background: transparent;
+  box-shadow: none;
+  color: #16A34A;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.save-status-dot.is-saved::before {
+  content: "✓";
 }
 
 .save-status-dot.is-unsaved {
-  background-color: #F59E0B;
-  box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: #EA580C;
+  box-shadow: 0 0 5px rgba(234, 88, 12, 0.6);
 }
 
 .save-status-dot.is-syncing {
-  background-color: #3B82F6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: #2563EB;
   animation: adminSyncPulse 1s infinite ease-in-out;
 }
 
@@ -5700,39 +5760,48 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
           </div>
           <div class="pdf-toolbar-right">
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
-              🔑 Settings
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Settings
             </button>
             <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Extract exercises from current PDF page and replace active lesson (pushes Undo first)">
-              ✨ Extract Page
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>
+              Extract Page
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-append-pdf-page" title="Extract current PDF page and append measures to end of active exercise">
-              ➕ Append Page
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Append Page
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-undo" title="Undo note edit, measure change or extraction (Ctrl+Z)" disabled>
-              ↩️ Undo
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+              Undo
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-redo" title="Redo note edit, measure change or extraction (Ctrl+Y)" disabled>
-              ↪️ Redo
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+              Redo
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-backspace" title="Convert note to Rest of same duration (Backspace)">
-              ⌫
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+              Rest
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-delete" title="Delete note/rest completely from measure (Delete)">
-              🗑️
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
             <button type="button" class="micro-pill admin-only-control" id="btn-revert-lesson" title="Restore active lesson to baseline state">
-              🔄 Revert Lesson
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              Revert
             </button>
-            <button type="button" class="micro-pill save-live-btn admin-only-control" id="btn-save-live" title="Save changes and commit live to GitHub repo (Ctrl+S)">
-              ☁️ Save Live
+            <button type="button" class="micro-pill save-live-btn admin-only-control" id="btn-save-live" title="Save changes and commit live to GitHub repo (Ctrl+S)" data-status="saved">
               <span class="save-status-dot is-saved" id="save-status-dot"></span>
               <span class="save-status-text" id="save-status-text">Saved</span>
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-add-exercise" title="Add a new interactive exercise card to this page">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + New Exercise
             </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
             </label>
-            <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
           </div>
         </div>
 
@@ -11897,18 +11966,14 @@ class ScoreRenderer {
   _getMeasuresPerSystem(containerWidth) {
     if (!this.measures || this.measures.length === 0) return 4;
     const total = this.measures.length;
-    const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 4);
-    // Desktop (>= 900px): keep exercises up to 8 bars on one continuous row
-    if (containerWidth >= 900) {
-      if (total <= 8) return total;
-      return Math.min(total, maxEvents >= 8 ? 3 : 4);
-    }
-    // Tablet / iPad / Phone Landscape (540px - 899px): wrap cleanly at 4 bars per row
-    if (containerWidth >= 540) {
-      return Math.min(total, maxEvents >= 8 ? 3 : 4);
-    }
-    // Phone Portrait (< 540px): wrap at 2 bars per row so staves stay legible
-    return Math.min(total, 2);
+    // Always keep standard exercises (up to 8 measures) on ONE single horizontal line
+    // Never wrap a 4-bar drill into 3 + 1 orphan bar!
+    if (total <= 8) return total;
+    // For longer multi-system pieces (> 8 measures), wrap into balanced systems of 4 or 6:
+    if (total % 4 === 0) return 4;
+    if (total % 6 === 0) return 6;
+    if (total % 3 === 0 && total <= 9) return 3;
+    return 4;
   }
 
   _buildBeatIndexLookup(mIdx) {
@@ -11964,14 +12029,16 @@ class ScoreRenderer {
     const leftGutter = showTreble && showTab ? 18 : 6;
     const clefExtra = showTreble ? 78 : 54;
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 1);
-    const minPerBar = maxEvents >= 6 ? 152 : (maxEvents >= 4 ? 128 : 112);
-    const mobileMinPerBar = maxEvents >= 6 ? 150 : 132;
-    const minLogicalW = availW < 540
-      ? (leftGutter + clefExtra + mps * mobileMinPerBar + 16)
-      : (mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0);
+    const minPerBar = maxEvents >= 8 ? 144 : (maxEvents >= 6 ? 130 : (maxEvents >= 4 ? 116 : 96));
+    const minLogicalW = leftGutter + clefExtra + mps * minPerBar + 16;
     const logicalW = Math.max(Math.floor(availW / baseScale), minLogicalW);
-    const SCALE = availW / logicalW;
+
+    const naturalScale = availW / logicalW;
+    const minReadableScale = 0.65;
+    const SCALE = Math.max(naturalScale, minReadableScale);
     this._activeScale = SCALE;
+
+    const renderedW = Math.max(availW, Math.ceil(logicalW * SCALE));
 
     const systems = [];
     for (let i = 0; i < totalMeasures; i += mps) {
@@ -12021,7 +12088,7 @@ class ScoreRenderer {
       const sysH = (showTab ? (tabY + 116) : (trebleY + 112)) + rhythmExtra;
 
       const renderer = new VF.Renderer(sysEl, VF.Renderer.Backends.SVG);
-      renderer.resize(availW, Math.ceil(sysH * SCALE));
+      renderer.resize(renderedW, Math.ceil(sysH * SCALE));
       const ctx = renderer.getContext();
       ctx.scale(SCALE, SCALE);
 
@@ -12030,7 +12097,13 @@ class ScoreRenderer {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
         svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
-        svgEl.removeAttribute("width");
+        if (renderedW > availW) {
+          svgEl.style.width = `${renderedW}px`;
+          svgEl.style.minWidth = `${renderedW}px`;
+        } else {
+          svgEl.style.width = "100%";
+          svgEl.style.minWidth = "";
+        }
         svgEl.removeAttribute("height");
       }
 
@@ -18284,15 +18357,30 @@ class NotationEditor {
       <div class="ne-tools-row">
         <div class="ne-group" role="group" aria-label="Note Actions">
           <button type="button" class="ne-action-btn" id="ne-btn-add-note" title="Add note after currently selected note">+ Add Note After</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">⌫ Rest</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">🗑️ Del Note</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            Rest
+          </button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Del Note
+          </button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Measure Actions">
           <button type="button" class="ne-action-btn" id="ne-btn-insert-bar-after" title="Insert a new empty measure after active bar">+ Insert Bar After</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">📋 Duplicate Bar</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">🗑️ Delete Bar</button>
-          <button type="button" class="ne-action-btn is-danger ne-delete-ex-btn" id="ne-btn-delete-exercise" title="Delete entire current exercise">🗑️ Delete Exercise</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Duplicate Bar
+          </button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Bar
+          </button>
+          <button type="button" class="ne-action-btn is-danger ne-delete-ex-btn" id="ne-btn-delete-exercise" title="Delete entire current exercise">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Exercise
+          </button>
         </div>
       </div>
 
@@ -18759,7 +18847,7 @@ class GuitarMasterApp {
     this.drawerOpen = window.innerWidth > 1024;
     this._lastCompactViewport = this.isCompactFretboardViewport();
     this.fretboardVisible = !this._lastCompactViewport;
-    this.expandedSessions = new Set(["lessonBook_1", "lessonBook_2"]);
+    this.expandedSessions = new Set(["lessonBook_2"]);
     this.pdfBookCategory = "lessonBook";
     this.pdfCurrentPage = 1;
     this.customPdfUrls = {};
@@ -18867,6 +18955,7 @@ class GuitarMasterApp {
     this.btnAdminDelete = document.getElementById("btn-admin-delete");
     this.btnRevertLesson = document.getElementById("btn-revert-lesson");
     this.btnSaveLive = document.getElementById("btn-save-live");
+    this.btnAdminAddExercise = document.getElementById("btn-admin-add-exercise");
     this.saveStatusDot = document.getElementById("save-status-dot");
     this.saveStatusText = document.getElementById("save-status-text");
 
@@ -20787,18 +20876,26 @@ class GuitarMasterApp {
 
   markUnsaved() {
     this.hasUnsavedChanges = true;
-    this.setSaveLiveStatus("unsaved", "Unsaved");
+    this.setSaveLiveStatus("unsaved");
   }
 
   setSaveLiveStatus(state, label) {
+    if (this.btnSaveLive) {
+      this.btnSaveLive.dataset.status = state;
+    }
     if (this.saveStatusDot) {
       this.saveStatusDot.className = `save-status-dot is-${state}`;
     }
-    if (this.saveStatusText && label) {
-      this.saveStatusText.textContent = label;
-    }
-    if (this.btnSaveLive) {
-      this.btnSaveLive.dataset.status = state;
+    if (this.saveStatusText) {
+      if (label) {
+        this.saveStatusText.textContent = label;
+      } else if (state === "unsaved") {
+        this.saveStatusText.textContent = "Save Live";
+      } else if (state === "syncing") {
+        this.saveStatusText.textContent = "Saving...";
+      } else {
+        this.saveStatusText.textContent = "Saved";
+      }
     }
   }
 
@@ -20941,7 +21038,7 @@ class GuitarMasterApp {
   }
 
   async saveLive() {
-    this.setSaveLiveStatus("syncing", "Syncing...");
+    this.setSaveLiveStatus("syncing");
     this.setAiExtractStatus("Saving curriculum locally and committing live to GitHub...", "busy");
     try {
       const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
@@ -20950,9 +21047,9 @@ class GuitarMasterApp {
       const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
       if (!pat) {
         this.hasUnsavedChanges = false;
-        this.setSaveLiveStatus("saved", "Saved Locally");
+        this.setSaveLiveStatus("saved");
         this.setAiExtractStatus(
-          "Saved to browser localStorage. Add GitHub PAT in 🔑 Settings to push live to repo automatically.",
+          "Saved to browser localStorage. Add GitHub PAT in Settings to push live to repo automatically.",
           "info"
         );
         return;
@@ -20960,14 +21057,14 @@ class GuitarMasterApp {
 
       const res = await this.commitCurriculumToGitHub();
       this.hasUnsavedChanges = false;
-      this.setSaveLiveStatus("saved", "Saved Live");
+      this.setSaveLiveStatus("saved");
       const commitSha = res && res.commit && res.commit.sha ? res.commit.sha.slice(0, 7) : "";
       this.setAiExtractStatus(
         `✓ Saved & pushed live to GitHub (${commitSha ? `commit ${commitSha}` : "main"})! Changes are now permanent.`,
         "success"
       );
     } catch (err) {
-      this.setSaveLiveStatus("unsaved", "Sync Failed");
+      this.setSaveLiveStatus("unsaved");
       this.setAiExtractStatus(
         `Saved locally, but GitHub Live Commit failed: ${err && err.message ? err.message : String(err)}`,
         "error"
@@ -21460,7 +21557,7 @@ class GuitarMasterApp {
               <span class="acc-ex-meta">
                 ${isRestDrill ? '<span class="acc-rest-dot" title="Contains Rest / Damp Cue"></span>' : ''}
                 ${isDone ? '<span class="acc-done-mark" title="Completed">&#10003;</span>' : ''}
-                <span class="acc-delete-btn admin-only-control" data-delete-sidebar-ex="${ex.id}" title="Delete ${this.escapeHtml(ex.title)}" aria-label="Delete exercise">🗑️</span>
+                <span class="acc-delete-btn admin-only-control" data-delete-sidebar-ex="${ex.id}" title="Delete ${this.escapeHtml(ex.title)}" aria-label="Delete exercise"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
               </span>
             </button>
           `;
@@ -21471,7 +21568,7 @@ class GuitarMasterApp {
             <span class="acc-topic-title-text">${this.escapeHtml(cleanTopic)}</span>
             <span class="acc-topic-meta-wrap">
               ${topic.exercises.length > 1 ? `<span class="acc-topic-count">${topic.exercises.length}</span>` : ""}
-              <span class="acc-delete-btn admin-only-control" data-delete-sidebar-topic="${computedTopicId}" title="Delete entire topic &amp; exercises" aria-label="Delete topic">🗑️</span>
+              <span class="acc-delete-btn admin-only-control" data-delete-sidebar-topic="${computedTopicId}" title="Delete entire topic &amp; exercises" aria-label="Delete topic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
             </span>
           </button>
           ${exRows}
@@ -21499,16 +21596,31 @@ class GuitarMasterApp {
 
     this.sessionsAccordion.innerHTML = html;
 
-    // Accordion expand / collapse
+    // Strict Single-Open Accordion: only one session open at a time
     this.sessionsAccordion.querySelectorAll(".acc-session-trigger").forEach(btn => {
       btn.addEventListener("click", () => {
         const parent = btn.closest(".acc-session");
         const key = parent.dataset.sessionKey;
         const willOpen = !parent.classList.contains("is-open");
+
+        // Collapse all other sessions
+        this.sessionsAccordion.querySelectorAll(".acc-session").forEach(other => {
+          if (other !== parent) {
+            other.classList.remove("is-open");
+            const otherTrig = other.querySelector(".acc-session-trigger");
+            if (otherTrig) otherTrig.setAttribute("aria-expanded", "false");
+            if (other.dataset.sessionKey) this.expandedSessions.delete(other.dataset.sessionKey);
+          }
+        });
+
         parent.classList.toggle("is-open", willOpen);
         btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        if (willOpen) this.expandedSessions.add(key);
-        else this.expandedSessions.delete(key);
+        if (willOpen) {
+          this.expandedSessions.clear();
+          this.expandedSessions.add(key);
+        } else {
+          this.expandedSessions.delete(key);
+        }
       });
     });
 
@@ -21628,7 +21740,6 @@ class GuitarMasterApp {
               <span class="topic-ex-meta-pill">${tsLabel}</span>
               <span class="topic-ex-meta-pill">&#9833; ${ex.defaultBpm || 60}</span>
               <button class="topic-ex-edit-btn admin-only-control ${isEditing ? "is-active" : ""}" type="button" data-edit-ex="${ex.id}" title="Open visual notation editor">Edit Exercise</button>
-              <button class="topic-ex-delete-btn admin-only-control is-danger" type="button" data-delete-ex="${ex.id}" title="Delete entire exercise card">🗑️ Delete Exercise</button>
               <button class="topic-ex-select-btn" type="button" data-select-ex="${ex.id}">${isSelected ? "Active" : "Select"}</button>
               <button class="topic-ex-play-btn" type="button" data-play-ex="${ex.id}" title="Select and play this exercise">&#9654;</button>
             </div>
@@ -21639,7 +21750,7 @@ class GuitarMasterApp {
       `;
     }).join("") + `
       <div class="topic-add-subex-row admin-only-control">
-        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">➕ Add New Exercise</button>
+        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" style="vertical-align: -2px; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Add New Exercise</button>
       </div>
     `;
 
@@ -21648,7 +21759,6 @@ class GuitarMasterApp {
       const scoreHost = blockEl ? blockEl.querySelector(".topic-ex-score-host") : null;
       const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${ex.id}"]`) : null;
       const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${ex.id}"]`) : null;
-      const deleteBtn = blockEl ? blockEl.querySelector(`[data-delete-ex="${ex.id}"]`) : null;
       const selectBtn = blockEl ? blockEl.querySelector(`[data-select-ex="${ex.id}"]`) : null;
       const playBtn = blockEl ? blockEl.querySelector(`[data-play-ex="${ex.id}"]`) : null;
       const headEl = blockEl ? blockEl.querySelector(`[data-select-header="${ex.id}"]`) : null;
@@ -21725,17 +21835,9 @@ class GuitarMasterApp {
         if (renderer) renderer.highlightBeat(0, 0, Boolean(fb0 && fb0.isRest), null, 0);
       }
 
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (!this.adminMode) return;
-          this.deleteExercise(ex.id);
-        });
-      }
-
       if (headEl) {
         headEl.addEventListener("click", (e) => {
-          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]") || e.target.closest("[data-delete-ex]") || e.target.closest("[contenteditable='true']")) return;
+          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]") || e.target.closest("[contenteditable='true']")) return;
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -21752,7 +21854,7 @@ class GuitarMasterApp {
         });
       }
 
-      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn, deleteBtn });
+      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn });
     });
 
     const addSubBtn = this.topicExercisesStack.querySelector("#btn-add-sub-exercise");
@@ -21856,6 +21958,7 @@ class GuitarMasterApp {
     this.renderActiveSessionChecklist(found);
 
     if (found.sessionNumber) {
+      this.expandedSessions.clear();
       this.expandedSessions.add(`${found.bookCategory}_${found.sessionNumber}`);
     }
 
@@ -21951,6 +22054,12 @@ class GuitarMasterApp {
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
+      try {
+        activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {}
+    }
     if (!isFreeMet && !(uiOpts && uiOpts.noPdfReload)) {
       this.syncPdfToExercise(found);
     }
@@ -23202,6 +23311,12 @@ class GuitarMasterApp {
     this.currentBookCategory = cat;
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
+      try {
+        activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {}
+    }
   }
 
   getNoteDuration(beatData, curMeasure) {
@@ -23389,6 +23504,11 @@ class GuitarMasterApp {
     if (this.btnSaveLive) {
       this.btnSaveLive.addEventListener("click", () => {
         this.saveLive();
+      });
+    }
+    if (this.btnAdminAddExercise) {
+      this.btnAdminAddExercise.addEventListener("click", () => {
+        if (this.adminMode) this.addSubExerciseToCurrentTopic();
       });
     }
 

@@ -457,18 +457,14 @@ export class ScoreRenderer {
   _getMeasuresPerSystem(containerWidth) {
     if (!this.measures || this.measures.length === 0) return 4;
     const total = this.measures.length;
-    const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 4);
-    // Desktop (>= 900px): keep exercises up to 8 bars on one continuous row
-    if (containerWidth >= 900) {
-      if (total <= 8) return total;
-      return Math.min(total, maxEvents >= 8 ? 3 : 4);
-    }
-    // Tablet / iPad / Phone Landscape (540px - 899px): wrap cleanly at 4 bars per row
-    if (containerWidth >= 540) {
-      return Math.min(total, maxEvents >= 8 ? 3 : 4);
-    }
-    // Phone Portrait (< 540px): wrap at 2 bars per row so staves stay legible
-    return Math.min(total, 2);
+    // Always keep standard exercises (up to 8 measures) on ONE single horizontal line
+    // Never wrap a 4-bar drill into 3 + 1 orphan bar!
+    if (total <= 8) return total;
+    // For longer multi-system pieces (> 8 measures), wrap into balanced systems of 4 or 6:
+    if (total % 4 === 0) return 4;
+    if (total % 6 === 0) return 6;
+    if (total % 3 === 0 && total <= 9) return 3;
+    return 4;
   }
 
   _buildBeatIndexLookup(mIdx) {
@@ -524,14 +520,16 @@ export class ScoreRenderer {
     const leftGutter = showTreble && showTab ? 18 : 6;
     const clefExtra = showTreble ? 78 : 54;
     const maxEvents = this.measures.reduce((mx, m) => Math.max(mx, (m.events || []).length), 1);
-    const minPerBar = maxEvents >= 6 ? 152 : (maxEvents >= 4 ? 128 : 112);
-    const mobileMinPerBar = maxEvents >= 6 ? 150 : 132;
-    const minLogicalW = availW < 540
-      ? (leftGutter + clefExtra + mps * mobileMinPerBar + 16)
-      : (mps > 4 ? (leftGutter + clefExtra + mps * minPerBar + 16) : 0);
+    const minPerBar = maxEvents >= 8 ? 144 : (maxEvents >= 6 ? 130 : (maxEvents >= 4 ? 116 : 96));
+    const minLogicalW = leftGutter + clefExtra + mps * minPerBar + 16;
     const logicalW = Math.max(Math.floor(availW / baseScale), minLogicalW);
-    const SCALE = availW / logicalW;
+
+    const naturalScale = availW / logicalW;
+    const minReadableScale = 0.65;
+    const SCALE = Math.max(naturalScale, minReadableScale);
     this._activeScale = SCALE;
+
+    const renderedW = Math.max(availW, Math.ceil(logicalW * SCALE));
 
     const systems = [];
     for (let i = 0; i < totalMeasures; i += mps) {
@@ -581,7 +579,7 @@ export class ScoreRenderer {
       const sysH = (showTab ? (tabY + 116) : (trebleY + 112)) + rhythmExtra;
 
       const renderer = new VF.Renderer(sysEl, VF.Renderer.Backends.SVG);
-      renderer.resize(availW, Math.ceil(sysH * SCALE));
+      renderer.resize(renderedW, Math.ceil(sysH * SCALE));
       const ctx = renderer.getContext();
       ctx.scale(SCALE, SCALE);
 
@@ -590,7 +588,13 @@ export class ScoreRenderer {
         svgEl.classList.add("vf-system-svg");
         svgEl.setAttribute("viewBox", `0 0 ${logicalW} ${sysH}`);
         svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
-        svgEl.removeAttribute("width");
+        if (renderedW > availW) {
+          svgEl.style.width = `${renderedW}px`;
+          svgEl.style.minWidth = `${renderedW}px`;
+        } else {
+          svgEl.style.width = "100%";
+          svgEl.style.minWidth = "";
+        }
         svgEl.removeAttribute("height");
       }
 

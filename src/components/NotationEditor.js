@@ -1065,15 +1065,30 @@ export class NotationEditor {
       <div class="ne-tools-row">
         <div class="ne-group" role="group" aria-label="Note Actions">
           <button type="button" class="ne-action-btn" id="ne-btn-add-note" title="Add note after currently selected note">+ Add Note After</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">⌫ Rest</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">🗑️ Del Note</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            Rest
+          </button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Del Note
+          </button>
         </div>
 
         <div class="ne-group" role="group" aria-label="Measure Actions">
           <button type="button" class="ne-action-btn" id="ne-btn-insert-bar-after" title="Insert a new empty measure after active bar">+ Insert Bar After</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">📋 Duplicate Bar</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">🗑️ Delete Bar</button>
-          <button type="button" class="ne-action-btn is-danger ne-delete-ex-btn" id="ne-btn-delete-exercise" title="Delete entire current exercise">🗑️ Delete Exercise</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Duplicate Bar
+          </button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Bar
+          </button>
+          <button type="button" class="ne-action-btn is-danger ne-delete-ex-btn" id="ne-btn-delete-exercise" title="Delete entire current exercise">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Exercise
+          </button>
         </div>
       </div>
 

@@ -2029,6 +2029,9 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
   min-height: 110px;
   padding-top: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Note Names: Above Note vs Inside Notehead (AlphaNotes) */
@@ -5064,34 +5067,91 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
    ADMIN ACTION BAR, SETTINGS MODAL & CLOUD COMMIT STYLES
    ========================================================================== */
 
+.btn-icon {
+  display: inline-block;
+  vertical-align: -1.5px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
 .save-live-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-weight: 600;
+  transition: all 0.15s ease;
 }
 
-.save-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-  transition: background-color 0.2s ease;
+.save-live-btn[data-status="unsaved"] {
+  background: rgba(194, 65, 12, 0.12) !important;
+  border-color: rgba(194, 65, 12, 0.5) !important;
+  color: #C2410C !important;
+}
+
+.save-live-btn[data-status="unsaved"]:hover {
+  background: #C2410C !important;
+  border-color: #C2410C !important;
+  color: #FFFFFF !important;
+}
+
+.save-live-btn[data-status="unsaved"] .save-status-text {
+  color: inherit;
+  font-weight: 700;
+}
+
+.save-live-btn[data-status="syncing"] {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: #2563EB !important;
+}
+
+.save-live-btn[data-status="syncing"] .save-status-text {
+  color: inherit;
+}
+
+.save-live-btn[data-status="saved"] {
+  background: #FAF9F5;
+  border-color: rgba(24, 24, 27, 0.16);
+  color: var(--text-muted, #71717A);
+  opacity: 0.85;
+}
+
+.save-live-btn[data-status="saved"]:hover {
+  opacity: 1;
+  color: #18181B;
 }
 
 .save-status-dot.is-saved {
-  background-color: #10B981;
-  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+  width: auto;
+  height: auto;
+  background: transparent;
+  box-shadow: none;
+  color: #16A34A;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.save-status-dot.is-saved::before {
+  content: "✓";
 }
 
 .save-status-dot.is-unsaved {
-  background-color: #F59E0B;
-  box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: #EA580C;
+  box-shadow: 0 0 5px rgba(234, 88, 12, 0.6);
 }
 
 .save-status-dot.is-syncing {
-  background-color: #3B82F6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: #2563EB;
   animation: adminSyncPulse 1s infinite ease-in-out;
 }
 

@@ -278,7 +278,7 @@ export class GuitarMasterApp {
     this.drawerOpen = window.innerWidth > 1024;
     this._lastCompactViewport = this.isCompactFretboardViewport();
     this.fretboardVisible = !this._lastCompactViewport;
-    this.expandedSessions = new Set(["lessonBook_1", "lessonBook_2"]);
+    this.expandedSessions = new Set(["lessonBook_2"]);
     this.pdfBookCategory = "lessonBook";
     this.pdfCurrentPage = 1;
     this.customPdfUrls = {};
@@ -386,6 +386,7 @@ export class GuitarMasterApp {
     this.btnAdminDelete = document.getElementById("btn-admin-delete");
     this.btnRevertLesson = document.getElementById("btn-revert-lesson");
     this.btnSaveLive = document.getElementById("btn-save-live");
+    this.btnAdminAddExercise = document.getElementById("btn-admin-add-exercise");
     this.saveStatusDot = document.getElementById("save-status-dot");
     this.saveStatusText = document.getElementById("save-status-text");
 
@@ -2306,18 +2307,26 @@ export class GuitarMasterApp {
 
   markUnsaved() {
     this.hasUnsavedChanges = true;
-    this.setSaveLiveStatus("unsaved", "Unsaved");
+    this.setSaveLiveStatus("unsaved");
   }
 
   setSaveLiveStatus(state, label) {
+    if (this.btnSaveLive) {
+      this.btnSaveLive.dataset.status = state;
+    }
     if (this.saveStatusDot) {
       this.saveStatusDot.className = `save-status-dot is-${state}`;
     }
-    if (this.saveStatusText && label) {
-      this.saveStatusText.textContent = label;
-    }
-    if (this.btnSaveLive) {
-      this.btnSaveLive.dataset.status = state;
+    if (this.saveStatusText) {
+      if (label) {
+        this.saveStatusText.textContent = label;
+      } else if (state === "unsaved") {
+        this.saveStatusText.textContent = "Save Live";
+      } else if (state === "syncing") {
+        this.saveStatusText.textContent = "Saving...";
+      } else {
+        this.saveStatusText.textContent = "Saved";
+      }
     }
   }
 
@@ -2460,7 +2469,7 @@ export class GuitarMasterApp {
   }
 
   async saveLive() {
-    this.setSaveLiveStatus("syncing", "Syncing...");
+    this.setSaveLiveStatus("syncing");
     this.setAiExtractStatus("Saving curriculum locally and committing live to GitHub...", "busy");
     try {
       const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
@@ -2469,9 +2478,9 @@ export class GuitarMasterApp {
       const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
       if (!pat) {
         this.hasUnsavedChanges = false;
-        this.setSaveLiveStatus("saved", "Saved Locally");
+        this.setSaveLiveStatus("saved");
         this.setAiExtractStatus(
-          "Saved to browser localStorage. Add GitHub PAT in 🔑 Settings to push live to repo automatically.",
+          "Saved to browser localStorage. Add GitHub PAT in Settings to push live to repo automatically.",
           "info"
         );
         return;
@@ -2479,14 +2488,14 @@ export class GuitarMasterApp {
 
       const res = await this.commitCurriculumToGitHub();
       this.hasUnsavedChanges = false;
-      this.setSaveLiveStatus("saved", "Saved Live");
+      this.setSaveLiveStatus("saved");
       const commitSha = res && res.commit && res.commit.sha ? res.commit.sha.slice(0, 7) : "";
       this.setAiExtractStatus(
         `✓ Saved & pushed live to GitHub (${commitSha ? `commit ${commitSha}` : "main"})! Changes are now permanent.`,
         "success"
       );
     } catch (err) {
-      this.setSaveLiveStatus("unsaved", "Sync Failed");
+      this.setSaveLiveStatus("unsaved");
       this.setAiExtractStatus(
         `Saved locally, but GitHub Live Commit failed: ${err && err.message ? err.message : String(err)}`,
         "error"
@@ -2979,7 +2988,7 @@ export class GuitarMasterApp {
               <span class="acc-ex-meta">
                 ${isRestDrill ? '<span class="acc-rest-dot" title="Contains Rest / Damp Cue"></span>' : ''}
                 ${isDone ? '<span class="acc-done-mark" title="Completed">&#10003;</span>' : ''}
-                <span class="acc-delete-btn admin-only-control" data-delete-sidebar-ex="${ex.id}" title="Delete ${this.escapeHtml(ex.title)}" aria-label="Delete exercise">🗑️</span>
+                <span class="acc-delete-btn admin-only-control" data-delete-sidebar-ex="${ex.id}" title="Delete ${this.escapeHtml(ex.title)}" aria-label="Delete exercise"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
               </span>
             </button>
           `;
@@ -2990,7 +2999,7 @@ export class GuitarMasterApp {
             <span class="acc-topic-title-text">${this.escapeHtml(cleanTopic)}</span>
             <span class="acc-topic-meta-wrap">
               ${topic.exercises.length > 1 ? `<span class="acc-topic-count">${topic.exercises.length}</span>` : ""}
-              <span class="acc-delete-btn admin-only-control" data-delete-sidebar-topic="${computedTopicId}" title="Delete entire topic &amp; exercises" aria-label="Delete topic">🗑️</span>
+              <span class="acc-delete-btn admin-only-control" data-delete-sidebar-topic="${computedTopicId}" title="Delete entire topic &amp; exercises" aria-label="Delete topic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
             </span>
           </button>
           ${exRows}
@@ -3018,16 +3027,31 @@ export class GuitarMasterApp {
 
     this.sessionsAccordion.innerHTML = html;
 
-    // Accordion expand / collapse
+    // Strict Single-Open Accordion: only one session open at a time
     this.sessionsAccordion.querySelectorAll(".acc-session-trigger").forEach(btn => {
       btn.addEventListener("click", () => {
         const parent = btn.closest(".acc-session");
         const key = parent.dataset.sessionKey;
         const willOpen = !parent.classList.contains("is-open");
+
+        // Collapse all other sessions
+        this.sessionsAccordion.querySelectorAll(".acc-session").forEach(other => {
+          if (other !== parent) {
+            other.classList.remove("is-open");
+            const otherTrig = other.querySelector(".acc-session-trigger");
+            if (otherTrig) otherTrig.setAttribute("aria-expanded", "false");
+            if (other.dataset.sessionKey) this.expandedSessions.delete(other.dataset.sessionKey);
+          }
+        });
+
         parent.classList.toggle("is-open", willOpen);
         btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        if (willOpen) this.expandedSessions.add(key);
-        else this.expandedSessions.delete(key);
+        if (willOpen) {
+          this.expandedSessions.clear();
+          this.expandedSessions.add(key);
+        } else {
+          this.expandedSessions.delete(key);
+        }
       });
     });
 
@@ -3147,7 +3171,6 @@ export class GuitarMasterApp {
               <span class="topic-ex-meta-pill">${tsLabel}</span>
               <span class="topic-ex-meta-pill">&#9833; ${ex.defaultBpm || 60}</span>
               <button class="topic-ex-edit-btn admin-only-control ${isEditing ? "is-active" : ""}" type="button" data-edit-ex="${ex.id}" title="Open visual notation editor">Edit Exercise</button>
-              <button class="topic-ex-delete-btn admin-only-control is-danger" type="button" data-delete-ex="${ex.id}" title="Delete entire exercise card">🗑️ Delete Exercise</button>
               <button class="topic-ex-select-btn" type="button" data-select-ex="${ex.id}">${isSelected ? "Active" : "Select"}</button>
               <button class="topic-ex-play-btn" type="button" data-play-ex="${ex.id}" title="Select and play this exercise">&#9654;</button>
             </div>
@@ -3158,7 +3181,7 @@ export class GuitarMasterApp {
       `;
     }).join("") + `
       <div class="topic-add-subex-row admin-only-control">
-        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise">➕ Add New Exercise</button>
+        <button type="button" class="topic-add-subex-btn admin-only-control" id="btn-add-sub-exercise"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon" style="vertical-align: -2px; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Add New Exercise</button>
       </div>
     `;
 
@@ -3167,7 +3190,6 @@ export class GuitarMasterApp {
       const scoreHost = blockEl ? blockEl.querySelector(".topic-ex-score-host") : null;
       const editorSlot = blockEl ? blockEl.querySelector(`[data-editor-slot="${ex.id}"]`) : null;
       const editBtn = blockEl ? blockEl.querySelector(`[data-edit-ex="${ex.id}"]`) : null;
-      const deleteBtn = blockEl ? blockEl.querySelector(`[data-delete-ex="${ex.id}"]`) : null;
       const selectBtn = blockEl ? blockEl.querySelector(`[data-select-ex="${ex.id}"]`) : null;
       const playBtn = blockEl ? blockEl.querySelector(`[data-play-ex="${ex.id}"]`) : null;
       const headEl = blockEl ? blockEl.querySelector(`[data-select-header="${ex.id}"]`) : null;
@@ -3244,17 +3266,9 @@ export class GuitarMasterApp {
         if (renderer) renderer.highlightBeat(0, 0, Boolean(fb0 && fb0.isRest), null, 0);
       }
 
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if (!this.adminMode) return;
-          this.deleteExercise(ex.id);
-        });
-      }
-
       if (headEl) {
         headEl.addEventListener("click", (e) => {
-          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]") || e.target.closest("[data-delete-ex]") || e.target.closest("[contenteditable='true']")) return;
+          if (e.target.closest("[data-play-ex]") || e.target.closest("[data-edit-ex]") || e.target.closest("[contenteditable='true']")) return;
           if (!this.currentExercise || this.currentExercise.id !== ex.id) {
             this.loadExercise(ex.id, false, { noScroll: true });
           }
@@ -3271,7 +3285,7 @@ export class GuitarMasterApp {
         });
       }
 
-      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn, deleteBtn });
+      this.activeTopicRenderers.set(ex.id, { renderer, blockEl, selectBtn, playBtn, editBtn });
     });
 
     const addSubBtn = this.topicExercisesStack.querySelector("#btn-add-sub-exercise");
@@ -3375,6 +3389,7 @@ export class GuitarMasterApp {
     this.renderActiveSessionChecklist(found);
 
     if (found.sessionNumber) {
+      this.expandedSessions.clear();
       this.expandedSessions.add(`${found.bookCategory}_${found.sessionNumber}`);
     }
 
@@ -3470,6 +3485,12 @@ export class GuitarMasterApp {
 
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
+      try {
+        activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {}
+    }
     if (!isFreeMet && !(uiOpts && uiOpts.noPdfReload)) {
       this.syncPdfToExercise(found);
     }
@@ -4721,6 +4742,12 @@ export class GuitarMasterApp {
     this.currentBookCategory = cat;
     this.syncBookTabsUI();
     this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+    const activeSidebarEl = this.sessionsAccordion ? this.sessionsAccordion.querySelector(`.acc-ex-item.is-active, .acc-topic-btn.is-active-topic`) : null;
+    if (activeSidebarEl && typeof activeSidebarEl.scrollIntoView === "function") {
+      try {
+        activeSidebarEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {}
+    }
   }
 
   getNoteDuration(beatData, curMeasure) {
@@ -4908,6 +4935,11 @@ export class GuitarMasterApp {
     if (this.btnSaveLive) {
       this.btnSaveLive.addEventListener("click", () => {
         this.saveLive();
+      });
+    }
+    if (this.btnAdminAddExercise) {
+      this.btnAdminAddExercise.addEventListener("click", () => {
+        if (this.adminMode) this.addSubExerciseToCurrentTopic();
       });
     }
 
