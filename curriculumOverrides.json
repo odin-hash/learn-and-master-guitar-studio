@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-15T14:15:52.435Z",
+  "updatedAt": "2026-11-15T14:17:13.815Z",
   "repo": "odin-hash/learn-and-master-guitar-studio",
   "branch": "main",
   "modelPreference": "auto",
@@ -27656,7 +27656,7 @@
       "targetExerciseId": "lb-s3-8th-ex1",
       "modelUsed": "manual-editor",
       "pageTitle": "Eighth Note Exercises 1-6 (Lesson Book p. 17 - Strings 1 & 2)",
-      "extractedAt": "2026-11-15T14:15:34.203Z",
+      "extractedAt": "2026-11-15T14:17:05.650Z",
       "mathWarnings": [],
       "exercises": [
         {
@@ -31363,9 +31363,9 @@
                   "vexKey": "e/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 5,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
                   "pick": "Down",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31375,7 +31375,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 5"
+                  "tip": "String 1, Fret 0"
                 },
                 {
                   "beat": 2.5,
@@ -31479,9 +31479,9 @@
                   "vexKey": "g/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 8,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Down",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31491,7 +31491,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 8"
+                  "tip": "String 1, Fret 3"
                 },
                 {
                   "beat": 1.5,
@@ -31501,9 +31501,9 @@
                   "vexKey": "f/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 6,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 1,
+                  "finger": 1,
                   "pick": "Up",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31513,7 +31513,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 6"
+                  "tip": "String 1, Fret 1"
                 },
                 {
                   "beat": 2,
@@ -31523,9 +31523,9 @@
                   "vexKey": "e/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 5,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 0,
+                  "finger": 0,
                   "pick": "Down",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31535,7 +31535,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 5"
+                  "tip": "String 1, Fret 0"
                 },
                 {
                   "beat": 2.5,
@@ -31639,9 +31639,9 @@
                   "vexKey": "g/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 8,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Down",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31651,7 +31651,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 8"
+                  "tip": "String 1, Fret 3"
                 },
                 {
                   "beat": 1.5,
@@ -31661,9 +31661,9 @@
                   "vexKey": "g/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 2,
-                  "fret": 8,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Up",
                   "duration": 0.5,
                   "isDotted": false,
@@ -31673,7 +31673,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 8"
+                  "tip": "String 1, Fret 3"
                 },
                 {
                   "beat": 2,
@@ -31683,9 +31683,9 @@
                   "vexKey": "g/5",
                   "symbol": "1/4",
                   "type": "play",
-                  "string": 2,
-                  "fret": 8,
-                  "finger": 4,
+                  "string": 1,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Down",
                   "duration": 1,
                   "isDotted": false,
@@ -31695,7 +31695,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 2, Fret 8"
+                  "tip": "String 1, Fret 3"
                 },
                 {
                   "beat": 3,
@@ -31934,10 +31934,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 5,
+                  "string": 1,
+                  "fret": 0,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 0,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -31952,11 +31952,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 5
+                      "str": 1,
+                      "fret": 0
                     }
                   ],
-                  "tip": "String 2, Fret 5",
+                  "tip": "String 1, Fret 0",
                   "isAutoFillRest": false
                 },
                 {
@@ -32097,10 +32097,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 8,
+                  "string": 1,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 3,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32115,11 +32115,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 8
+                      "str": 1,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 2, Fret 8",
+                  "tip": "String 1, Fret 3",
                   "isAutoFillRest": false
                 },
                 {
@@ -32128,10 +32128,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 6,
+                  "string": 1,
+                  "fret": 1,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 1,
                   "pick": "Up",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32146,11 +32146,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 6
+                      "str": 1,
+                      "fret": 1
                     }
                   ],
-                  "tip": "String 2, Fret 6",
+                  "tip": "String 1, Fret 1",
                   "isAutoFillRest": false
                 },
                 {
@@ -32159,10 +32159,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 5,
+                  "string": 1,
+                  "fret": 0,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 0,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32177,11 +32177,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 5
+                      "str": 1,
+                      "fret": 0
                     }
                   ],
-                  "tip": "String 2, Fret 5",
+                  "tip": "String 1, Fret 0",
                   "isAutoFillRest": false
                 },
                 {
@@ -32323,10 +32323,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 8,
+                  "string": 1,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 3,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32341,11 +32341,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 8
+                      "str": 1,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 2, Fret 8",
+                  "tip": "String 1, Fret 3",
                   "isAutoFillRest": false
                 },
                 {
@@ -32354,10 +32354,10 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 8,
+                  "string": 1,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 3,
                   "pick": "Up",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32372,11 +32372,11 @@
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 8
+                      "str": 1,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 2, Fret 8",
+                  "tip": "String 1, Fret 3",
                   "isAutoFillRest": false
                 },
                 {
@@ -32385,10 +32385,10 @@
                   "isRest": false,
                   "duration": "q",
                   "isDotted": false,
-                  "string": 2,
-                  "fret": 8,
+                  "string": 1,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 4,
+                  "finger": 3,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
@@ -32403,11 +32403,11 @@
                   "symbol": "1/4",
                   "positions": [
                     {
-                      "str": 2,
-                      "fret": 8
+                      "str": 1,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 2, Fret 8",
+                  "tip": "String 1, Fret 3",
                   "isAutoFillRest": false
                 },
                 {
