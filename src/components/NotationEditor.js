@@ -30,10 +30,11 @@ function editorDurSpec(codeOrDur, isDotted = false) {
 }
 
 export class NotationEditor {
-  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise } = {}) {
+  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise, onBeforeMutate } = {}) {
     this.onCommitExercise = onCommitExercise || null;
     this.onSelectNoteForFeedback = onSelectNoteForFeedback || null;
     this.onAddSubExercise = onAddSubExercise || null;
+    this.onBeforeMutate = onBeforeMutate || null;
 
     this.exercise = null;
     this.hostEl = null;
@@ -43,6 +44,12 @@ export class NotationEditor {
     this.shorthandOpen = false;
     this._fretDigitBuffer = "";
     this._fretDigitTimer = null;
+  }
+
+  notifyBeforeMutate(actionName = "Edit Notation") {
+    if (typeof this.onBeforeMutate === "function") {
+      this.onBeforeMutate(actionName);
+    }
   }
 
   isActive() {
@@ -519,9 +526,13 @@ export class NotationEditor {
     this.renderPalette();
   }
 
-  mutateActiveEvent(fn) {
+  mutateActiveEvent(actionOrFn, maybeFn) {
     const ev = this.getActiveEvent();
     if (!ev) return;
+    const action = typeof actionOrFn === "string" ? actionOrFn : "Edit Note";
+    const fn = typeof actionOrFn === "function" ? actionOrFn : maybeFn;
+    if (typeof fn !== "function") return;
+    this.notifyBeforeMutate(action);
     fn(ev);
     this.commitChanges();
   }
@@ -595,6 +606,7 @@ export class NotationEditor {
     const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev) return;
+    this.notifyBeforeMutate(`Change Duration to ${code}`);
     const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
     const oldBeats = Number(ev.durationBeats) || 1;
     const { spec } = editorDurSpec(code, Boolean(ev.isDotted));
@@ -607,7 +619,7 @@ export class NotationEditor {
   }
 
   toggleRest() {
-    this.mutateActiveEvent(ev => {
+    this.mutateActiveEvent("Toggle Rest", ev => {
       ev.isRest = !ev.isRest;
       ev.isAutoFillRest = false;
       if (!ev.isRest && typeof ev.string !== "number") {
@@ -622,6 +634,7 @@ export class NotationEditor {
     const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev) return;
+    this.notifyBeforeMutate("Toggle Dot");
     const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
     const oldBeats = Number(ev.durationBeats) || 1;
     ev.isDotted = !ev.isDotted;
@@ -637,6 +650,7 @@ export class NotationEditor {
     const m = measures && measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev || ev.isRest) return;
+    this.notifyBeforeMutate("Toggle Tie");
     ev.tieToNext = !ev.tieToNext;
     // Sync next note tieFromPrev cleanly when same bar or next bar
     let nextEv = m.events[this.selectedEventIdx + 1] || null;
@@ -650,7 +664,7 @@ export class NotationEditor {
   }
 
   setEnharmonicFlat(useFlat) {
-    this.mutateActiveEvent(ev => {
+    this.mutateActiveEvent(useFlat ? "Spell as Flat (♭)" : "Spell as Sharp (♯)", ev => {
       if (ev.isRest) return;
       ev.preferFlat = Boolean(useFlat);
       this.syncEventFromSource(ev);
@@ -658,9 +672,9 @@ export class NotationEditor {
   }
 
   setStringAndFret(strVal, fretVal) {
-    this.mutateActiveEvent(ev => {
-      const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
-      const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
+    const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
+    const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
+    this.mutateActiveEvent(`Set String ${str} Fret ${fret}`, ev => {
       ev.isRest = false;
       ev.isAutoFillRest = false;
       ev.string = str;
@@ -699,10 +713,102 @@ export class NotationEditor {
     this.setStringAndFret(str, nextFret);
   }
 
+  setChordSymbol(chordVal) {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    const clean = String(chordVal || "").trim();
+    this.notifyBeforeMutate(`Set Chord "${clean || "None"}"`);
+    ev.chordChange = clean || null;
+    if (this.selectedEventIdx === 0) {
+      const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
+      if (m) m.chordName = clean || null;
+    }
+    this.commitChanges();
+  }
+
+  setTimeSignature(tsStr) {
+    if (!this.exercise) return;
+    this.notifyBeforeMutate(`Change Time Signature to ${tsStr}`);
+    const parts = String(tsStr).split("/").map(Number);
+    const num = parts[0] || 4;
+    const den = parts[1] || 4;
+    this.exercise.timeSignature = [num, den];
+    (this.exercise.measures || []).forEach(m => {
+      m.timeSignature = `${num}/${den}`;
+    });
+    this.commitChanges();
+  }
+
+  setDefaultBpm(bpmVal) {
+    if (!this.exercise) return;
+    const bpm = Math.max(30, Math.min(240, parseInt(bpmVal, 10) || 60));
+    this.notifyBeforeMutate(`Set BPM to ${bpm}`);
+    this.exercise.defaultBpm = bpm;
+    this.exercise.bpm = bpm;
+    this.commitChanges();
+  }
+
+  notifyFeedbackSelection() {
+    if (typeof this.onSelectNoteForFeedback === "function") {
+      const ev = this.getActiveEvent();
+      this.onSelectNoteForFeedback(
+        this.selectedMeasureIdx,
+        ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0,
+        Boolean(ev && ev.isRest),
+        this.selectedEventIdx
+      );
+    }
+  }
+
+  selectPrevNote() {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    if (this.selectedEventIdx > 0) {
+      this.selectNote(this.selectedMeasureIdx, 0, this.selectedEventIdx - 1);
+    } else if (this.selectedMeasureIdx > 0) {
+      const prevM = this.exercise.measures[this.selectedMeasureIdx - 1];
+      const lastEvIdx = Math.max(0, (prevM.events || []).length - 1);
+      this.selectNote(this.selectedMeasureIdx - 1, 0, lastEvIdx);
+    }
+    this.notifyFeedbackSelection();
+  }
+
+  selectNextNote() {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    if (this.selectedEventIdx < (m.events || []).length - 1) {
+      this.selectNote(this.selectedMeasureIdx, 0, this.selectedEventIdx + 1);
+    } else if (this.selectedMeasureIdx < this.exercise.measures.length - 1) {
+      this.selectNote(this.selectedMeasureIdx + 1, 0, 0);
+    }
+    this.notifyFeedbackSelection();
+  }
+
+  smartBackspace() {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    if (!ev.isRest) {
+      this.notifyBeforeMutate("Convert Note to Rest");
+      ev.isRest = true;
+      ev.isAutoFillRest = false;
+      this.syncEventFromSource(ev);
+      this.commitChanges();
+    } else {
+      this.deleteSelectedNote();
+    }
+  }
+
+  smartDelete() {
+    this.deleteSelectedNote();
+  }
+
   addNoteAfterSelected() {
     if (!this.exercise || !this.exercise.measures) return;
     const m = this.exercise.measures[this.selectedMeasureIdx];
     if (!m) return;
+    this.notifyBeforeMutate("Add Note After Selected");
     const cur = this.getActiveEvent();
     const str = cur && typeof cur.string === "number" ? cur.string : 1;
     const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
@@ -731,6 +837,7 @@ export class NotationEditor {
     if (!this.exercise || !this.exercise.measures) return;
     const m = this.exercise.measures[this.selectedMeasureIdx];
     if (!m || !Array.isArray(m.events)) return;
+    this.notifyBeforeMutate("Delete Note");
     if (m.events.length <= 1) {
       const ev = m.events[0];
       if (ev) {
@@ -748,53 +855,68 @@ export class NotationEditor {
     this.commitChanges();
   }
 
-  addMeasure() {
+  insertMeasureAfter() {
     if (!this.exercise || !this.exercise.measures) return;
+    this.notifyBeforeMutate("Insert Bar After");
     const ts = this.exercise.timeSignature || [4, 4];
     const tsNum = Array.isArray(ts) ? ts[0] : 4;
     const tsDen = Array.isArray(ts) ? ts[1] : 4;
     const tsStr = `${tsNum}/${tsDen}`;
     const beatsPerBar = tsNum * (4 / tsDen);
-    const cur = this.getActiveEvent();
-    const str = cur && typeof cur.string === "number" ? cur.string : 1;
-    const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
-
     const quarterCount = Math.max(1, Math.round(beatsPerBar));
     const events = [];
     for (let i = 0; i < quarterCount; i++) {
       events.push(this.syncEventFromSource({
         beat: i + 1,
-        isRest: false,
+        isRest: true,
         duration: "q",
-        isDotted: false,
-        string: str,
-        fret,
-        preferFlat: Boolean(cur && cur.preferFlat),
-        pick: i % 2 === 0 ? "Down" : "Up",
-        tieToNext: false,
-        tieFromPrev: false
+        isDotted: false
       }));
     }
 
-    this.exercise.measures.push({
-      measure: this.exercise.measures.length + 1,
+    const newMeasure = {
+      measure: this.selectedMeasureIdx + 2,
       clef: "treble",
       notationMode: "standard",
       timeSignature: tsStr,
       chordName: null,
       events
-    });
-    this.selectedMeasureIdx = this.exercise.measures.length - 1;
+    };
+
+    this.exercise.measures.splice(this.selectedMeasureIdx + 1, 0, newMeasure);
+    this.selectedMeasureIdx = this.selectedMeasureIdx + 1;
     this.selectedEventIdx = 0;
     this.commitChanges();
   }
 
-  deleteMeasure() {
+  duplicateSelectedMeasure() {
+    if (!this.exercise || !this.exercise.measures) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    this.notifyBeforeMutate("Duplicate Bar");
+    const clonedMeasure = JSON.parse(JSON.stringify(m));
+    clonedMeasure.events.forEach(ev => this.syncEventFromSource(ev));
+    this.exercise.measures.splice(this.selectedMeasureIdx + 1, 0, clonedMeasure);
+    this.selectedMeasureIdx = this.selectedMeasureIdx + 1;
+    this.selectedEventIdx = 0;
+    this.commitChanges();
+  }
+
+  deleteSelectedMeasure() {
     if (!this.exercise || !this.exercise.measures || this.exercise.measures.length <= 1) return;
+    this.notifyBeforeMutate("Delete Bar");
     this.exercise.measures.splice(this.selectedMeasureIdx, 1);
     this.selectedMeasureIdx = Math.max(0, Math.min(this.selectedMeasureIdx, this.exercise.measures.length - 1));
     this.selectedEventIdx = 0;
     this.commitChanges();
+  }
+
+  addMeasure() {
+    this.insertMeasureAfter();
+  }
+
+  deleteMeasure() {
+    this.deleteSelectedMeasure();
   }
 
   renderPalette() {
@@ -810,7 +932,10 @@ export class NotationEditor {
     const curMeasure = measures[this.selectedMeasureIdx] || measures[0];
     const ev = this.getActiveEvent();
     const ts = this.exercise.timeSignature || [4, 4];
-    const expectedBeats = (ts[0] || 4) * (4 / (ts[1] || 4));
+    const tsNum = Array.isArray(ts) ? (ts[0] || 4) : 4;
+    const tsDen = Array.isArray(ts) ? (ts[1] || 4) : 4;
+    const tsStr = `${tsNum}/${tsDen}`;
+    const expectedBeats = tsNum * (4 / tsDen);
     const curBeatsSum = curMeasure
       ? (curMeasure.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0)
       : 0;
@@ -829,9 +954,13 @@ export class NotationEditor {
     const preferFlat = Boolean(derived && derived.preferFlat);
     const curPick = ev && ev.pick === "Up" ? "Up" : "Down";
     const curFinger = ev && ev.finger !== null && ev.finger !== undefined ? ev.finger : 0;
+    const curChord = ev ? (ev.chordChange || (this.selectedEventIdx === 0 && curMeasure ? curMeasure.chordName : "") || "") : "";
+    const curBpm = this.exercise.defaultBpm || this.exercise.bpm || 60;
     const pitchSummary = ev
       ? (isRest ? "Rest" : `${derived.concertPitch} (${derived.displayName}) · S${derived.string} F${derived.fret}`)
       : "No Selection";
+
+    const commonChords = ["", "C", "G", "G7", "D", "D7", "Am", "Em", "E", "E7", "A", "A7", "F", "Dm", "Dm7", "C7", "B7", "F#m", "Bm"];
 
     this.paletteEl.innerHTML = `
       <div class="ne-header-row">
@@ -842,6 +971,19 @@ export class NotationEditor {
           `).join("")}
         </div>
         <div class="ne-header-meta">
+          <div class="ne-meter-cluster" title="Exercise Time Signature">
+            <span class="ne-lbl">Meter</span>
+            <select class="ne-select-sm" id="ne-meter-select">
+              <option value="4/4" ${tsStr === "4/4" ? "selected" : ""}>4/4</option>
+              <option value="3/4" ${tsStr === "3/4" ? "selected" : ""}>3/4</option>
+              <option value="2/4" ${tsStr === "2/4" ? "selected" : ""}>2/4</option>
+              <option value="6/8" ${tsStr === "6/8" ? "selected" : ""}>6/8</option>
+            </select>
+          </div>
+          <div class="ne-bpm-cluster" title="Exercise Default Tempo BPM">
+            <span class="ne-lbl">BPM</span>
+            <input type="number" id="ne-bpm-input" class="ne-input-sm mono-font" min="30" max="240" value="${curBpm}">
+          </div>
           <span class="ne-beat-counter ${isMathOk ? "is-ok" : "is-warn"}" title="Total beats in Bar ${this.selectedMeasureIdx + 1} vs Time Signature">
             ${Number(curBeatsSum.toFixed(2))} / ${Number(expectedBeats.toFixed(2))} beats
           </span>
@@ -870,11 +1012,17 @@ export class NotationEditor {
           <button type="button" class="ne-sym-btn ${isBlackKey && preferFlat ? "active" : ""}" id="ne-spell-flat" data-ne-spell="flat" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Flat (♭)" : "Natural fret — never takes sharp or flat"}">&#9837;</button>
         </div>
 
-        <div class="ne-group" role="group" aria-label="Bar Actions">
-          <button type="button" class="ne-action-btn" id="ne-btn-add-note">+ Add Note</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note">Delete Note</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-add-bar">+ Add Bar</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""}>- Delete Bar</button>
+        <div class="ne-group" role="group" aria-label="Chord Symbol Tag">
+          <span class="ne-lbl">Chord</span>
+          <select class="ne-select-sm ne-chord-select" id="ne-chord-select" title="Attach chord symbol above active note">
+            <option value="">-- None --</option>
+            ${commonChords.filter(Boolean).map(c => `
+              <option value="${c}" ${curChord === c ? "selected" : ""}>${c}</option>
+            `).join("")}
+            ${curChord && !commonChords.includes(curChord) ? `<option value="${curChord}" selected>${curChord}</option>` : ""}
+          </select>
+          <input type="text" class="ne-input-sm ne-chord-input mono-font" id="ne-chord-input" placeholder="Custom" value="${curChord}" maxlength="8" title="Type custom chord symbol and press Enter">
+          <button type="button" class="ne-num-btn" id="ne-btn-clear-chord" title="Clear Chord" ${!curChord ? "disabled" : ""}>&times;</button>
         </div>
       </div>
 
@@ -913,6 +1061,20 @@ export class NotationEditor {
         </div>
       </div>
 
+      <div class="ne-tools-row">
+        <div class="ne-group" role="group" aria-label="Note Actions">
+          <button type="button" class="ne-action-btn" id="ne-btn-add-note" title="Add note after currently selected note">+ Add Note After</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">⌫ Rest</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">🗑️ Del Note</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Measure Actions">
+          <button type="button" class="ne-action-btn" id="ne-btn-insert-bar-after" title="Insert a new empty measure after active bar">+ Insert Bar After</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">📋 Duplicate Bar</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">🗑️ Delete Bar</button>
+        </div>
+      </div>
+
       <div class="ne-shorthand-row" ${this.shorthandOpen ? "" : "hidden"}>
         <span class="ne-lbl">Quick Shorthand (Str:Fret/Dur, use | between bars)</span>
         <input type="text" class="ne-shorthand-input" id="ne-shorthand-input" value="${this.formatExerciseShorthand().replace(/"/g, "&quot;")}" placeholder="e.g. 3:0/h 3:2/h | 3:0/q 3:0/q 3:0/h | 3:2/q 3:2/q 3:2/h">
@@ -930,17 +1092,25 @@ export class NotationEditor {
       btn.addEventListener("click", () => {
         const b = parseInt(btn.dataset.neBar, 10);
         this.selectNote(b, 0, 0);
-        if (typeof this.onSelectNoteForFeedback === "function") {
-          const ev = this.getActiveEvent();
-          this.onSelectNoteForFeedback(
-            this.selectedMeasureIdx,
-            ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0,
-            Boolean(ev && ev.isRest),
-            this.selectedEventIdx
-          );
-        }
+        this.notifyFeedbackSelection();
       });
     });
+
+    const meterSelect = this.paletteEl.querySelector("#ne-meter-select");
+    if (meterSelect) {
+      meterSelect.addEventListener("change", () => this.setTimeSignature(meterSelect.value));
+    }
+
+    const bpmInput = this.paletteEl.querySelector("#ne-bpm-input");
+    if (bpmInput) {
+      bpmInput.addEventListener("change", () => this.setDefaultBpm(bpmInput.value));
+      bpmInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.setDefaultBpm(bpmInput.value);
+        }
+      });
+    }
 
     this.paletteEl.querySelectorAll("[data-ne-dur]").forEach(btn => {
       btn.addEventListener("click", () => this.setDurationCode(btn.dataset.neDur));
@@ -958,6 +1128,33 @@ export class NotationEditor {
     this.paletteEl.querySelectorAll("[data-ne-spell]").forEach(btn => {
       btn.addEventListener("click", () => this.setEnharmonicFlat(btn.dataset.neSpell === "flat"));
     });
+
+    const chordSelect = this.paletteEl.querySelector("#ne-chord-select");
+    const chordInput = this.paletteEl.querySelector("#ne-chord-input");
+    const btnClearChord = this.paletteEl.querySelector("#ne-btn-clear-chord");
+    if (chordSelect) {
+      chordSelect.addEventListener("change", () => {
+        const val = chordSelect.value;
+        if (chordInput) chordInput.value = val;
+        this.setChordSymbol(val);
+      });
+    }
+    if (chordInput) {
+      chordInput.addEventListener("change", () => this.setChordSymbol(chordInput.value));
+      chordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.setChordSymbol(chordInput.value);
+        }
+      });
+    }
+    if (btnClearChord) {
+      btnClearChord.addEventListener("click", () => {
+        if (chordInput) chordInput.value = "";
+        if (chordSelect) chordSelect.value = "";
+        this.setChordSymbol("");
+      });
+    }
 
     this.paletteEl.querySelectorAll("[data-ne-str]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -985,7 +1182,7 @@ export class NotationEditor {
 
     this.paletteEl.querySelectorAll("[data-ne-pick]").forEach(btn => {
       btn.addEventListener("click", () => {
-        this.mutateActiveEvent(ev => {
+        this.mutateActiveEvent("Set Pick Direction", ev => {
           ev.pick = btn.dataset.nePick;
         });
       });
@@ -993,7 +1190,7 @@ export class NotationEditor {
 
     this.paletteEl.querySelectorAll("[data-ne-finger]").forEach(btn => {
       btn.addEventListener("click", () => {
-        this.mutateActiveEvent(ev => {
+        this.mutateActiveEvent("Set Left Hand Finger", ev => {
           ev.finger = parseInt(btn.dataset.neFinger, 10);
         });
       });
@@ -1002,14 +1199,20 @@ export class NotationEditor {
     const btnAddNote = this.paletteEl.querySelector("#ne-btn-add-note");
     if (btnAddNote) btnAddNote.addEventListener("click", () => this.addNoteAfterSelected());
 
-    const btnDelNote = this.paletteEl.querySelector("#ne-btn-del-note");
-    if (btnDelNote) btnDelNote.addEventListener("click", () => this.deleteSelectedNote());
+    const btnBackspace = this.paletteEl.querySelector("#ne-btn-backspace");
+    if (btnBackspace) btnBackspace.addEventListener("click", () => this.smartBackspace());
 
-    const btnAddBar = this.paletteEl.querySelector("#ne-btn-add-bar");
-    if (btnAddBar) btnAddBar.addEventListener("click", () => this.addMeasure());
+    const btnDelNote = this.paletteEl.querySelector("#ne-btn-del-note");
+    if (btnDelNote) btnDelNote.addEventListener("click", () => this.smartDelete());
+
+    const btnInsertBarAfter = this.paletteEl.querySelector("#ne-btn-insert-bar-after");
+    if (btnInsertBarAfter) btnInsertBarAfter.addEventListener("click", () => this.insertMeasureAfter());
+
+    const btnDupBar = this.paletteEl.querySelector("#ne-btn-dup-bar");
+    if (btnDupBar) btnDupBar.addEventListener("click", () => this.duplicateSelectedMeasure());
 
     const btnDelBar = this.paletteEl.querySelector("#ne-btn-del-bar");
-    if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteMeasure());
+    if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteSelectedMeasure());
 
     const btnShortToggle = this.paletteEl.querySelector("#ne-btn-shorthand");
     if (btnShortToggle) {

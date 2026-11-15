@@ -373,64 +373,40 @@ $css
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
-            <button type="button" class="micro-pill pdf-ai-key-btn admin-only-control" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-              <span class="ai-key-dot" id="ai-key-dot"></span>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
+              🔑 Settings
             </button>
-            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Snapshot current PDF page at 4.0x Ultra-HD and extract exact exercises via Gemini Vision">
-              &#10024; Extract Exercises from Current PDF Page
+            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Extract exercises from current PDF page and replace active lesson (pushes Undo first)">
+              ✨ Extract Page
             </button>
-            <button type="button" class="micro-pill admin-only-control" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
-              Batch Extract
+            <button type="button" class="micro-pill admin-only-control" id="btn-append-pdf-page" title="Extract current PDF page and append measures to end of active exercise">
+              ➕ Append Page
             </button>
-            <button type="button" class="micro-pill admin-only-control" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
-              Export Curriculum JSON
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-undo" title="Undo note edit, measure change or extraction (Ctrl+Z)" disabled>
+              ↩️ Undo
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-redo" title="Redo note edit, measure change or extraction (Ctrl+Y)" disabled>
+              ↪️ Redo
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-backspace" title="Convert note to Rest of same duration (Backspace)">
+              ⌫
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-delete" title="Delete note/rest completely from measure (Delete)">
+              🗑️
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-revert-lesson" title="Restore active lesson to baseline state">
+              🔄 Revert Lesson
+            </button>
+            <button type="button" class="micro-pill save-live-btn admin-only-control" id="btn-save-live" title="Save changes and commit live to GitHub repo (Ctrl+S)">
+              ☁️ Save Live
+              <span class="save-status-dot is-saved" id="save-status-dot"></span>
+              <span class="save-status-text" id="save-status-text">Saved</span>
             </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
             </label>
             <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
-          </div>
-        </div>
-
-        <!-- Inline Gemini API Key & Model Selector Drawer -->
-        <div class="pdf-ai-drawer admin-only-control" id="gemini-key-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
-          <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
-          <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
-            <span>Model</span>
-            <select id="gemini-model-select" class="pdf-ai-model-select">
-              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
-              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
-              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
-            </select>
-          </label>
-          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
-          <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
-          <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
-        </div>
-
-        <!-- Inline Batch Extraction Drawer -->
-        <div class="pdf-ai-drawer admin-only-control" id="pdf-batch-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
-          <label class="pdf-batch-field">
-            <span>From p.</span>
-            <input type="number" id="batch-from-page" class="mono-input" min="1" max="200" value="1">
-          </label>
-          <label class="pdf-batch-field">
-            <span>To p.</span>
-            <input type="number" id="batch-to-page" class="mono-input" min="1" max="200" value="5">
-          </label>
-          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-start-batch-extract">Start Batch</button>
-          <button type="button" class="micro-pill" id="btn-cancel-batch-extract" hidden>Stop</button>
-          <button type="button" class="micro-pill" id="btn-close-batch-extract">&times;</button>
-          <div class="pdf-ai-progress-wrap" id="ai-extract-progress-wrap" hidden>
-            <div class="pdf-ai-progress-track">
-              <div class="pdf-ai-progress-fill" id="ai-extract-progress-fill" style="width:0%"></div>
-            </div>
-            <span class="pdf-ai-progress-pct" id="ai-extract-progress-pct">0%</span>
           </div>
         </div>
 
@@ -477,6 +453,89 @@ $css
       </section>
 
     </main>
+  </div>
+
+  <!-- ADMIN SETTINGS MODAL -->
+  <div class="admin-settings-modal-backdrop admin-only-control" id="admin-settings-modal" hidden>
+    <div class="admin-settings-modal-dialog" role="dialog" aria-labelledby="admin-settings-title" aria-modal="true">
+      <div class="admin-settings-modal-header">
+        <div class="admin-settings-modal-title" id="admin-settings-title">
+          <span class="settings-modal-icon">⚙️</span>
+          <h3>Admin &amp; Curriculum Cloud Settings</h3>
+        </div>
+        <button type="button" class="micro-pill admin-settings-modal-close" id="btn-close-settings-modal" aria-label="Close Settings">&times;</button>
+      </div>
+
+      <div class="admin-settings-modal-body">
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">1</span>
+            <h4>Gemini Vision OMR Key &amp; Model</h4>
+          </div>
+          <p class="admin-settings-hint">Used for high-resolution AI optical music recognition directly from PDF pages.</p>
+          <div class="admin-settings-field">
+            <label for="modal-gemini-key">Gemini API Key</label>
+            <input type="password" id="modal-gemini-key" class="admin-settings-input mono-font" placeholder="AIzaSy..." autocomplete="off">
+          </div>
+          <div class="admin-settings-field">
+            <label for="modal-gemini-model">Vision Model</label>
+            <select id="modal-gemini-model" class="admin-settings-select">
+              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash (Fast &amp; Free Tier Recommended)</option>
+              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Requires Billing)</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">2</span>
+            <h4>GitHub Direct Commit (Live Cloud Sync)</h4>
+          </div>
+          <p class="admin-settings-hint">Commits curriculum edits directly to your repository so changes go live across all student devices without manual pull requests.</p>
+          <div class="admin-settings-grid-2">
+            <div class="admin-settings-field">
+              <label for="modal-github-pat">Personal Access Token (PAT with repo scope)</label>
+              <input type="password" id="modal-github-pat" class="admin-settings-input mono-font" placeholder="ghp_..." autocomplete="off">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-repo">GitHub Repository (owner/repo)</label>
+              <input type="text" id="modal-github-repo" class="admin-settings-input mono-font" value="odin-hash/learn-and-master-guitar-studio" placeholder="owner/repo">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-branch">Target Branch</label>
+              <input type="text" id="modal-github-branch" class="admin-settings-input mono-font" value="main" placeholder="main">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-path">Curriculum Overrides Path</label>
+              <input type="text" id="modal-github-path" class="admin-settings-input mono-font" value="curriculumOverrides.json" placeholder="curriculumOverrides.json">
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">3</span>
+            <h4>Offline Backups &amp; Reset</h4>
+          </div>
+          <div class="admin-settings-actions-row">
+            <button type="button" class="micro-pill admin-settings-action-btn" id="modal-btn-download-backup" title="Download current curriculum and AI extracts as offline JSON file">
+              📥 Download Backup JSON
+            </button>
+            <button type="button" class="micro-pill admin-settings-action-btn is-danger" id="modal-btn-clear-ai-data" title="Clear all local AI extractions and edits from this browser">
+              ⚠️ Clear Local AI Storage
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="admin-settings-modal-footer">
+        <span class="admin-settings-status" id="admin-settings-status-msg"></span>
+        <button type="button" class="micro-pill" id="btn-cancel-settings-modal">Cancel</button>
+        <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-settings-modal">Save Settings</button>
+      </div>
+    </div>
   </div>
 
   <!-- ZONE 4: FIXED BOTTOM TRANSPORT DOCK (56px) -->

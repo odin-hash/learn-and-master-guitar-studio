@@ -4982,3 +4982,333 @@ body:not([data-admin-mode="true"]) .admin-only-control {
     padding: 9px 12px;
   }
 }
+
+/* ==========================================================================
+   ADMIN ACTION BAR, SETTINGS MODAL & CLOUD COMMIT STYLES
+   ========================================================================== */
+
+.save-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.save-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.save-status-dot.is-saved {
+  background-color: #10B981;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+.save-status-dot.is-unsaved {
+  background-color: #F59E0B;
+  box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+}
+
+.save-status-dot.is-syncing {
+  background-color: #3B82F6;
+  animation: adminSyncPulse 1s infinite ease-in-out;
+}
+
+@keyframes adminSyncPulse {
+  0% { transform: scale(0.85); opacity: 0.5; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.85); opacity: 0.5; }
+}
+
+.save-status-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Notation Editor Measure & Chord Controls */
+.ne-meter-cluster,
+.ne-bpm-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+}
+
+.ne-select-sm,
+.ne-input-sm {
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid #D4D4D8;
+  border-radius: 4px;
+  background: #FFFFFF;
+  color: #18181B;
+  font-size: 11px;
+  outline: none;
+}
+
+.ne-select-sm:focus,
+.ne-input-sm:focus {
+  border-color: #18181B;
+}
+
+.ne-input-sm.mono-font {
+  font-family: var(--font-mono);
+  width: 44px;
+  text-align: center;
+}
+
+.ne-chord-select {
+  min-width: 68px;
+}
+
+.ne-chord-input {
+  width: 58px;
+  font-family: var(--font-mono);
+}
+
+/* Admin Settings Modal */
+.admin-settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.admin-settings-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.admin-settings-modal-dialog {
+  background: #FFFFFF;
+  color: #18181B;
+  border: 1px solid var(--border-hairline, #E4E4E7);
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-hairline, #E4E4E7);
+}
+
+.admin-settings-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-settings-modal-title h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.admin-settings-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.admin-settings-modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-settings-section {
+  padding: 12px 14px;
+  background: #FAF9F5;
+  border: 1px solid #E4E4E7;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-settings-section-title h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #18181B;
+}
+
+.section-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #18181B;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.admin-settings-hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #71717A;
+  margin: 0;
+}
+
+.admin-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-settings-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #52525B;
+}
+
+.admin-settings-input,
+.admin-settings-select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #D4D4D8;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #18181B;
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-settings-input:focus,
+.admin-settings-select:focus {
+  border-color: #18181B;
+}
+
+.admin-settings-input.mono-font {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.admin-settings-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .admin-settings-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-settings-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-settings-action-btn {
+  height: 28px;
+}
+
+.admin-settings-action-btn.is-danger {
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+.admin-settings-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-hairline, #E4E4E7);
+  background: #FAF9F5;
+}
+
+.admin-settings-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #166534;
+  margin-right: auto;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .admin-settings-modal-dialog {
+  background: #18181B;
+  color: #F4F4F5;
+  border-color: #27272A;
+}
+
+[data-theme="dark"] .admin-settings-modal-header {
+  border-bottom-color: #27272A;
+}
+
+[data-theme="dark"] .admin-settings-section {
+  background: #27272A;
+  border-color: #3F3F46;
+}
+
+[data-theme="dark"] .admin-settings-section-title h4 {
+  color: #F4F4F5;
+}
+
+[data-theme="dark"] .section-badge {
+  background: #3F3F46;
+  color: #F4F4F5;
+}
+
+[data-theme="dark"] .admin-settings-field label {
+  color: #A1A1AA;
+}
+
+[data-theme="dark"] .admin-settings-input,
+[data-theme="dark"] .admin-settings-select {
+  background: #18181B;
+  color: #F4F4F5;
+  border-color: #3F3F46;
+}
+
+[data-theme="dark"] .admin-settings-modal-footer {
+  background: #18181B;
+  border-top-color: #27272A;
+}
+
+[data-theme="dark"] .vf-chord-label {
+  fill: #F4F4F5;
+}

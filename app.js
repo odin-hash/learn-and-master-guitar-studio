@@ -10,15 +10,20 @@ import { NotationEditor } from "./src/components/NotationEditor.js";
 
 export class GuitarMasterApp {
   constructor() {
+    this.initialBaselineCourses = JSON.parse(JSON.stringify(GUITAR_COURSES));
     if (typeof mergeVerifiedCurriculumIntoCourses === "function") {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
     this.pdfAiExtractor = new PdfAiExtractor();
     this.adminMode = false;
     this.editingExerciseId = null;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.hasUnsavedChanges = false;
     this.notationEditor = new NotationEditor({
       onCommitExercise: (updatedEx, mIdx, tabBeatIdx, evIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx),
-      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx)
+      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx),
+      onBeforeMutate: (action) => this.pushUndo(action)
     });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
@@ -90,6 +95,7 @@ export class GuitarMasterApp {
     // Restore state from URL Hash / LocalStorage
     this.restoreState();
     this.hydrateIndexedDbExtractions();
+    this.loadRemoteCurriculumOverrides();
   }
 
   ensureStorageVersion() {
@@ -132,9 +138,14 @@ export class GuitarMasterApp {
           "guitar_completed_exercises",
           "guitar_checked_goals",
           "lmgs_admin_mode",
+          "lmgs_admin_mode_unlocked",
           "lmgs_gemini_api_key",
           "lmgs_gemini_model_pref",
-          "lmgs_ai_extracted_pages_v1"
+          "lmgs_ai_extracted_pages_v1",
+          "lmgs_github_pat",
+          "lmgs_github_repo",
+          "lmgs_github_branch",
+          "lmgs_github_path"
         ]);
         Object.keys(localStorage).forEach(k => {
           if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
@@ -359,7 +370,35 @@ export class GuitarMasterApp {
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
 
-    // PDF AI Extractor Toolbar & Drawers
+    // Admin Action Bar & Cloud Settings
+    this.btnAdminSettings = document.getElementById("btn-admin-settings");
+    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
+    this.btnAppendPdfPage = document.getElementById("btn-append-pdf-page");
+    this.btnAdminUndo = document.getElementById("btn-admin-undo");
+    this.btnAdminRedo = document.getElementById("btn-admin-redo");
+    this.btnAdminBackspace = document.getElementById("btn-admin-backspace");
+    this.btnAdminDelete = document.getElementById("btn-admin-delete");
+    this.btnRevertLesson = document.getElementById("btn-revert-lesson");
+    this.btnSaveLive = document.getElementById("btn-save-live");
+    this.saveStatusDot = document.getElementById("save-status-dot");
+    this.saveStatusText = document.getElementById("save-status-text");
+
+    // Admin Settings Modal
+    this.adminSettingsModal = document.getElementById("admin-settings-modal");
+    this.btnCloseSettingsModal = document.getElementById("btn-close-settings-modal");
+    this.btnCancelSettingsModal = document.getElementById("btn-cancel-settings-modal");
+    this.btnSaveSettingsModal = document.getElementById("btn-save-settings-modal");
+    this.modalGeminiKey = document.getElementById("modal-gemini-key");
+    this.modalGeminiModel = document.getElementById("modal-gemini-model");
+    this.modalGithubPat = document.getElementById("modal-github-pat");
+    this.modalGithubRepo = document.getElementById("modal-github-repo");
+    this.modalGithubBranch = document.getElementById("modal-github-branch");
+    this.modalGithubPath = document.getElementById("modal-github-path");
+    this.modalBtnDownloadBackup = document.getElementById("modal-btn-download-backup");
+    this.modalBtnClearAiData = document.getElementById("modal-btn-clear-ai-data");
+    this.adminSettingsStatusMsg = document.getElementById("admin-settings-status-msg");
+
+    // PDF AI Extractor Toolbar & Drawers (Compatibility)
     this.btnGeminiApiKey = document.getElementById("btn-gemini-api-key");
     this.aiKeyDot = document.getElementById("ai-key-dot");
     this.geminiKeyBar = document.getElementById("gemini-key-bar");
@@ -368,7 +407,6 @@ export class GuitarMasterApp {
     this.btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
     this.btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
     this.btnCloseGeminiKey = document.getElementById("btn-close-gemini-key");
-    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
     this.btnBatchExtractToggle = document.getElementById("btn-batch-extract-toggle");
     this.btnExportCurriculumJson = document.getElementById("btn-export-curriculum-json");
     this.pdfBatchBar = document.getElementById("pdf-batch-bar");
@@ -387,6 +425,7 @@ export class GuitarMasterApp {
     this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
     this.syncGeminiKeyUI();
     this.initAdminMode();
+    this.updateUndoRedoUI();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -1278,6 +1317,7 @@ export class GuitarMasterApp {
       if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
       if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
       if (this.aiExtractStatusBar) this.aiExtractStatusBar.hidden = true;
+      if (this.adminSettingsModal) this.adminSettingsModal.hidden = true;
       document.querySelectorAll(".topic-ex-edit-btn").forEach(btn => btn.classList.remove("is-active"));
     }
   }
@@ -1399,6 +1439,7 @@ export class GuitarMasterApp {
       }
     }
     this.persistEditedTopicOrExercise(updatedEx);
+    this.markUnsaved();
   }
 
   handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx = null) {
@@ -1773,10 +1814,12 @@ export class GuitarMasterApp {
   async extractCurrentPdfPage() {
     if (this.pdfAiExtractor._isBusy) return;
     const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    this.pushUndo(`Extract PDF Page ${rawPage}`);
     this.pdfAiExtractor._isBusy = true;
     if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
     try {
       await this.extractSinglePdfPage(rawPage, { switchExercise: true });
+      this.markUnsaved();
     } catch (err) {
       this.setAiExtractStatus(`Extraction failed: ${err && err.message ? err.message : String(err)}`, "error");
     } finally {
@@ -1785,15 +1828,467 @@ export class GuitarMasterApp {
     }
   }
 
+  pushUndo(actionDescription = "Edit") {
+    if (!this.currentExercise) return;
+    const snapshot = {
+      action: actionDescription,
+      exerciseId: this.currentExercise.id,
+      topicId: this.currentExercise.topicId,
+      exerciseClone: JSON.parse(JSON.stringify(this.currentExercise)),
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.undoStack.push(snapshot);
+    if (this.undoStack.length > 50) {
+      this.undoStack.shift();
+    }
+    this.redoStack = [];
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+  }
+
+  undo() {
+    if (!this.undoStack || this.undoStack.length === 0) return;
+    const currentSnapshot = {
+      action: "Redo",
+      exerciseId: this.currentExercise ? this.currentExercise.id : null,
+      topicId: this.currentExercise ? this.currentExercise.topicId : null,
+      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.redoStack.push(currentSnapshot);
+    if (this.redoStack.length > 50) {
+      this.redoStack.shift();
+    }
+    const prevSnapshot = this.undoStack.pop();
+    this.applyStateSnapshot(prevSnapshot);
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+    this.setAiExtractStatus(`Undid: ${prevSnapshot.action}`, "info");
+  }
+
+  redo() {
+    if (!this.redoStack || this.redoStack.length === 0) return;
+    const currentSnapshot = {
+      action: "Undo",
+      exerciseId: this.currentExercise ? this.currentExercise.id : null,
+      topicId: this.currentExercise ? this.currentExercise.topicId : null,
+      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.undoStack.push(currentSnapshot);
+    if (this.undoStack.length > 50) {
+      this.undoStack.shift();
+    }
+    const nextSnapshot = this.redoStack.pop();
+    this.applyStateSnapshot(nextSnapshot);
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+    this.setAiExtractStatus(`Redid: ${nextSnapshot.action}`, "info");
+  }
+
+  applyStateSnapshot(snapshot) {
+    if (!snapshot || !snapshot.exerciseClone) return;
+    const restoredEx = JSON.parse(JSON.stringify(snapshot.exerciseClone));
+    this.notationEditor.ensureCanonicalMeasures(restoredEx);
+    this.currentExercise = restoredEx;
+
+    const slot = this._findCourseSlotForExercise(restoredEx.id);
+    if (slot && slot.topic) {
+      slot.topic.exercises[slot.exIdx] = restoredEx;
+    }
+    this.allExercises = this.buildFlatExerciseList();
+    this.persistEditedTopicOrExercise(restoredEx);
+
+    const entry = this.activeTopicRenderers.get(restoredEx.id);
+    if (entry && entry.renderer) {
+      entry.renderer.loadExercise(restoredEx, {
+        noteNameMode: this.noteNameMode,
+        tabVisibilityMode: this.tabVisibilityMode,
+        showRhythmGuide: this.showRhythmGuide,
+        showCoachBanner: this.showCoachBanner
+      });
+      const mIdx = snapshot.selectedMeasureIdx || 0;
+      const evIdx = snapshot.selectedEventIdx || 0;
+      const fb = this._buildFeedbackBeatFromMeasureEvent(restoredEx, mIdx, null, evIdx);
+      const isRest = fb ? fb.isRest : false;
+      entry.renderer.highlightBeat(mIdx, 0, isRest, null, evIdx);
+    }
+    if (this.notationEditor && this.notationEditor.isActive()) {
+      this.notationEditor.open(
+        restoredEx,
+        this.notationEditor.hostEl,
+        snapshot.selectedMeasureIdx || 0,
+        snapshot.selectedEventIdx || 0
+      );
+    }
+  }
+
+  updateUndoRedoUI() {
+    if (this.btnAdminUndo) {
+      this.btnAdminUndo.disabled = !this.undoStack || this.undoStack.length === 0;
+      this.btnAdminUndo.title = this.undoStack && this.undoStack.length > 0
+        ? `Undo ${this.undoStack[this.undoStack.length - 1].action} (Ctrl+Z)`
+        : "Undo (Ctrl+Z)";
+    }
+    if (this.btnAdminRedo) {
+      this.btnAdminRedo.disabled = !this.redoStack || this.redoStack.length === 0;
+      this.btnAdminRedo.title = this.redoStack && this.redoStack.length > 0
+        ? `Redo ${this.redoStack[this.redoStack.length - 1].action} (Ctrl+Y)`
+        : "Redo (Ctrl+Y)";
+    }
+  }
+
+  markUnsaved() {
+    this.hasUnsavedChanges = true;
+    this.setSaveLiveStatus("unsaved", "Unsaved");
+  }
+
+  setSaveLiveStatus(state, label) {
+    if (this.saveStatusDot) {
+      this.saveStatusDot.className = `save-status-dot is-${state}`;
+    }
+    if (this.saveStatusText && label) {
+      this.saveStatusText.textContent = label;
+    }
+    if (this.btnSaveLive) {
+      this.btnSaveLive.dataset.status = state;
+    }
+  }
+
+  openAdminSettingsModal() {
+    if (!this.adminSettingsModal) return;
+    if (this.modalGeminiKey && this.pdfAiExtractor) {
+      this.modalGeminiKey.value = this.pdfAiExtractor.getApiKey();
+    }
+    if (this.modalGeminiModel && this.pdfAiExtractor) {
+      this.modalGeminiModel.value = this.pdfAiExtractor.getModelPreference();
+    }
+    if (this.modalGithubPat) {
+      this.modalGithubPat.value = localStorage.getItem("lmgs_github_pat") || "";
+    }
+    if (this.modalGithubRepo) {
+      this.modalGithubRepo.value = localStorage.getItem("lmgs_github_repo") || "odin-hash/learn-and-master-guitar-studio";
+    }
+    if (this.modalGithubBranch) {
+      this.modalGithubBranch.value = localStorage.getItem("lmgs_github_branch") || "main";
+    }
+    if (this.modalGithubPath) {
+      this.modalGithubPath.value = localStorage.getItem("lmgs_github_path") || "curriculumOverrides.json";
+    }
+    if (this.adminSettingsStatusMsg) {
+      this.adminSettingsStatusMsg.textContent = "";
+    }
+    this.adminSettingsModal.hidden = false;
+  }
+
+  closeAdminSettingsModal() {
+    if (this.adminSettingsModal) {
+      this.adminSettingsModal.hidden = true;
+    }
+  }
+
+  saveAdminSettings() {
+    const geminiKey = this.modalGeminiKey ? this.modalGeminiKey.value.trim() : "";
+    const modelPref = this.modalGeminiModel ? this.modalGeminiModel.value : "auto";
+    const githubPat = this.modalGithubPat ? this.modalGithubPat.value.trim() : "";
+    const githubRepo = this.modalGithubRepo ? this.modalGithubRepo.value.trim() : "odin-hash/learn-and-master-guitar-studio";
+    const githubBranch = this.modalGithubBranch ? this.modalGithubBranch.value.trim() : "main";
+    const githubPath = this.modalGithubPath ? this.modalGithubPath.value.trim() : "curriculumOverrides.json";
+
+    if (this.pdfAiExtractor) {
+      this.pdfAiExtractor.saveApiKey(geminiKey);
+      this.pdfAiExtractor.saveModelPreference(modelPref);
+    }
+    localStorage.setItem("lmgs_github_pat", githubPat);
+    localStorage.setItem("lmgs_github_repo", githubRepo);
+    localStorage.setItem("lmgs_github_branch", githubBranch);
+    localStorage.setItem("lmgs_github_path", githubPath);
+
+    this.syncGeminiKeyUI();
+    if (this.adminSettingsStatusMsg) {
+      this.adminSettingsStatusMsg.textContent = "✓ Settings saved!";
+    }
+    setTimeout(() => {
+      this.closeAdminSettingsModal();
+    }, 400);
+  }
+
+  async commitCurriculumToGitHub() {
+    const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
+    const repo = (localStorage.getItem("lmgs_github_repo") || "odin-hash/learn-and-master-guitar-studio").trim();
+    const branch = (localStorage.getItem("lmgs_github_branch") || "main").trim();
+    const path = (localStorage.getItem("lmgs_github_path") || "curriculumOverrides.json").trim();
+
+    if (!pat) {
+      throw new Error("No GitHub Personal Access Token (PAT) configured. Click 🔑 Settings to enter your token.");
+    }
+
+    let sha = null;
+    const getUrl = `https://api.github.com/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}&_=${Date.now()}`;
+    try {
+      const getRes = await fetch(getUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${pat}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28"
+        }
+      });
+      if (getRes.status === 200) {
+        const data = await getRes.json();
+        sha = data.sha;
+      } else if (getRes.status !== 404) {
+        const errJson = await getRes.json().catch(() => null);
+        throw new Error((errJson && errJson.message) || `GitHub check returned status ${getRes.status}`);
+      }
+    } catch (err) {
+      if (err.message && err.message.includes("404")) {
+        sha = null;
+      } else {
+        throw err;
+      }
+    }
+
+    const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+    const payload = {
+      schemaVersion: "2.0.0",
+      updatedAt: new Date().toISOString(),
+      repo,
+      branch,
+      modelPreference: this.pdfAiExtractor.getModelPreference(),
+      extractedPageCount: Object.keys(store).length,
+      extractedPages: store
+    };
+    const jsonStr = JSON.stringify(payload, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    const putUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+    const commitBody = {
+      message: `feat(curriculum): live update via Admin Action Bar [skip ci]`,
+      content: base64Content,
+      branch: branch
+    };
+    if (sha) {
+      commitBody.sha = sha;
+    }
+
+    const putRes = await fetch(putUrl, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${pat}`,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(commitBody)
+    });
+
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => null);
+      throw new Error((errData && errData.message) || `GitHub commit failed with HTTP ${putRes.status}`);
+    }
+
+    return await putRes.json();
+  }
+
+  async saveLive() {
+    this.setSaveLiveStatus("syncing", "Syncing...");
+    this.setAiExtractStatus("Saving curriculum locally and committing live to GitHub...", "busy");
+    try {
+      const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+      this.pdfAiExtractor.saveExtractedStoreSync(store);
+
+      const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
+      if (!pat) {
+        this.hasUnsavedChanges = false;
+        this.setSaveLiveStatus("saved", "Saved Locally");
+        this.setAiExtractStatus(
+          "Saved to browser localStorage. Add GitHub PAT in 🔑 Settings to push live to repo automatically.",
+          "info"
+        );
+        return;
+      }
+
+      const res = await this.commitCurriculumToGitHub();
+      this.hasUnsavedChanges = false;
+      this.setSaveLiveStatus("saved", "Saved Live");
+      const commitSha = res && res.commit && res.commit.sha ? res.commit.sha.slice(0, 7) : "";
+      this.setAiExtractStatus(
+        `✓ Saved & pushed live to GitHub (${commitSha ? `commit ${commitSha}` : "main"})! Changes are now permanent.`,
+        "success"
+      );
+    } catch (err) {
+      this.setSaveLiveStatus("unsaved", "Sync Failed");
+      this.setAiExtractStatus(
+        `Saved locally, but GitHub Live Commit failed: ${err && err.message ? err.message : String(err)}`,
+        "error"
+      );
+    }
+  }
+
+  async loadRemoteCurriculumOverrides() {
+    try {
+      const res = await fetch(`./curriculumOverrides.json?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.extractedPages && typeof data.extractedPages === "object") {
+        const pageEntries = Object.values(data.extractedPages);
+        if (pageEntries.length > 0) {
+          pageEntries.forEach(entry => {
+            this.applyExtractedEntryToCourses(entry);
+          });
+          this.allExercises = this.buildFlatExerciseList();
+          const localStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
+          Object.assign(localStore, data.extractedPages);
+          this.pdfAiExtractor.saveExtractedStoreSync(localStore);
+        }
+      }
+    } catch (e) {}
+  }
+
+  async revertCurrentLesson() {
+    const activeEx = this.currentExercise;
+    if (!activeEx || activeEx.isMetronomeOnly) {
+      this.setAiExtractStatus("Please select an exercise or lesson to revert.", "warn");
+      return;
+    }
+    const slot = this._findCourseSlotForExercise(activeEx.id);
+    if (!slot) return;
+    this.pushUndo(`Revert Lesson "${activeEx.title}"`);
+
+    const { bookCat, session, topic, computedTopicId, exIdx } = slot;
+    const baselineBook = this.initialBaselineCourses && this.initialBaselineCourses[bookCat];
+    const baselineSession = baselineBook && baselineBook.find(s => s.session === session.session);
+    const baselineTopic = baselineSession && baselineSession.topics && baselineSession.topics.find(t => (t.topicId || t.topicTitle) === (topic.topicId || topic.topicTitle));
+
+    if (baselineTopic && Array.isArray(baselineTopic.exercises)) {
+      topic.exercises = JSON.parse(JSON.stringify(baselineTopic.exercises));
+      topic.aiExtracted = false;
+    }
+
+    const bookPage = activeEx.pdfPage || topic.pdfPage || 1;
+    const rawPdfPage = activeEx.pdfRawPage || this.bookPageToPdfPage(bookPage, bookCat);
+    const pageKey = `${bookCat}_p${rawPdfPage}`;
+    await this.pdfAiExtractor.deletePageEntry(pageKey);
+
+    this.allExercises = this.buildFlatExerciseList();
+    const restoredEx = topic.exercises[0] || this.allExercises[0];
+    this.loadExercise(restoredEx.id, false, { forceTopicRebuild: true, scrollTopicTop: true, noPdfReload: true });
+    this.markUnsaved();
+    this.setAiExtractStatus(`Reverted lesson "${topic.topicTitle || restoredEx.title}" to baseline state.`, "info");
+  }
+
+  async appendCurrentPdfPage() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const activeEx = this.currentExercise;
+    if (!activeEx || activeEx.isMetronomeOnly) {
+      this.setAiExtractStatus("Please select an exercise or song first to append measures to.", "warn");
+      return;
+    }
+
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      this.openAdminSettingsModal();
+      this.setAiExtractStatus("Enter and save your Gemini API key first in Settings.", "error");
+      return;
+    }
+
+    const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    const bookCat = this.pdfBookCategory || "lessonBook";
+    const bookPage = this.pdfPageToBookPage(rawPage, bookCat);
+
+    this.pdfAiExtractor._isBusy = true;
+    if (this.btnAppendPdfPage) this.btnAppendPdfPage.disabled = true;
+
+    try {
+      this.pushUndo(`Append PDF Page ${rawPage}`);
+      this.setAiExtractStatus(`Rendering PDF p. ${rawPage} at 4.0x Ultra-HD for append...`, "busy", null);
+      const { pdfDoc } = await this.getPdfDocumentForExtraction();
+      const clampedPage = Math.max(1, Math.min(rawPage, pdfDoc.numPages || rawPage));
+      const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 4.0);
+
+      const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+      const contextHint = `Continuation/Append measures for "${activeEx.title}" (${bookLabel}, p. ${bookPage}, PDF p. ${clampedPage})`;
+
+      const { omrJson, modelUsed } = await this.pdfAiExtractor.callGeminiVision(
+        snap.base64,
+        apiKey,
+        contextHint,
+        (activeModel, fallbackNote) => {
+          const msg = fallbackNote || `Extracting append measures from PDF p. ${clampedPage} with ${activeModel}...`;
+          this.setAiExtractStatus(msg, "busy", snap.dataUrl);
+        }
+      );
+
+      const tempEntry = this.pdfAiExtractor.normalizeExtractedPage({
+        omrJson,
+        bookCategory: bookCat,
+        rawPdfPage: clampedPage,
+        bookPage,
+        modelUsed
+      });
+
+      if (!tempEntry.exercises || tempEntry.exercises.length === 0) {
+        this.setAiExtractStatus(`No exercises or measures found on PDF p. ${clampedPage} to append.`, "warn", snap.dataUrl);
+        return;
+      }
+
+      this.notationEditor.ensureCanonicalMeasures(activeEx);
+      const existingMeasureCount = activeEx.measures.length;
+
+      const incomingMeasures = [];
+      tempEntry.exercises.forEach(srcEx => {
+        this.notationEditor.ensureCanonicalMeasures(srcEx);
+        (srcEx.measures || []).forEach(m => {
+          incomingMeasures.push(JSON.parse(JSON.stringify(m)));
+        });
+      });
+
+      if (incomingMeasures.length === 0) {
+        this.setAiExtractStatus(`No musical measures found to append.`, "warn", snap.dataUrl);
+        return;
+      }
+
+      incomingMeasures.forEach((m, idx) => {
+        m.measure = existingMeasureCount + idx + 1;
+        (m.events || []).forEach(ev => this.notationEditor.syncEventFromSource(ev));
+        activeEx.measures.push(m);
+      });
+
+      this.notationEditor.syncMeasuresToTabData(activeEx);
+      await this.persistEditedTopicOrExercise(activeEx);
+      this.handleNotationEditCommit(activeEx, existingMeasureCount, 0, 0);
+
+      if (this.notationEditor && this.notationEditor.isActive()) {
+        this.notationEditor.selectNote(existingMeasureCount, 0, 0);
+      }
+
+      this.markUnsaved();
+      this.setAiExtractStatus(
+        `Appended ${incomingMeasures.length} measures from PDF p. ${clampedPage} to "${activeEx.title}" (Total: ${activeEx.measures.length} bars) via ${modelUsed}!`,
+        "success",
+        snap.dataUrl
+      );
+    } catch (err) {
+      this.setAiExtractStatus(`Append failed: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnAppendPdfPage) this.btnAppendPdfPage.disabled = false;
+    }
+  }
+
   async runBatchPdfExtract() {
     if (this.pdfAiExtractor._isBusy) return;
     const apiKey = this.pdfAiExtractor.getApiKey();
     if (!apiKey) {
-      if (this.geminiKeyBar) {
-        this.geminiKeyBar.hidden = false;
-        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
-      }
-      this.setAiExtractStatus("Enter and save your Gemini API key before starting Batch Extract.", "error");
+      this.openAdminSettingsModal();
+      this.setAiExtractStatus("Enter and save your Gemini API key in Settings before extracting.", "error");
       return;
     }
 
@@ -1845,6 +2340,7 @@ export class GuitarMasterApp {
             noPdfReload: true
           });
         }
+        this.markUnsaved();
         this.setAiExtractStatus(
           `Batch complete: ${completedPages} pages processed, ${totalExercises} exercises extracted & saved!`,
           "success"
@@ -3930,16 +4426,97 @@ export class GuitarMasterApp {
       });
     }
 
-    // PDF AI OMR Extractor Controls
+    // Admin Action Bar Controls
+    if (this.btnAdminSettings) {
+      this.btnAdminSettings.addEventListener("click", () => {
+        this.openAdminSettingsModal();
+      });
+    }
+    if (this.btnExtractPdfPage) {
+      this.btnExtractPdfPage.addEventListener("click", () => {
+        this.extractCurrentPdfPage();
+      });
+    }
+    if (this.btnAppendPdfPage) {
+      this.btnAppendPdfPage.addEventListener("click", () => {
+        this.appendCurrentPdfPage();
+      });
+    }
+    if (this.btnAdminUndo) {
+      this.btnAdminUndo.addEventListener("click", () => {
+        this.undo();
+      });
+    }
+    if (this.btnAdminRedo) {
+      this.btnAdminRedo.addEventListener("click", () => {
+        this.redo();
+      });
+    }
+    if (this.btnAdminBackspace) {
+      this.btnAdminBackspace.addEventListener("click", () => {
+        if (this.notationEditor && this.notationEditor.isActive()) {
+          this.notationEditor.smartBackspace();
+        }
+      });
+    }
+    if (this.btnAdminDelete) {
+      this.btnAdminDelete.addEventListener("click", () => {
+        if (this.notationEditor && this.notationEditor.isActive()) {
+          this.notationEditor.smartDelete();
+        }
+      });
+    }
+    if (this.btnRevertLesson) {
+      this.btnRevertLesson.addEventListener("click", () => {
+        this.revertCurrentLesson();
+      });
+    }
+    if (this.btnSaveLive) {
+      this.btnSaveLive.addEventListener("click", () => {
+        this.saveLive();
+      });
+    }
+
+    // Admin Settings Modal Controls
+    if (this.btnCloseSettingsModal) {
+      this.btnCloseSettingsModal.addEventListener("click", () => {
+        this.closeAdminSettingsModal();
+      });
+    }
+    if (this.btnCancelSettingsModal) {
+      this.btnCancelSettingsModal.addEventListener("click", () => {
+        this.closeAdminSettingsModal();
+      });
+    }
+    if (this.btnSaveSettingsModal) {
+      this.btnSaveSettingsModal.addEventListener("click", () => {
+        this.saveAdminSettings();
+      });
+    }
+    if (this.modalBtnDownloadBackup) {
+      this.modalBtnDownloadBackup.addEventListener("click", () => {
+        this.exportCurriculumJson();
+      });
+    }
+    if (this.modalBtnClearAiData) {
+      this.modalBtnClearAiData.addEventListener("click", () => {
+        if (window.confirm("Are you sure you want to clear all local AI extractions and edits from this browser?")) {
+          this.clearAiExtractedData();
+        }
+      });
+    }
+    if (this.adminSettingsModal) {
+      this.adminSettingsModal.addEventListener("click", (e) => {
+        if (e.target === this.adminSettingsModal) {
+          this.closeAdminSettingsModal();
+        }
+      });
+    }
+
+    // Legacy drawer compatibility (if elements exist)
     if (this.btnGeminiApiKey && this.geminiKeyBar) {
       this.btnGeminiApiKey.addEventListener("click", () => {
-        const nextHidden = !this.geminiKeyBar.hidden;
-        this.geminiKeyBar.hidden = nextHidden;
-        if (!nextHidden) {
-          if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
-          this.syncGeminiKeyUI();
-          if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
-        }
+        this.openAdminSettingsModal();
       });
     }
     if (this.btnCloseGeminiKey && this.geminiKeyBar) {
@@ -3979,11 +4556,6 @@ export class GuitarMasterApp {
         if (this.geminiApiKeyInput) this.geminiApiKeyInput.value = "";
         this.syncGeminiKeyUI();
         this.setAiExtractStatus("Gemini API Key removed.", "info");
-      });
-    }
-    if (this.btnExtractPdfPage) {
-      this.btnExtractPdfPage.addEventListener("click", () => {
-        this.extractCurrentPdfPage();
       });
     }
     if (this.btnBatchExtractToggle && this.pdfBatchBar) {
@@ -4231,12 +4803,55 @@ export class GuitarMasterApp {
         this.setAdminMode(!this.adminMode);
         return;
       }
+      if (this.adminMode) {
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "z") {
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.redo();
+          } else {
+            this.undo();
+          }
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "y") {
+          e.preventDefault();
+          this.redo();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "s") {
+          e.preventDefault();
+          this.saveLive();
+          return;
+        }
+      }
       if (this.appMode !== "studio") return;
       if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
-      if (this.adminMode && this.notationEditor && this.notationEditor.isActive() && /^[0-9]$/.test(e.key)) {
-        e.preventDefault();
-        this.notationEditor.handleDirectFretDigit(e.key);
-        return;
+      if (this.adminMode && this.notationEditor && this.notationEditor.isActive()) {
+        if (/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          this.notationEditor.handleDirectFretDigit(e.key);
+          return;
+        }
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          this.notationEditor.smartBackspace();
+          return;
+        }
+        if (e.key === "Delete") {
+          e.preventDefault();
+          this.notationEditor.smartDelete();
+          return;
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          this.notationEditor.selectPrevNote();
+          return;
+        }
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          this.notationEditor.selectNextNote();
+          return;
+        }
       }
       if (e.code === "Space") {
         e.preventDefault();

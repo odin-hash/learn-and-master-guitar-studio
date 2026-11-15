@@ -257,6 +257,10 @@ export class PdfAiExtractor {
     return clean;
   }
 
+  setApiKey(key) {
+    return this.saveApiKey(key);
+  }
+
   getModelPreference() {
     try {
       const val = (localStorage.getItem(STORAGE_KEY_MODEL) || "auto").trim();
@@ -272,6 +276,10 @@ export class PdfAiExtractor {
       localStorage.setItem(STORAGE_KEY_MODEL, clean);
     } catch (e) {}
     return clean;
+  }
+
+  setModelPreference(model) {
+    return this.saveModelPreference(model);
   }
 
   getModelChain() {
@@ -334,6 +342,33 @@ export class PdfAiExtractor {
     }
   }
 
+  saveExtractedStoreSync(storeMap) {
+    if (!storeMap || typeof storeMap !== "object") return;
+    try {
+      localStorage.setItem(STORAGE_KEY_EXTRACTED, JSON.stringify(storeMap));
+    } catch (e) {}
+  }
+
+  async saveExtractedStoreAsync(storeMap) {
+    this.saveExtractedStoreSync(storeMap);
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        const store = tx.objectStore(IDB_STORE);
+        store.clear();
+        Object.values(storeMap || {}).forEach(entry => {
+          if (entry && entry.pageKey) {
+            store.put(entry);
+          }
+        });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+    return storeMap;
+  }
+
   async savePageEntry(entry) {
     const storeMap = this.loadExtractedStoreSync();
     storeMap[entry.pageKey] = entry;
@@ -347,6 +382,25 @@ export class PdfAiExtractor {
       await new Promise((resolve, reject) => {
         const tx = db.transaction(IDB_STORE, "readwrite");
         tx.objectStore(IDB_STORE).put(entry);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+    return storeMap;
+  }
+
+  async deletePageEntry(pageKey) {
+    if (!pageKey) return;
+    const storeMap = this.loadExtractedStoreSync();
+    delete storeMap[pageKey];
+    try {
+      localStorage.setItem(STORAGE_KEY_EXTRACTED, JSON.stringify(storeMap));
+    } catch (e) {}
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(pageKey);
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
       });

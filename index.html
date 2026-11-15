@@ -4994,6 +4994,336 @@ body:not([data-admin-mode="true"]) .admin-only-control {
   }
 }
 
+/* ==========================================================================
+   ADMIN ACTION BAR, SETTINGS MODAL & CLOUD COMMIT STYLES
+   ========================================================================== */
+
+.save-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.save-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.save-status-dot.is-saved {
+  background-color: #10B981;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+.save-status-dot.is-unsaved {
+  background-color: #F59E0B;
+  box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+}
+
+.save-status-dot.is-syncing {
+  background-color: #3B82F6;
+  animation: adminSyncPulse 1s infinite ease-in-out;
+}
+
+@keyframes adminSyncPulse {
+  0% { transform: scale(0.85); opacity: 0.5; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.85); opacity: 0.5; }
+}
+
+.save-status-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Notation Editor Measure & Chord Controls */
+.ne-meter-cluster,
+.ne-bpm-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-radius: 5px;
+}
+
+.ne-select-sm,
+.ne-input-sm {
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid #D4D4D8;
+  border-radius: 4px;
+  background: #FFFFFF;
+  color: #18181B;
+  font-size: 11px;
+  outline: none;
+}
+
+.ne-select-sm:focus,
+.ne-input-sm:focus {
+  border-color: #18181B;
+}
+
+.ne-input-sm.mono-font {
+  font-family: var(--font-mono);
+  width: 44px;
+  text-align: center;
+}
+
+.ne-chord-select {
+  min-width: 68px;
+}
+
+.ne-chord-input {
+  width: 58px;
+  font-family: var(--font-mono);
+}
+
+/* Admin Settings Modal */
+.admin-settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.admin-settings-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.admin-settings-modal-dialog {
+  background: #FFFFFF;
+  color: #18181B;
+  border: 1px solid var(--border-hairline, #E4E4E7);
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-hairline, #E4E4E7);
+}
+
+.admin-settings-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-settings-modal-title h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.admin-settings-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.admin-settings-modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-settings-section {
+  padding: 12px 14px;
+  background: #FAF9F5;
+  border: 1px solid #E4E4E7;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-settings-section-title h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #18181B;
+}
+
+.section-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #18181B;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.admin-settings-hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #71717A;
+  margin: 0;
+}
+
+.admin-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-settings-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #52525B;
+}
+
+.admin-settings-input,
+.admin-settings-select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #D4D4D8;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #18181B;
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-settings-input:focus,
+.admin-settings-select:focus {
+  border-color: #18181B;
+}
+
+.admin-settings-input.mono-font {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.admin-settings-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .admin-settings-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-settings-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-settings-action-btn {
+  height: 28px;
+}
+
+.admin-settings-action-btn.is-danger {
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+.admin-settings-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-hairline, #E4E4E7);
+  background: #FAF9F5;
+}
+
+.admin-settings-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #166534;
+  margin-right: auto;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .admin-settings-modal-dialog {
+  background: #18181B;
+  color: #F4F4F5;
+  border-color: #27272A;
+}
+
+[data-theme="dark"] .admin-settings-modal-header {
+  border-bottom-color: #27272A;
+}
+
+[data-theme="dark"] .admin-settings-section {
+  background: #27272A;
+  border-color: #3F3F46;
+}
+
+[data-theme="dark"] .admin-settings-section-title h4 {
+  color: #F4F4F5;
+}
+
+[data-theme="dark"] .section-badge {
+  background: #3F3F46;
+  color: #F4F4F5;
+}
+
+[data-theme="dark"] .admin-settings-field label {
+  color: #A1A1AA;
+}
+
+[data-theme="dark"] .admin-settings-input,
+[data-theme="dark"] .admin-settings-select {
+  background: #18181B;
+  color: #F4F4F5;
+  border-color: #3F3F46;
+}
+
+[data-theme="dark"] .admin-settings-modal-footer {
+  background: #18181B;
+  border-top-color: #27272A;
+}
+
+[data-theme="dark"] .vf-chord-label {
+  fill: #F4F4F5;
+}
+
   </style>
 </head>
 <body data-app-mode="primer">
@@ -5271,64 +5601,40 @@ body:not([data-admin-mode="true"]) .admin-only-control {
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
           </div>
           <div class="pdf-toolbar-right">
-            <button type="button" class="micro-pill pdf-ai-key-btn admin-only-control" id="btn-gemini-api-key" title="Set Gemini API Key for PDF OMR Extraction">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-              <span class="ai-key-dot" id="ai-key-dot"></span>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
+              🔑 Settings
             </button>
-            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Snapshot current PDF page at 4.0x Ultra-HD and extract exact exercises via Gemini Vision">
-              &#10024; Extract Exercises from Current PDF Page
+            <button type="button" class="micro-pill pdf-ai-extract-btn admin-only-control" id="btn-extract-pdf-page" title="Extract exercises from current PDF page and replace active lesson (pushes Undo first)">
+              ✨ Extract Page
             </button>
-            <button type="button" class="micro-pill admin-only-control" id="btn-batch-extract-toggle" title="Batch extract a range of PDF pages">
-              Batch Extract
+            <button type="button" class="micro-pill admin-only-control" id="btn-append-pdf-page" title="Extract current PDF page and append measures to end of active exercise">
+              ➕ Append Page
             </button>
-            <button type="button" class="micro-pill admin-only-control" id="btn-export-curriculum-json" title="Export extracted &amp; curriculum exercises as JSON">
-              Export Curriculum JSON
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-undo" title="Undo note edit, measure change or extraction (Ctrl+Z)" disabled>
+              ↩️ Undo
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-redo" title="Redo note edit, measure change or extraction (Ctrl+Y)" disabled>
+              ↪️ Redo
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-backspace" title="Convert note to Rest of same duration (Backspace)">
+              ⌫
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-admin-delete" title="Delete note/rest completely from measure (Delete)">
+              🗑️
+            </button>
+            <button type="button" class="micro-pill admin-only-control" id="btn-revert-lesson" title="Restore active lesson to baseline state">
+              🔄 Revert Lesson
+            </button>
+            <button type="button" class="micro-pill save-live-btn admin-only-control" id="btn-save-live" title="Save changes and commit live to GitHub repo (Ctrl+S)">
+              ☁️ Save Live
+              <span class="save-status-dot is-saved" id="save-status-dot"></span>
+              <span class="save-status-text" id="save-status-text">Saved</span>
             </button>
             <label class="micro-pill pdf-upload-label" title="Load a local PDF copy from your computer">
               Open Local PDF
               <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
             </label>
             <a class="micro-pill" id="pdf-open-newtab" href="./assets/Learn-and-Master-Guitar-Lesson-Book.pdf" target="_blank" rel="noopener">New Tab &nearr;</a>
-          </div>
-        </div>
-
-        <!-- Inline Gemini API Key & Model Selector Drawer -->
-        <div class="pdf-ai-drawer admin-only-control" id="gemini-key-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Gemini API Key:</span>
-          <input type="password" id="gemini-api-key-input" class="pdf-ai-key-input" placeholder="Paste Gemini API Key (AIza...)" autocomplete="off">
-          <label class="pdf-ai-model-wrap" title="Select Gemini Vision Model (Auto falls back on 404/429)">
-            <span>Model</span>
-            <select id="gemini-model-select" class="pdf-ai-model-select">
-              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
-              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
-              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview</option>
-            </select>
-          </label>
-          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-gemini-key">Save Key</button>
-          <button type="button" class="micro-pill" id="btn-clear-gemini-key">Clear Key</button>
-          <button type="button" class="micro-pill" id="btn-close-gemini-key">&times;</button>
-        </div>
-
-        <!-- Inline Batch Extraction Drawer -->
-        <div class="pdf-ai-drawer admin-only-control" id="pdf-batch-bar" hidden>
-          <span class="pdf-ai-drawer-lbl">Batch Extract PDF Pages:</span>
-          <label class="pdf-batch-field">
-            <span>From p.</span>
-            <input type="number" id="batch-from-page" class="mono-input" min="1" max="200" value="1">
-          </label>
-          <label class="pdf-batch-field">
-            <span>To p.</span>
-            <input type="number" id="batch-to-page" class="mono-input" min="1" max="200" value="5">
-          </label>
-          <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-start-batch-extract">Start Batch</button>
-          <button type="button" class="micro-pill" id="btn-cancel-batch-extract" hidden>Stop</button>
-          <button type="button" class="micro-pill" id="btn-close-batch-extract">&times;</button>
-          <div class="pdf-ai-progress-wrap" id="ai-extract-progress-wrap" hidden>
-            <div class="pdf-ai-progress-track">
-              <div class="pdf-ai-progress-fill" id="ai-extract-progress-fill" style="width:0%"></div>
-            </div>
-            <span class="pdf-ai-progress-pct" id="ai-extract-progress-pct">0%</span>
           </div>
         </div>
 
@@ -5375,6 +5681,89 @@ body:not([data-admin-mode="true"]) .admin-only-control {
       </section>
 
     </main>
+  </div>
+
+  <!-- ADMIN SETTINGS MODAL -->
+  <div class="admin-settings-modal-backdrop admin-only-control" id="admin-settings-modal" hidden>
+    <div class="admin-settings-modal-dialog" role="dialog" aria-labelledby="admin-settings-title" aria-modal="true">
+      <div class="admin-settings-modal-header">
+        <div class="admin-settings-modal-title" id="admin-settings-title">
+          <span class="settings-modal-icon">⚙️</span>
+          <h3>Admin &amp; Curriculum Cloud Settings</h3>
+        </div>
+        <button type="button" class="micro-pill admin-settings-modal-close" id="btn-close-settings-modal" aria-label="Close Settings">&times;</button>
+      </div>
+
+      <div class="admin-settings-modal-body">
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">1</span>
+            <h4>Gemini Vision OMR Key &amp; Model</h4>
+          </div>
+          <p class="admin-settings-hint">Used for high-resolution AI optical music recognition directly from PDF pages.</p>
+          <div class="admin-settings-field">
+            <label for="modal-gemini-key">Gemini API Key</label>
+            <input type="password" id="modal-gemini-key" class="admin-settings-input mono-font" placeholder="AIzaSy..." autocomplete="off">
+          </div>
+          <div class="admin-settings-field">
+            <label for="modal-gemini-model">Vision Model</label>
+            <select id="modal-gemini-model" class="admin-settings-select">
+              <option value="auto" selected>Auto (Free Tier: gemini-2.5-flash)</option>
+              <option value="gemini-2.5-flash">gemini-2.5-flash (Fast &amp; Free Tier Recommended)</option>
+              <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
+              <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Requires Billing)</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">2</span>
+            <h4>GitHub Direct Commit (Live Cloud Sync)</h4>
+          </div>
+          <p class="admin-settings-hint">Commits curriculum edits directly to your repository so changes go live across all student devices without manual pull requests.</p>
+          <div class="admin-settings-grid-2">
+            <div class="admin-settings-field">
+              <label for="modal-github-pat">Personal Access Token (PAT with repo scope)</label>
+              <input type="password" id="modal-github-pat" class="admin-settings-input mono-font" placeholder="ghp_..." autocomplete="off">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-repo">GitHub Repository (owner/repo)</label>
+              <input type="text" id="modal-github-repo" class="admin-settings-input mono-font" value="odin-hash/learn-and-master-guitar-studio" placeholder="owner/repo">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-branch">Target Branch</label>
+              <input type="text" id="modal-github-branch" class="admin-settings-input mono-font" value="main" placeholder="main">
+            </div>
+            <div class="admin-settings-field">
+              <label for="modal-github-path">Curriculum Overrides Path</label>
+              <input type="text" id="modal-github-path" class="admin-settings-input mono-font" value="curriculumOverrides.json" placeholder="curriculumOverrides.json">
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-settings-section">
+          <div class="admin-settings-section-title">
+            <span class="section-badge">3</span>
+            <h4>Offline Backups &amp; Reset</h4>
+          </div>
+          <div class="admin-settings-actions-row">
+            <button type="button" class="micro-pill admin-settings-action-btn" id="modal-btn-download-backup" title="Download current curriculum and AI extracts as offline JSON file">
+              📥 Download Backup JSON
+            </button>
+            <button type="button" class="micro-pill admin-settings-action-btn is-danger" id="modal-btn-clear-ai-data" title="Clear all local AI extractions and edits from this browser">
+              ⚠️ Clear Local AI Storage
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="admin-settings-modal-footer">
+        <span class="admin-settings-status" id="admin-settings-status-msg"></span>
+        <button type="button" class="micro-pill" id="btn-cancel-settings-modal">Cancel</button>
+        <button type="button" class="micro-pill pdf-ai-primary-sm" id="btn-save-settings-modal">Save Settings</button>
+      </div>
+    </div>
   </div>
 
   <!-- ZONE 4: FIXED BOTTOM TRANSPORT DOCK (56px) -->
@@ -16141,6 +16530,10 @@ class PdfAiExtractor {
     return clean;
   }
 
+  setApiKey(key) {
+    return this.saveApiKey(key);
+  }
+
   getModelPreference() {
     try {
       const val = (localStorage.getItem(STORAGE_KEY_MODEL) || "auto").trim();
@@ -16156,6 +16549,10 @@ class PdfAiExtractor {
       localStorage.setItem(STORAGE_KEY_MODEL, clean);
     } catch (e) {}
     return clean;
+  }
+
+  setModelPreference(model) {
+    return this.saveModelPreference(model);
   }
 
   getModelChain() {
@@ -16218,6 +16615,33 @@ class PdfAiExtractor {
     }
   }
 
+  saveExtractedStoreSync(storeMap) {
+    if (!storeMap || typeof storeMap !== "object") return;
+    try {
+      localStorage.setItem(STORAGE_KEY_EXTRACTED, JSON.stringify(storeMap));
+    } catch (e) {}
+  }
+
+  async saveExtractedStoreAsync(storeMap) {
+    this.saveExtractedStoreSync(storeMap);
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        const store = tx.objectStore(IDB_STORE);
+        store.clear();
+        Object.values(storeMap || {}).forEach(entry => {
+          if (entry && entry.pageKey) {
+            store.put(entry);
+          }
+        });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+    return storeMap;
+  }
+
   async savePageEntry(entry) {
     const storeMap = this.loadExtractedStoreSync();
     storeMap[entry.pageKey] = entry;
@@ -16231,6 +16655,25 @@ class PdfAiExtractor {
       await new Promise((resolve, reject) => {
         const tx = db.transaction(IDB_STORE, "readwrite");
         tx.objectStore(IDB_STORE).put(entry);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (e) {}
+    return storeMap;
+  }
+
+  async deletePageEntry(pageKey) {
+    if (!pageKey) return;
+    const storeMap = this.loadExtractedStoreSync();
+    delete storeMap[pageKey];
+    try {
+      localStorage.setItem(STORAGE_KEY_EXTRACTED, JSON.stringify(storeMap));
+    } catch (e) {}
+    try {
+      const db = await this._openIdb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(pageKey);
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
       });
@@ -16708,10 +17151,11 @@ function editorDurSpec(codeOrDur, isDotted = false) {
 }
 
 class NotationEditor {
-  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise } = {}) {
+  constructor({ onCommitExercise, onSelectNoteForFeedback, onAddSubExercise, onBeforeMutate } = {}) {
     this.onCommitExercise = onCommitExercise || null;
     this.onSelectNoteForFeedback = onSelectNoteForFeedback || null;
     this.onAddSubExercise = onAddSubExercise || null;
+    this.onBeforeMutate = onBeforeMutate || null;
 
     this.exercise = null;
     this.hostEl = null;
@@ -16721,6 +17165,12 @@ class NotationEditor {
     this.shorthandOpen = false;
     this._fretDigitBuffer = "";
     this._fretDigitTimer = null;
+  }
+
+  notifyBeforeMutate(actionName = "Edit Notation") {
+    if (typeof this.onBeforeMutate === "function") {
+      this.onBeforeMutate(actionName);
+    }
   }
 
   isActive() {
@@ -17197,9 +17647,13 @@ class NotationEditor {
     this.renderPalette();
   }
 
-  mutateActiveEvent(fn) {
+  mutateActiveEvent(actionOrFn, maybeFn) {
     const ev = this.getActiveEvent();
     if (!ev) return;
+    const action = typeof actionOrFn === "string" ? actionOrFn : "Edit Note";
+    const fn = typeof actionOrFn === "function" ? actionOrFn : maybeFn;
+    if (typeof fn !== "function") return;
+    this.notifyBeforeMutate(action);
     fn(ev);
     this.commitChanges();
   }
@@ -17273,6 +17727,7 @@ class NotationEditor {
     const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev) return;
+    this.notifyBeforeMutate(`Change Duration to ${code}`);
     const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
     const oldBeats = Number(ev.durationBeats) || 1;
     const { spec } = editorDurSpec(code, Boolean(ev.isDotted));
@@ -17285,7 +17740,7 @@ class NotationEditor {
   }
 
   toggleRest() {
-    this.mutateActiveEvent(ev => {
+    this.mutateActiveEvent("Toggle Rest", ev => {
       ev.isRest = !ev.isRest;
       ev.isAutoFillRest = false;
       if (!ev.isRest && typeof ev.string !== "number") {
@@ -17300,6 +17755,7 @@ class NotationEditor {
     const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev) return;
+    this.notifyBeforeMutate("Toggle Dot");
     const prevBeatsSum = (m.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0);
     const oldBeats = Number(ev.durationBeats) || 1;
     ev.isDotted = !ev.isDotted;
@@ -17315,6 +17771,7 @@ class NotationEditor {
     const m = measures && measures[this.selectedMeasureIdx];
     const ev = this.getActiveEvent();
     if (!m || !ev || ev.isRest) return;
+    this.notifyBeforeMutate("Toggle Tie");
     ev.tieToNext = !ev.tieToNext;
     // Sync next note tieFromPrev cleanly when same bar or next bar
     let nextEv = m.events[this.selectedEventIdx + 1] || null;
@@ -17328,7 +17785,7 @@ class NotationEditor {
   }
 
   setEnharmonicFlat(useFlat) {
-    this.mutateActiveEvent(ev => {
+    this.mutateActiveEvent(useFlat ? "Spell as Flat (♭)" : "Spell as Sharp (♯)", ev => {
       if (ev.isRest) return;
       ev.preferFlat = Boolean(useFlat);
       this.syncEventFromSource(ev);
@@ -17336,9 +17793,9 @@ class NotationEditor {
   }
 
   setStringAndFret(strVal, fretVal) {
-    this.mutateActiveEvent(ev => {
-      const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
-      const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
+    const str = Math.max(1, Math.min(6, parseInt(strVal, 10) || 1));
+    const fret = Math.max(0, Math.min(24, parseInt(fretVal, 10) || 0));
+    this.mutateActiveEvent(`Set String ${str} Fret ${fret}`, ev => {
       ev.isRest = false;
       ev.isAutoFillRest = false;
       ev.string = str;
@@ -17377,10 +17834,102 @@ class NotationEditor {
     this.setStringAndFret(str, nextFret);
   }
 
+  setChordSymbol(chordVal) {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    const clean = String(chordVal || "").trim();
+    this.notifyBeforeMutate(`Set Chord "${clean || "None"}"`);
+    ev.chordChange = clean || null;
+    if (this.selectedEventIdx === 0) {
+      const m = this.exercise && this.exercise.measures && this.exercise.measures[this.selectedMeasureIdx];
+      if (m) m.chordName = clean || null;
+    }
+    this.commitChanges();
+  }
+
+  setTimeSignature(tsStr) {
+    if (!this.exercise) return;
+    this.notifyBeforeMutate(`Change Time Signature to ${tsStr}`);
+    const parts = String(tsStr).split("/").map(Number);
+    const num = parts[0] || 4;
+    const den = parts[1] || 4;
+    this.exercise.timeSignature = [num, den];
+    (this.exercise.measures || []).forEach(m => {
+      m.timeSignature = `${num}/${den}`;
+    });
+    this.commitChanges();
+  }
+
+  setDefaultBpm(bpmVal) {
+    if (!this.exercise) return;
+    const bpm = Math.max(30, Math.min(240, parseInt(bpmVal, 10) || 60));
+    this.notifyBeforeMutate(`Set BPM to ${bpm}`);
+    this.exercise.defaultBpm = bpm;
+    this.exercise.bpm = bpm;
+    this.commitChanges();
+  }
+
+  notifyFeedbackSelection() {
+    if (typeof this.onSelectNoteForFeedback === "function") {
+      const ev = this.getActiveEvent();
+      this.onSelectNoteForFeedback(
+        this.selectedMeasureIdx,
+        ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0,
+        Boolean(ev && ev.isRest),
+        this.selectedEventIdx
+      );
+    }
+  }
+
+  selectPrevNote() {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    if (this.selectedEventIdx > 0) {
+      this.selectNote(this.selectedMeasureIdx, 0, this.selectedEventIdx - 1);
+    } else if (this.selectedMeasureIdx > 0) {
+      const prevM = this.exercise.measures[this.selectedMeasureIdx - 1];
+      const lastEvIdx = Math.max(0, (prevM.events || []).length - 1);
+      this.selectNote(this.selectedMeasureIdx - 1, 0, lastEvIdx);
+    }
+    this.notifyFeedbackSelection();
+  }
+
+  selectNextNote() {
+    if (!this.exercise || !Array.isArray(this.exercise.measures)) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    if (this.selectedEventIdx < (m.events || []).length - 1) {
+      this.selectNote(this.selectedMeasureIdx, 0, this.selectedEventIdx + 1);
+    } else if (this.selectedMeasureIdx < this.exercise.measures.length - 1) {
+      this.selectNote(this.selectedMeasureIdx + 1, 0, 0);
+    }
+    this.notifyFeedbackSelection();
+  }
+
+  smartBackspace() {
+    const ev = this.getActiveEvent();
+    if (!ev) return;
+    if (!ev.isRest) {
+      this.notifyBeforeMutate("Convert Note to Rest");
+      ev.isRest = true;
+      ev.isAutoFillRest = false;
+      this.syncEventFromSource(ev);
+      this.commitChanges();
+    } else {
+      this.deleteSelectedNote();
+    }
+  }
+
+  smartDelete() {
+    this.deleteSelectedNote();
+  }
+
   addNoteAfterSelected() {
     if (!this.exercise || !this.exercise.measures) return;
     const m = this.exercise.measures[this.selectedMeasureIdx];
     if (!m) return;
+    this.notifyBeforeMutate("Add Note After Selected");
     const cur = this.getActiveEvent();
     const str = cur && typeof cur.string === "number" ? cur.string : 1;
     const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
@@ -17409,6 +17958,7 @@ class NotationEditor {
     if (!this.exercise || !this.exercise.measures) return;
     const m = this.exercise.measures[this.selectedMeasureIdx];
     if (!m || !Array.isArray(m.events)) return;
+    this.notifyBeforeMutate("Delete Note");
     if (m.events.length <= 1) {
       const ev = m.events[0];
       if (ev) {
@@ -17426,53 +17976,68 @@ class NotationEditor {
     this.commitChanges();
   }
 
-  addMeasure() {
+  insertMeasureAfter() {
     if (!this.exercise || !this.exercise.measures) return;
+    this.notifyBeforeMutate("Insert Bar After");
     const ts = this.exercise.timeSignature || [4, 4];
     const tsNum = Array.isArray(ts) ? ts[0] : 4;
     const tsDen = Array.isArray(ts) ? ts[1] : 4;
     const tsStr = `${tsNum}/${tsDen}`;
     const beatsPerBar = tsNum * (4 / tsDen);
-    const cur = this.getActiveEvent();
-    const str = cur && typeof cur.string === "number" ? cur.string : 1;
-    const fret = cur && typeof cur.fret === "number" ? cur.fret : 0;
-
     const quarterCount = Math.max(1, Math.round(beatsPerBar));
     const events = [];
     for (let i = 0; i < quarterCount; i++) {
       events.push(this.syncEventFromSource({
         beat: i + 1,
-        isRest: false,
+        isRest: true,
         duration: "q",
-        isDotted: false,
-        string: str,
-        fret,
-        preferFlat: Boolean(cur && cur.preferFlat),
-        pick: i % 2 === 0 ? "Down" : "Up",
-        tieToNext: false,
-        tieFromPrev: false
+        isDotted: false
       }));
     }
 
-    this.exercise.measures.push({
-      measure: this.exercise.measures.length + 1,
+    const newMeasure = {
+      measure: this.selectedMeasureIdx + 2,
       clef: "treble",
       notationMode: "standard",
       timeSignature: tsStr,
       chordName: null,
       events
-    });
-    this.selectedMeasureIdx = this.exercise.measures.length - 1;
+    };
+
+    this.exercise.measures.splice(this.selectedMeasureIdx + 1, 0, newMeasure);
+    this.selectedMeasureIdx = this.selectedMeasureIdx + 1;
     this.selectedEventIdx = 0;
     this.commitChanges();
   }
 
-  deleteMeasure() {
+  duplicateSelectedMeasure() {
+    if (!this.exercise || !this.exercise.measures) return;
+    const m = this.exercise.measures[this.selectedMeasureIdx];
+    if (!m) return;
+    this.notifyBeforeMutate("Duplicate Bar");
+    const clonedMeasure = JSON.parse(JSON.stringify(m));
+    clonedMeasure.events.forEach(ev => this.syncEventFromSource(ev));
+    this.exercise.measures.splice(this.selectedMeasureIdx + 1, 0, clonedMeasure);
+    this.selectedMeasureIdx = this.selectedMeasureIdx + 1;
+    this.selectedEventIdx = 0;
+    this.commitChanges();
+  }
+
+  deleteSelectedMeasure() {
     if (!this.exercise || !this.exercise.measures || this.exercise.measures.length <= 1) return;
+    this.notifyBeforeMutate("Delete Bar");
     this.exercise.measures.splice(this.selectedMeasureIdx, 1);
     this.selectedMeasureIdx = Math.max(0, Math.min(this.selectedMeasureIdx, this.exercise.measures.length - 1));
     this.selectedEventIdx = 0;
     this.commitChanges();
+  }
+
+  addMeasure() {
+    this.insertMeasureAfter();
+  }
+
+  deleteMeasure() {
+    this.deleteSelectedMeasure();
   }
 
   renderPalette() {
@@ -17488,7 +18053,10 @@ class NotationEditor {
     const curMeasure = measures[this.selectedMeasureIdx] || measures[0];
     const ev = this.getActiveEvent();
     const ts = this.exercise.timeSignature || [4, 4];
-    const expectedBeats = (ts[0] || 4) * (4 / (ts[1] || 4));
+    const tsNum = Array.isArray(ts) ? (ts[0] || 4) : 4;
+    const tsDen = Array.isArray(ts) ? (ts[1] || 4) : 4;
+    const tsStr = `${tsNum}/${tsDen}`;
+    const expectedBeats = tsNum * (4 / tsDen);
     const curBeatsSum = curMeasure
       ? (curMeasure.events || []).reduce((s, x) => s + (Number(x.durationBeats) || 1), 0)
       : 0;
@@ -17507,9 +18075,13 @@ class NotationEditor {
     const preferFlat = Boolean(derived && derived.preferFlat);
     const curPick = ev && ev.pick === "Up" ? "Up" : "Down";
     const curFinger = ev && ev.finger !== null && ev.finger !== undefined ? ev.finger : 0;
+    const curChord = ev ? (ev.chordChange || (this.selectedEventIdx === 0 && curMeasure ? curMeasure.chordName : "") || "") : "";
+    const curBpm = this.exercise.defaultBpm || this.exercise.bpm || 60;
     const pitchSummary = ev
       ? (isRest ? "Rest" : `${derived.concertPitch} (${derived.displayName}) · S${derived.string} F${derived.fret}`)
       : "No Selection";
+
+    const commonChords = ["", "C", "G", "G7", "D", "D7", "Am", "Em", "E", "E7", "A", "A7", "F", "Dm", "Dm7", "C7", "B7", "F#m", "Bm"];
 
     this.paletteEl.innerHTML = `
       <div class="ne-header-row">
@@ -17520,6 +18092,19 @@ class NotationEditor {
           `).join("")}
         </div>
         <div class="ne-header-meta">
+          <div class="ne-meter-cluster" title="Exercise Time Signature">
+            <span class="ne-lbl">Meter</span>
+            <select class="ne-select-sm" id="ne-meter-select">
+              <option value="4/4" ${tsStr === "4/4" ? "selected" : ""}>4/4</option>
+              <option value="3/4" ${tsStr === "3/4" ? "selected" : ""}>3/4</option>
+              <option value="2/4" ${tsStr === "2/4" ? "selected" : ""}>2/4</option>
+              <option value="6/8" ${tsStr === "6/8" ? "selected" : ""}>6/8</option>
+            </select>
+          </div>
+          <div class="ne-bpm-cluster" title="Exercise Default Tempo BPM">
+            <span class="ne-lbl">BPM</span>
+            <input type="number" id="ne-bpm-input" class="ne-input-sm mono-font" min="30" max="240" value="${curBpm}">
+          </div>
           <span class="ne-beat-counter ${isMathOk ? "is-ok" : "is-warn"}" title="Total beats in Bar ${this.selectedMeasureIdx + 1} vs Time Signature">
             ${Number(curBeatsSum.toFixed(2))} / ${Number(expectedBeats.toFixed(2))} beats
           </span>
@@ -17548,11 +18133,17 @@ class NotationEditor {
           <button type="button" class="ne-sym-btn ${isBlackKey && preferFlat ? "active" : ""}" id="ne-spell-flat" data-ne-spell="flat" ${!isBlackKey ? "disabled" : ""} title="${isBlackKey ? "Spell chromatic fret as Flat (♭)" : "Natural fret — never takes sharp or flat"}">&#9837;</button>
         </div>
 
-        <div class="ne-group" role="group" aria-label="Bar Actions">
-          <button type="button" class="ne-action-btn" id="ne-btn-add-note">+ Add Note</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note">Delete Note</button>
-          <button type="button" class="ne-action-btn" id="ne-btn-add-bar">+ Add Bar</button>
-          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""}>- Delete Bar</button>
+        <div class="ne-group" role="group" aria-label="Chord Symbol Tag">
+          <span class="ne-lbl">Chord</span>
+          <select class="ne-select-sm ne-chord-select" id="ne-chord-select" title="Attach chord symbol above active note">
+            <option value="">-- None --</option>
+            ${commonChords.filter(Boolean).map(c => `
+              <option value="${c}" ${curChord === c ? "selected" : ""}>${c}</option>
+            `).join("")}
+            ${curChord && !commonChords.includes(curChord) ? `<option value="${curChord}" selected>${curChord}</option>` : ""}
+          </select>
+          <input type="text" class="ne-input-sm ne-chord-input mono-font" id="ne-chord-input" placeholder="Custom" value="${curChord}" maxlength="8" title="Type custom chord symbol and press Enter">
+          <button type="button" class="ne-num-btn" id="ne-btn-clear-chord" title="Clear Chord" ${!curChord ? "disabled" : ""}>&times;</button>
         </div>
       </div>
 
@@ -17591,6 +18182,20 @@ class NotationEditor {
         </div>
       </div>
 
+      <div class="ne-tools-row">
+        <div class="ne-group" role="group" aria-label="Note Actions">
+          <button type="button" class="ne-action-btn" id="ne-btn-add-note" title="Add note after currently selected note">+ Add Note After</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-backspace" title="Convert note to Rest of exact same duration (Backspace)">⌫ Rest</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-note" title="Delete note/rest completely from measure (Delete)">🗑️ Del Note</button>
+        </div>
+
+        <div class="ne-group" role="group" aria-label="Measure Actions">
+          <button type="button" class="ne-action-btn" id="ne-btn-insert-bar-after" title="Insert a new empty measure after active bar">+ Insert Bar After</button>
+          <button type="button" class="ne-action-btn" id="ne-btn-dup-bar" title="Duplicate currently selected measure">📋 Duplicate Bar</button>
+          <button type="button" class="ne-action-btn is-danger" id="ne-btn-del-bar" ${measures.length <= 1 ? "disabled" : ""} title="Delete entire currently selected measure">🗑️ Delete Bar</button>
+        </div>
+      </div>
+
       <div class="ne-shorthand-row" ${this.shorthandOpen ? "" : "hidden"}>
         <span class="ne-lbl">Quick Shorthand (Str:Fret/Dur, use | between bars)</span>
         <input type="text" class="ne-shorthand-input" id="ne-shorthand-input" value="${this.formatExerciseShorthand().replace(/"/g, "&quot;")}" placeholder="e.g. 3:0/h 3:2/h | 3:0/q 3:0/q 3:0/h | 3:2/q 3:2/q 3:2/h">
@@ -17608,17 +18213,25 @@ class NotationEditor {
       btn.addEventListener("click", () => {
         const b = parseInt(btn.dataset.neBar, 10);
         this.selectNote(b, 0, 0);
-        if (typeof this.onSelectNoteForFeedback === "function") {
-          const ev = this.getActiveEvent();
-          this.onSelectNoteForFeedback(
-            this.selectedMeasureIdx,
-            ev && ev.tabBeatIndex !== undefined ? ev.tabBeatIndex : 0,
-            Boolean(ev && ev.isRest),
-            this.selectedEventIdx
-          );
-        }
+        this.notifyFeedbackSelection();
       });
     });
+
+    const meterSelect = this.paletteEl.querySelector("#ne-meter-select");
+    if (meterSelect) {
+      meterSelect.addEventListener("change", () => this.setTimeSignature(meterSelect.value));
+    }
+
+    const bpmInput = this.paletteEl.querySelector("#ne-bpm-input");
+    if (bpmInput) {
+      bpmInput.addEventListener("change", () => this.setDefaultBpm(bpmInput.value));
+      bpmInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.setDefaultBpm(bpmInput.value);
+        }
+      });
+    }
 
     this.paletteEl.querySelectorAll("[data-ne-dur]").forEach(btn => {
       btn.addEventListener("click", () => this.setDurationCode(btn.dataset.neDur));
@@ -17636,6 +18249,33 @@ class NotationEditor {
     this.paletteEl.querySelectorAll("[data-ne-spell]").forEach(btn => {
       btn.addEventListener("click", () => this.setEnharmonicFlat(btn.dataset.neSpell === "flat"));
     });
+
+    const chordSelect = this.paletteEl.querySelector("#ne-chord-select");
+    const chordInput = this.paletteEl.querySelector("#ne-chord-input");
+    const btnClearChord = this.paletteEl.querySelector("#ne-btn-clear-chord");
+    if (chordSelect) {
+      chordSelect.addEventListener("change", () => {
+        const val = chordSelect.value;
+        if (chordInput) chordInput.value = val;
+        this.setChordSymbol(val);
+      });
+    }
+    if (chordInput) {
+      chordInput.addEventListener("change", () => this.setChordSymbol(chordInput.value));
+      chordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.setChordSymbol(chordInput.value);
+        }
+      });
+    }
+    if (btnClearChord) {
+      btnClearChord.addEventListener("click", () => {
+        if (chordInput) chordInput.value = "";
+        if (chordSelect) chordSelect.value = "";
+        this.setChordSymbol("");
+      });
+    }
 
     this.paletteEl.querySelectorAll("[data-ne-str]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -17663,7 +18303,7 @@ class NotationEditor {
 
     this.paletteEl.querySelectorAll("[data-ne-pick]").forEach(btn => {
       btn.addEventListener("click", () => {
-        this.mutateActiveEvent(ev => {
+        this.mutateActiveEvent("Set Pick Direction", ev => {
           ev.pick = btn.dataset.nePick;
         });
       });
@@ -17671,7 +18311,7 @@ class NotationEditor {
 
     this.paletteEl.querySelectorAll("[data-ne-finger]").forEach(btn => {
       btn.addEventListener("click", () => {
-        this.mutateActiveEvent(ev => {
+        this.mutateActiveEvent("Set Left Hand Finger", ev => {
           ev.finger = parseInt(btn.dataset.neFinger, 10);
         });
       });
@@ -17680,14 +18320,20 @@ class NotationEditor {
     const btnAddNote = this.paletteEl.querySelector("#ne-btn-add-note");
     if (btnAddNote) btnAddNote.addEventListener("click", () => this.addNoteAfterSelected());
 
-    const btnDelNote = this.paletteEl.querySelector("#ne-btn-del-note");
-    if (btnDelNote) btnDelNote.addEventListener("click", () => this.deleteSelectedNote());
+    const btnBackspace = this.paletteEl.querySelector("#ne-btn-backspace");
+    if (btnBackspace) btnBackspace.addEventListener("click", () => this.smartBackspace());
 
-    const btnAddBar = this.paletteEl.querySelector("#ne-btn-add-bar");
-    if (btnAddBar) btnAddBar.addEventListener("click", () => this.addMeasure());
+    const btnDelNote = this.paletteEl.querySelector("#ne-btn-del-note");
+    if (btnDelNote) btnDelNote.addEventListener("click", () => this.smartDelete());
+
+    const btnInsertBarAfter = this.paletteEl.querySelector("#ne-btn-insert-bar-after");
+    if (btnInsertBarAfter) btnInsertBarAfter.addEventListener("click", () => this.insertMeasureAfter());
+
+    const btnDupBar = this.paletteEl.querySelector("#ne-btn-dup-bar");
+    if (btnDupBar) btnDupBar.addEventListener("click", () => this.duplicateSelectedMeasure());
 
     const btnDelBar = this.paletteEl.querySelector("#ne-btn-del-bar");
-    if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteMeasure());
+    if (btnDelBar) btnDelBar.addEventListener("click", () => this.deleteSelectedMeasure());
 
     const btnShortToggle = this.paletteEl.querySelector("#ne-btn-shorthand");
     if (btnShortToggle) {
@@ -17733,15 +18379,20 @@ class NotationEditor {
 
 class GuitarMasterApp {
   constructor() {
+    this.initialBaselineCourses = JSON.parse(JSON.stringify(GUITAR_COURSES));
     if (typeof mergeVerifiedCurriculumIntoCourses === "function") {
       mergeVerifiedCurriculumIntoCourses(GUITAR_COURSES);
     }
     this.pdfAiExtractor = new PdfAiExtractor();
     this.adminMode = false;
     this.editingExerciseId = null;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.hasUnsavedChanges = false;
     this.notationEditor = new NotationEditor({
       onCommitExercise: (updatedEx, mIdx, tabBeatIdx, evIdx) => this.handleNotationEditCommit(updatedEx, mIdx, tabBeatIdx, evIdx),
-      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx)
+      onSelectNoteForFeedback: (mIdx, tabBeatIdx, isRest, evIdx) => this.handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx),
+      onBeforeMutate: (action) => this.pushUndo(action)
     });
     this.audio = new MetronomeAudioEngine();
     this.currentBookCategory = "lessonBook"; // "lessonBook" | "bonusWorkshop"
@@ -17813,6 +18464,7 @@ class GuitarMasterApp {
     // Restore state from URL Hash / LocalStorage
     this.restoreState();
     this.hydrateIndexedDbExtractions();
+    this.loadRemoteCurriculumOverrides();
   }
 
   ensureStorageVersion() {
@@ -17855,9 +18507,14 @@ class GuitarMasterApp {
           "guitar_completed_exercises",
           "guitar_checked_goals",
           "lmgs_admin_mode",
+          "lmgs_admin_mode_unlocked",
           "lmgs_gemini_api_key",
           "lmgs_gemini_model_pref",
-          "lmgs_ai_extracted_pages_v1"
+          "lmgs_ai_extracted_pages_v1",
+          "lmgs_github_pat",
+          "lmgs_github_repo",
+          "lmgs_github_branch",
+          "lmgs_github_path"
         ]);
         Object.keys(localStorage).forEach(k => {
           if (!preservedKeys.has(k) && (k.startsWith("guitar_") || k.startsWith("lmgs_"))) {
@@ -18082,7 +18739,35 @@ class GuitarMasterApp {
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
 
-    // PDF AI Extractor Toolbar & Drawers
+    // Admin Action Bar & Cloud Settings
+    this.btnAdminSettings = document.getElementById("btn-admin-settings");
+    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
+    this.btnAppendPdfPage = document.getElementById("btn-append-pdf-page");
+    this.btnAdminUndo = document.getElementById("btn-admin-undo");
+    this.btnAdminRedo = document.getElementById("btn-admin-redo");
+    this.btnAdminBackspace = document.getElementById("btn-admin-backspace");
+    this.btnAdminDelete = document.getElementById("btn-admin-delete");
+    this.btnRevertLesson = document.getElementById("btn-revert-lesson");
+    this.btnSaveLive = document.getElementById("btn-save-live");
+    this.saveStatusDot = document.getElementById("save-status-dot");
+    this.saveStatusText = document.getElementById("save-status-text");
+
+    // Admin Settings Modal
+    this.adminSettingsModal = document.getElementById("admin-settings-modal");
+    this.btnCloseSettingsModal = document.getElementById("btn-close-settings-modal");
+    this.btnCancelSettingsModal = document.getElementById("btn-cancel-settings-modal");
+    this.btnSaveSettingsModal = document.getElementById("btn-save-settings-modal");
+    this.modalGeminiKey = document.getElementById("modal-gemini-key");
+    this.modalGeminiModel = document.getElementById("modal-gemini-model");
+    this.modalGithubPat = document.getElementById("modal-github-pat");
+    this.modalGithubRepo = document.getElementById("modal-github-repo");
+    this.modalGithubBranch = document.getElementById("modal-github-branch");
+    this.modalGithubPath = document.getElementById("modal-github-path");
+    this.modalBtnDownloadBackup = document.getElementById("modal-btn-download-backup");
+    this.modalBtnClearAiData = document.getElementById("modal-btn-clear-ai-data");
+    this.adminSettingsStatusMsg = document.getElementById("admin-settings-status-msg");
+
+    // PDF AI Extractor Toolbar & Drawers (Compatibility)
     this.btnGeminiApiKey = document.getElementById("btn-gemini-api-key");
     this.aiKeyDot = document.getElementById("ai-key-dot");
     this.geminiKeyBar = document.getElementById("gemini-key-bar");
@@ -18091,7 +18776,6 @@ class GuitarMasterApp {
     this.btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
     this.btnClearGeminiKey = document.getElementById("btn-clear-gemini-key");
     this.btnCloseGeminiKey = document.getElementById("btn-close-gemini-key");
-    this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
     this.btnBatchExtractToggle = document.getElementById("btn-batch-extract-toggle");
     this.btnExportCurriculumJson = document.getElementById("btn-export-curriculum-json");
     this.pdfBatchBar = document.getElementById("pdf-batch-bar");
@@ -18110,6 +18794,7 @@ class GuitarMasterApp {
     this.btnDismissAiStatus = document.getElementById("btn-dismiss-ai-status");
     this.syncGeminiKeyUI();
     this.initAdminMode();
+    this.updateUndoRedoUI();
 
     // Zone 4: Fixed Bottom Transport Dock
     this.transportDock = document.getElementById("transport-dock");
@@ -19001,6 +19686,7 @@ class GuitarMasterApp {
       if (this.geminiKeyBar) this.geminiKeyBar.hidden = true;
       if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
       if (this.aiExtractStatusBar) this.aiExtractStatusBar.hidden = true;
+      if (this.adminSettingsModal) this.adminSettingsModal.hidden = true;
       document.querySelectorAll(".topic-ex-edit-btn").forEach(btn => btn.classList.remove("is-active"));
     }
   }
@@ -19122,6 +19808,7 @@ class GuitarMasterApp {
       }
     }
     this.persistEditedTopicOrExercise(updatedEx);
+    this.markUnsaved();
   }
 
   handleEditorNoteFeedback(mIdx, tabBeatIdx, isRest, evIdx = null) {
@@ -19496,10 +20183,12 @@ class GuitarMasterApp {
   async extractCurrentPdfPage() {
     if (this.pdfAiExtractor._isBusy) return;
     const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    this.pushUndo(`Extract PDF Page ${rawPage}`);
     this.pdfAiExtractor._isBusy = true;
     if (this.btnExtractPdfPage) this.btnExtractPdfPage.disabled = true;
     try {
       await this.extractSinglePdfPage(rawPage, { switchExercise: true });
+      this.markUnsaved();
     } catch (err) {
       this.setAiExtractStatus(`Extraction failed: ${err && err.message ? err.message : String(err)}`, "error");
     } finally {
@@ -19508,15 +20197,467 @@ class GuitarMasterApp {
     }
   }
 
+  pushUndo(actionDescription = "Edit") {
+    if (!this.currentExercise) return;
+    const snapshot = {
+      action: actionDescription,
+      exerciseId: this.currentExercise.id,
+      topicId: this.currentExercise.topicId,
+      exerciseClone: JSON.parse(JSON.stringify(this.currentExercise)),
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.undoStack.push(snapshot);
+    if (this.undoStack.length > 50) {
+      this.undoStack.shift();
+    }
+    this.redoStack = [];
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+  }
+
+  undo() {
+    if (!this.undoStack || this.undoStack.length === 0) return;
+    const currentSnapshot = {
+      action: "Redo",
+      exerciseId: this.currentExercise ? this.currentExercise.id : null,
+      topicId: this.currentExercise ? this.currentExercise.topicId : null,
+      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.redoStack.push(currentSnapshot);
+    if (this.redoStack.length > 50) {
+      this.redoStack.shift();
+    }
+    const prevSnapshot = this.undoStack.pop();
+    this.applyStateSnapshot(prevSnapshot);
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+    this.setAiExtractStatus(`Undid: ${prevSnapshot.action}`, "info");
+  }
+
+  redo() {
+    if (!this.redoStack || this.redoStack.length === 0) return;
+    const currentSnapshot = {
+      action: "Undo",
+      exerciseId: this.currentExercise ? this.currentExercise.id : null,
+      topicId: this.currentExercise ? this.currentExercise.topicId : null,
+      exerciseClone: this.currentExercise ? JSON.parse(JSON.stringify(this.currentExercise)) : null,
+      selectedMeasureIdx: this.notationEditor ? this.notationEditor.selectedMeasureIdx : 0,
+      selectedEventIdx: this.notationEditor ? this.notationEditor.selectedEventIdx : 0,
+      timestamp: Date.now()
+    };
+    this.undoStack.push(currentSnapshot);
+    if (this.undoStack.length > 50) {
+      this.undoStack.shift();
+    }
+    const nextSnapshot = this.redoStack.pop();
+    this.applyStateSnapshot(nextSnapshot);
+    this.updateUndoRedoUI();
+    this.markUnsaved();
+    this.setAiExtractStatus(`Redid: ${nextSnapshot.action}`, "info");
+  }
+
+  applyStateSnapshot(snapshot) {
+    if (!snapshot || !snapshot.exerciseClone) return;
+    const restoredEx = JSON.parse(JSON.stringify(snapshot.exerciseClone));
+    this.notationEditor.ensureCanonicalMeasures(restoredEx);
+    this.currentExercise = restoredEx;
+
+    const slot = this._findCourseSlotForExercise(restoredEx.id);
+    if (slot && slot.topic) {
+      slot.topic.exercises[slot.exIdx] = restoredEx;
+    }
+    this.allExercises = this.buildFlatExerciseList();
+    this.persistEditedTopicOrExercise(restoredEx);
+
+    const entry = this.activeTopicRenderers.get(restoredEx.id);
+    if (entry && entry.renderer) {
+      entry.renderer.loadExercise(restoredEx, {
+        noteNameMode: this.noteNameMode,
+        tabVisibilityMode: this.tabVisibilityMode,
+        showRhythmGuide: this.showRhythmGuide,
+        showCoachBanner: this.showCoachBanner
+      });
+      const mIdx = snapshot.selectedMeasureIdx || 0;
+      const evIdx = snapshot.selectedEventIdx || 0;
+      const fb = this._buildFeedbackBeatFromMeasureEvent(restoredEx, mIdx, null, evIdx);
+      const isRest = fb ? fb.isRest : false;
+      entry.renderer.highlightBeat(mIdx, 0, isRest, null, evIdx);
+    }
+    if (this.notationEditor && this.notationEditor.isActive()) {
+      this.notationEditor.open(
+        restoredEx,
+        this.notationEditor.hostEl,
+        snapshot.selectedMeasureIdx || 0,
+        snapshot.selectedEventIdx || 0
+      );
+    }
+  }
+
+  updateUndoRedoUI() {
+    if (this.btnAdminUndo) {
+      this.btnAdminUndo.disabled = !this.undoStack || this.undoStack.length === 0;
+      this.btnAdminUndo.title = this.undoStack && this.undoStack.length > 0
+        ? `Undo ${this.undoStack[this.undoStack.length - 1].action} (Ctrl+Z)`
+        : "Undo (Ctrl+Z)";
+    }
+    if (this.btnAdminRedo) {
+      this.btnAdminRedo.disabled = !this.redoStack || this.redoStack.length === 0;
+      this.btnAdminRedo.title = this.redoStack && this.redoStack.length > 0
+        ? `Redo ${this.redoStack[this.redoStack.length - 1].action} (Ctrl+Y)`
+        : "Redo (Ctrl+Y)";
+    }
+  }
+
+  markUnsaved() {
+    this.hasUnsavedChanges = true;
+    this.setSaveLiveStatus("unsaved", "Unsaved");
+  }
+
+  setSaveLiveStatus(state, label) {
+    if (this.saveStatusDot) {
+      this.saveStatusDot.className = `save-status-dot is-${state}`;
+    }
+    if (this.saveStatusText && label) {
+      this.saveStatusText.textContent = label;
+    }
+    if (this.btnSaveLive) {
+      this.btnSaveLive.dataset.status = state;
+    }
+  }
+
+  openAdminSettingsModal() {
+    if (!this.adminSettingsModal) return;
+    if (this.modalGeminiKey && this.pdfAiExtractor) {
+      this.modalGeminiKey.value = this.pdfAiExtractor.getApiKey();
+    }
+    if (this.modalGeminiModel && this.pdfAiExtractor) {
+      this.modalGeminiModel.value = this.pdfAiExtractor.getModelPreference();
+    }
+    if (this.modalGithubPat) {
+      this.modalGithubPat.value = localStorage.getItem("lmgs_github_pat") || "";
+    }
+    if (this.modalGithubRepo) {
+      this.modalGithubRepo.value = localStorage.getItem("lmgs_github_repo") || "odin-hash/learn-and-master-guitar-studio";
+    }
+    if (this.modalGithubBranch) {
+      this.modalGithubBranch.value = localStorage.getItem("lmgs_github_branch") || "main";
+    }
+    if (this.modalGithubPath) {
+      this.modalGithubPath.value = localStorage.getItem("lmgs_github_path") || "curriculumOverrides.json";
+    }
+    if (this.adminSettingsStatusMsg) {
+      this.adminSettingsStatusMsg.textContent = "";
+    }
+    this.adminSettingsModal.hidden = false;
+  }
+
+  closeAdminSettingsModal() {
+    if (this.adminSettingsModal) {
+      this.adminSettingsModal.hidden = true;
+    }
+  }
+
+  saveAdminSettings() {
+    const geminiKey = this.modalGeminiKey ? this.modalGeminiKey.value.trim() : "";
+    const modelPref = this.modalGeminiModel ? this.modalGeminiModel.value : "auto";
+    const githubPat = this.modalGithubPat ? this.modalGithubPat.value.trim() : "";
+    const githubRepo = this.modalGithubRepo ? this.modalGithubRepo.value.trim() : "odin-hash/learn-and-master-guitar-studio";
+    const githubBranch = this.modalGithubBranch ? this.modalGithubBranch.value.trim() : "main";
+    const githubPath = this.modalGithubPath ? this.modalGithubPath.value.trim() : "curriculumOverrides.json";
+
+    if (this.pdfAiExtractor) {
+      this.pdfAiExtractor.saveApiKey(geminiKey);
+      this.pdfAiExtractor.saveModelPreference(modelPref);
+    }
+    localStorage.setItem("lmgs_github_pat", githubPat);
+    localStorage.setItem("lmgs_github_repo", githubRepo);
+    localStorage.setItem("lmgs_github_branch", githubBranch);
+    localStorage.setItem("lmgs_github_path", githubPath);
+
+    this.syncGeminiKeyUI();
+    if (this.adminSettingsStatusMsg) {
+      this.adminSettingsStatusMsg.textContent = "✓ Settings saved!";
+    }
+    setTimeout(() => {
+      this.closeAdminSettingsModal();
+    }, 400);
+  }
+
+  async commitCurriculumToGitHub() {
+    const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
+    const repo = (localStorage.getItem("lmgs_github_repo") || "odin-hash/learn-and-master-guitar-studio").trim();
+    const branch = (localStorage.getItem("lmgs_github_branch") || "main").trim();
+    const path = (localStorage.getItem("lmgs_github_path") || "curriculumOverrides.json").trim();
+
+    if (!pat) {
+      throw new Error("No GitHub Personal Access Token (PAT) configured. Click 🔑 Settings to enter your token.");
+    }
+
+    let sha = null;
+    const getUrl = `https://api.github.com/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}&_=${Date.now()}`;
+    try {
+      const getRes = await fetch(getUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${pat}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28"
+        }
+      });
+      if (getRes.status === 200) {
+        const data = await getRes.json();
+        sha = data.sha;
+      } else if (getRes.status !== 404) {
+        const errJson = await getRes.json().catch(() => null);
+        throw new Error((errJson && errJson.message) || `GitHub check returned status ${getRes.status}`);
+      }
+    } catch (err) {
+      if (err.message && err.message.includes("404")) {
+        sha = null;
+      } else {
+        throw err;
+      }
+    }
+
+    const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+    const payload = {
+      schemaVersion: "2.0.0",
+      updatedAt: new Date().toISOString(),
+      repo,
+      branch,
+      modelPreference: this.pdfAiExtractor.getModelPreference(),
+      extractedPageCount: Object.keys(store).length,
+      extractedPages: store
+    };
+    const jsonStr = JSON.stringify(payload, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    const putUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+    const commitBody = {
+      message: `feat(curriculum): live update via Admin Action Bar [skip ci]`,
+      content: base64Content,
+      branch: branch
+    };
+    if (sha) {
+      commitBody.sha = sha;
+    }
+
+    const putRes = await fetch(putUrl, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${pat}`,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(commitBody)
+    });
+
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => null);
+      throw new Error((errData && errData.message) || `GitHub commit failed with HTTP ${putRes.status}`);
+    }
+
+    return await putRes.json();
+  }
+
+  async saveLive() {
+    this.setSaveLiveStatus("syncing", "Syncing...");
+    this.setAiExtractStatus("Saving curriculum locally and committing live to GitHub...", "busy");
+    try {
+      const store = await this.pdfAiExtractor.loadExtractedStoreAsync();
+      this.pdfAiExtractor.saveExtractedStoreSync(store);
+
+      const pat = (localStorage.getItem("lmgs_github_pat") || "").trim();
+      if (!pat) {
+        this.hasUnsavedChanges = false;
+        this.setSaveLiveStatus("saved", "Saved Locally");
+        this.setAiExtractStatus(
+          "Saved to browser localStorage. Add GitHub PAT in 🔑 Settings to push live to repo automatically.",
+          "info"
+        );
+        return;
+      }
+
+      const res = await this.commitCurriculumToGitHub();
+      this.hasUnsavedChanges = false;
+      this.setSaveLiveStatus("saved", "Saved Live");
+      const commitSha = res && res.commit && res.commit.sha ? res.commit.sha.slice(0, 7) : "";
+      this.setAiExtractStatus(
+        `✓ Saved & pushed live to GitHub (${commitSha ? `commit ${commitSha}` : "main"})! Changes are now permanent.`,
+        "success"
+      );
+    } catch (err) {
+      this.setSaveLiveStatus("unsaved", "Sync Failed");
+      this.setAiExtractStatus(
+        `Saved locally, but GitHub Live Commit failed: ${err && err.message ? err.message : String(err)}`,
+        "error"
+      );
+    }
+  }
+
+  async loadRemoteCurriculumOverrides() {
+    try {
+      const res = await fetch(`./curriculumOverrides.json?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.extractedPages && typeof data.extractedPages === "object") {
+        const pageEntries = Object.values(data.extractedPages);
+        if (pageEntries.length > 0) {
+          pageEntries.forEach(entry => {
+            this.applyExtractedEntryToCourses(entry);
+          });
+          this.allExercises = this.buildFlatExerciseList();
+          const localStore = await this.pdfAiExtractor.loadExtractedStoreAsync();
+          Object.assign(localStore, data.extractedPages);
+          this.pdfAiExtractor.saveExtractedStoreSync(localStore);
+        }
+      }
+    } catch (e) {}
+  }
+
+  async revertCurrentLesson() {
+    const activeEx = this.currentExercise;
+    if (!activeEx || activeEx.isMetronomeOnly) {
+      this.setAiExtractStatus("Please select an exercise or lesson to revert.", "warn");
+      return;
+    }
+    const slot = this._findCourseSlotForExercise(activeEx.id);
+    if (!slot) return;
+    this.pushUndo(`Revert Lesson "${activeEx.title}"`);
+
+    const { bookCat, session, topic, computedTopicId, exIdx } = slot;
+    const baselineBook = this.initialBaselineCourses && this.initialBaselineCourses[bookCat];
+    const baselineSession = baselineBook && baselineBook.find(s => s.session === session.session);
+    const baselineTopic = baselineSession && baselineSession.topics && baselineSession.topics.find(t => (t.topicId || t.topicTitle) === (topic.topicId || topic.topicTitle));
+
+    if (baselineTopic && Array.isArray(baselineTopic.exercises)) {
+      topic.exercises = JSON.parse(JSON.stringify(baselineTopic.exercises));
+      topic.aiExtracted = false;
+    }
+
+    const bookPage = activeEx.pdfPage || topic.pdfPage || 1;
+    const rawPdfPage = activeEx.pdfRawPage || this.bookPageToPdfPage(bookPage, bookCat);
+    const pageKey = `${bookCat}_p${rawPdfPage}`;
+    await this.pdfAiExtractor.deletePageEntry(pageKey);
+
+    this.allExercises = this.buildFlatExerciseList();
+    const restoredEx = topic.exercises[0] || this.allExercises[0];
+    this.loadExercise(restoredEx.id, false, { forceTopicRebuild: true, scrollTopicTop: true, noPdfReload: true });
+    this.markUnsaved();
+    this.setAiExtractStatus(`Reverted lesson "${topic.topicTitle || restoredEx.title}" to baseline state.`, "info");
+  }
+
+  async appendCurrentPdfPage() {
+    if (this.pdfAiExtractor._isBusy) return;
+    const activeEx = this.currentExercise;
+    if (!activeEx || activeEx.isMetronomeOnly) {
+      this.setAiExtractStatus("Please select an exercise or song first to append measures to.", "warn");
+      return;
+    }
+
+    const apiKey = this.pdfAiExtractor.getApiKey();
+    if (!apiKey) {
+      this.openAdminSettingsModal();
+      this.setAiExtractStatus("Enter and save your Gemini API key first in Settings.", "error");
+      return;
+    }
+
+    const rawPage = (this.pdfPageInput && parseInt(this.pdfPageInput.value, 10)) || this.pdfCurrentPage || 1;
+    const bookCat = this.pdfBookCategory || "lessonBook";
+    const bookPage = this.pdfPageToBookPage(rawPage, bookCat);
+
+    this.pdfAiExtractor._isBusy = true;
+    if (this.btnAppendPdfPage) this.btnAppendPdfPage.disabled = true;
+
+    try {
+      this.pushUndo(`Append PDF Page ${rawPage}`);
+      this.setAiExtractStatus(`Rendering PDF p. ${rawPage} at 4.0x Ultra-HD for append...`, "busy", null);
+      const { pdfDoc } = await this.getPdfDocumentForExtraction();
+      const clampedPage = Math.max(1, Math.min(rawPage, pdfDoc.numPages || rawPage));
+      const snap = await this.pdfAiExtractor.renderPdfPageToBase64Png(pdfDoc, clampedPage, 4.0);
+
+      const bookLabel = bookCat === "bonusWorkshop" ? "Bonus Workshop Book" : "Lesson Book";
+      const contextHint = `Continuation/Append measures for "${activeEx.title}" (${bookLabel}, p. ${bookPage}, PDF p. ${clampedPage})`;
+
+      const { omrJson, modelUsed } = await this.pdfAiExtractor.callGeminiVision(
+        snap.base64,
+        apiKey,
+        contextHint,
+        (activeModel, fallbackNote) => {
+          const msg = fallbackNote || `Extracting append measures from PDF p. ${clampedPage} with ${activeModel}...`;
+          this.setAiExtractStatus(msg, "busy", snap.dataUrl);
+        }
+      );
+
+      const tempEntry = this.pdfAiExtractor.normalizeExtractedPage({
+        omrJson,
+        bookCategory: bookCat,
+        rawPdfPage: clampedPage,
+        bookPage,
+        modelUsed
+      });
+
+      if (!tempEntry.exercises || tempEntry.exercises.length === 0) {
+        this.setAiExtractStatus(`No exercises or measures found on PDF p. ${clampedPage} to append.`, "warn", snap.dataUrl);
+        return;
+      }
+
+      this.notationEditor.ensureCanonicalMeasures(activeEx);
+      const existingMeasureCount = activeEx.measures.length;
+
+      const incomingMeasures = [];
+      tempEntry.exercises.forEach(srcEx => {
+        this.notationEditor.ensureCanonicalMeasures(srcEx);
+        (srcEx.measures || []).forEach(m => {
+          incomingMeasures.push(JSON.parse(JSON.stringify(m)));
+        });
+      });
+
+      if (incomingMeasures.length === 0) {
+        this.setAiExtractStatus(`No musical measures found to append.`, "warn", snap.dataUrl);
+        return;
+      }
+
+      incomingMeasures.forEach((m, idx) => {
+        m.measure = existingMeasureCount + idx + 1;
+        (m.events || []).forEach(ev => this.notationEditor.syncEventFromSource(ev));
+        activeEx.measures.push(m);
+      });
+
+      this.notationEditor.syncMeasuresToTabData(activeEx);
+      await this.persistEditedTopicOrExercise(activeEx);
+      this.handleNotationEditCommit(activeEx, existingMeasureCount, 0, 0);
+
+      if (this.notationEditor && this.notationEditor.isActive()) {
+        this.notationEditor.selectNote(existingMeasureCount, 0, 0);
+      }
+
+      this.markUnsaved();
+      this.setAiExtractStatus(
+        `Appended ${incomingMeasures.length} measures from PDF p. ${clampedPage} to "${activeEx.title}" (Total: ${activeEx.measures.length} bars) via ${modelUsed}!`,
+        "success",
+        snap.dataUrl
+      );
+    } catch (err) {
+      this.setAiExtractStatus(`Append failed: ${err && err.message ? err.message : String(err)}`, "error");
+    } finally {
+      this.pdfAiExtractor._isBusy = false;
+      if (this.btnAppendPdfPage) this.btnAppendPdfPage.disabled = false;
+    }
+  }
+
   async runBatchPdfExtract() {
     if (this.pdfAiExtractor._isBusy) return;
     const apiKey = this.pdfAiExtractor.getApiKey();
     if (!apiKey) {
-      if (this.geminiKeyBar) {
-        this.geminiKeyBar.hidden = false;
-        if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
-      }
-      this.setAiExtractStatus("Enter and save your Gemini API key before starting Batch Extract.", "error");
+      this.openAdminSettingsModal();
+      this.setAiExtractStatus("Enter and save your Gemini API key in Settings before extracting.", "error");
       return;
     }
 
@@ -19568,6 +20709,7 @@ class GuitarMasterApp {
             noPdfReload: true
           });
         }
+        this.markUnsaved();
         this.setAiExtractStatus(
           `Batch complete: ${completedPages} pages processed, ${totalExercises} exercises extracted & saved!`,
           "success"
@@ -21653,16 +22795,97 @@ class GuitarMasterApp {
       });
     }
 
-    // PDF AI OMR Extractor Controls
+    // Admin Action Bar Controls
+    if (this.btnAdminSettings) {
+      this.btnAdminSettings.addEventListener("click", () => {
+        this.openAdminSettingsModal();
+      });
+    }
+    if (this.btnExtractPdfPage) {
+      this.btnExtractPdfPage.addEventListener("click", () => {
+        this.extractCurrentPdfPage();
+      });
+    }
+    if (this.btnAppendPdfPage) {
+      this.btnAppendPdfPage.addEventListener("click", () => {
+        this.appendCurrentPdfPage();
+      });
+    }
+    if (this.btnAdminUndo) {
+      this.btnAdminUndo.addEventListener("click", () => {
+        this.undo();
+      });
+    }
+    if (this.btnAdminRedo) {
+      this.btnAdminRedo.addEventListener("click", () => {
+        this.redo();
+      });
+    }
+    if (this.btnAdminBackspace) {
+      this.btnAdminBackspace.addEventListener("click", () => {
+        if (this.notationEditor && this.notationEditor.isActive()) {
+          this.notationEditor.smartBackspace();
+        }
+      });
+    }
+    if (this.btnAdminDelete) {
+      this.btnAdminDelete.addEventListener("click", () => {
+        if (this.notationEditor && this.notationEditor.isActive()) {
+          this.notationEditor.smartDelete();
+        }
+      });
+    }
+    if (this.btnRevertLesson) {
+      this.btnRevertLesson.addEventListener("click", () => {
+        this.revertCurrentLesson();
+      });
+    }
+    if (this.btnSaveLive) {
+      this.btnSaveLive.addEventListener("click", () => {
+        this.saveLive();
+      });
+    }
+
+    // Admin Settings Modal Controls
+    if (this.btnCloseSettingsModal) {
+      this.btnCloseSettingsModal.addEventListener("click", () => {
+        this.closeAdminSettingsModal();
+      });
+    }
+    if (this.btnCancelSettingsModal) {
+      this.btnCancelSettingsModal.addEventListener("click", () => {
+        this.closeAdminSettingsModal();
+      });
+    }
+    if (this.btnSaveSettingsModal) {
+      this.btnSaveSettingsModal.addEventListener("click", () => {
+        this.saveAdminSettings();
+      });
+    }
+    if (this.modalBtnDownloadBackup) {
+      this.modalBtnDownloadBackup.addEventListener("click", () => {
+        this.exportCurriculumJson();
+      });
+    }
+    if (this.modalBtnClearAiData) {
+      this.modalBtnClearAiData.addEventListener("click", () => {
+        if (window.confirm("Are you sure you want to clear all local AI extractions and edits from this browser?")) {
+          this.clearAiExtractedData();
+        }
+      });
+    }
+    if (this.adminSettingsModal) {
+      this.adminSettingsModal.addEventListener("click", (e) => {
+        if (e.target === this.adminSettingsModal) {
+          this.closeAdminSettingsModal();
+        }
+      });
+    }
+
+    // Legacy drawer compatibility (if elements exist)
     if (this.btnGeminiApiKey && this.geminiKeyBar) {
       this.btnGeminiApiKey.addEventListener("click", () => {
-        const nextHidden = !this.geminiKeyBar.hidden;
-        this.geminiKeyBar.hidden = nextHidden;
-        if (!nextHidden) {
-          if (this.pdfBatchBar) this.pdfBatchBar.hidden = true;
-          this.syncGeminiKeyUI();
-          if (this.geminiApiKeyInput) this.geminiApiKeyInput.focus();
-        }
+        this.openAdminSettingsModal();
       });
     }
     if (this.btnCloseGeminiKey && this.geminiKeyBar) {
@@ -21702,11 +22925,6 @@ class GuitarMasterApp {
         if (this.geminiApiKeyInput) this.geminiApiKeyInput.value = "";
         this.syncGeminiKeyUI();
         this.setAiExtractStatus("Gemini API Key removed.", "info");
-      });
-    }
-    if (this.btnExtractPdfPage) {
-      this.btnExtractPdfPage.addEventListener("click", () => {
-        this.extractCurrentPdfPage();
       });
     }
     if (this.btnBatchExtractToggle && this.pdfBatchBar) {
@@ -21954,12 +23172,55 @@ class GuitarMasterApp {
         this.setAdminMode(!this.adminMode);
         return;
       }
+      if (this.adminMode) {
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "z") {
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.redo();
+          } else {
+            this.undo();
+          }
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "y") {
+          e.preventDefault();
+          this.redo();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && String(e.key || "").toLowerCase() === "s") {
+          e.preventDefault();
+          this.saveLive();
+          return;
+        }
+      }
       if (this.appMode !== "studio") return;
       if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
-      if (this.adminMode && this.notationEditor && this.notationEditor.isActive() && /^[0-9]$/.test(e.key)) {
-        e.preventDefault();
-        this.notationEditor.handleDirectFretDigit(e.key);
-        return;
+      if (this.adminMode && this.notationEditor && this.notationEditor.isActive()) {
+        if (/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          this.notationEditor.handleDirectFretDigit(e.key);
+          return;
+        }
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          this.notationEditor.smartBackspace();
+          return;
+        }
+        if (e.key === "Delete") {
+          e.preventDefault();
+          this.notationEditor.smartDelete();
+          return;
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          this.notationEditor.selectPrevNote();
+          return;
+        }
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          this.notationEditor.selectNextNote();
+          return;
+        }
       }
       if (e.code === "Space") {
         e.preventDefault();
