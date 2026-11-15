@@ -971,21 +971,34 @@ export class ScoreRenderer {
             const refNote = sn || tn;
             if (!refNote) return;
 
-            let centerX = curX + 24;
-            try {
-              centerX = refNote.getAbsoluteX() + 5;
-            } catch (e) {}
-
-            let headX = centerX;
+            let headX = curX + 24;
             let headY = topLineY + 22;
             if (sn) {
               try {
                 if (typeof sn.getNoteHeadBeginX === "function" && typeof sn.getNoteHeadEndX === "function") {
-                  headX = (sn.getNoteHeadBeginX() + sn.getNoteHeadEndX()) / 2;
+                  const bX = sn.getNoteHeadBeginX();
+                  const eX = sn.getNoteHeadEndX();
+                  if (typeof bX === "number" && typeof eX === "number" && !isNaN(bX) && !isNaN(eX) && eX > bX) {
+                    headX = (bX + eX) / 2;
+                  } else if (tn && typeof tn.getAbsoluteX === "function") {
+                    headX = tn.getAbsoluteX();
+                  } else if (typeof sn.getAbsoluteX === "function") {
+                    headX = sn.getAbsoluteX() + 4.75;
+                  }
+                } else if (tn && typeof tn.getAbsoluteX === "function") {
+                  headX = tn.getAbsoluteX();
+                } else if (typeof sn.getAbsoluteX === "function") {
+                  headX = sn.getAbsoluteX() + 4.75;
                 }
                 if (typeof sn.getYs === "function") {
                   const ys = sn.getYs();
                   if (ys && ys.length > 0) headY = ys[0];
+                }
+              } catch (e) {}
+            } else if (tn) {
+              try {
+                if (typeof tn.getAbsoluteX === "function") {
+                  headX = tn.getAbsoluteX();
                 }
               } catch (e) {}
             }
@@ -1182,18 +1195,9 @@ export class ScoreRenderer {
               textEls.push(guideG);
             }
 
-            const nextMeta = beatMeta[idx + 1];
-            let hitW = 28;
-            if (nextMeta && (nextMeta.sn || nextMeta.tn)) {
-              try {
-                const nextX = (nextMeta.sn || nextMeta.tn).getAbsoluteX() + 5;
-                hitW = Math.max(18, Math.min(44, nextX - headX));
-              } catch (e) {}
-            } else {
-              hitW = Math.max(20, Math.min(46, (curX + mWidth - headX)));
-            }
-
-            const bandX = headX - Math.min(13, hitW * 0.4);
+            // Strict constant highlight bar centered on note axis (no barline shrinking)
+            const HIGHLIGHT_WIDTH = 30;
+            const bandX = Math.round(headX - (HIGHLIGHT_WIDTH / 2));
             const bandY = topLineY - 8;
             const bandBot = botLineY + 8;
 
@@ -1202,16 +1206,19 @@ export class ScoreRenderer {
             bandRect.setAttribute("id", `vf-cursor-${mIdx}-${evIdx}`);
             bandRect.setAttribute("x", String(bandX));
             bandRect.setAttribute("y", String(bandY));
-            bandRect.setAttribute("width", String(hitW));
+            bandRect.setAttribute("width", String(HIGHLIGHT_WIDTH));
             bandRect.setAttribute("height", String(bandBot - bandY));
-            bandRect.setAttribute("rx", "3");
+            bandRect.setAttribute("rx", "6");
+            bandRect.setAttribute("ry", "6");
             bandRect.setAttribute("stroke", "none");
             backdropLayer.appendChild(bandRect);
 
+            const hitW = Math.max(HIGHLIGHT_WIDTH, 36);
+            const hitX = Math.round(headX - (hitW / 2));
             const hitBot = (isTabBlurred && showTreble) ? (trebleBotY + 14) : (bandBot + 10);
             const hitRect = document.createElementNS(SVG_NS, "rect");
             hitRect.setAttribute("class", "vf-hit-target");
-            hitRect.setAttribute("x", String(bandX));
+            hitRect.setAttribute("x", String(hitX));
             hitRect.setAttribute("y", String(bandY - 6));
             hitRect.setAttribute("width", String(hitW));
             hitRect.setAttribute("height", String(Math.max(24, hitBot - (bandY - 6))));
@@ -1243,7 +1250,8 @@ export class ScoreRenderer {
               bandEl: bandRect,
               noteEls,
               textEls,
-              sysEl
+              sysEl,
+              headX
             });
           });
         }
@@ -1258,7 +1266,7 @@ export class ScoreRenderer {
     });
   }
 
-  updateCoachBanner(measureIdx, coachMeta) {
+  updateCoachBanner(measureIdx, coachMeta, activeHeadX = null) {
     if (!this._coachPillEl || !this.showCoachBanner || !coachMeta || !coachMeta.text) {
       this.clearCoachBanner();
       return;
@@ -1279,7 +1287,9 @@ export class ScoreRenderer {
     const containerW = (this.container && this.container.clientWidth) ? this.container.clientWidth : 740;
     const measureLeftPx = bounds.x * SCALE;
     const measureWidthPx = bounds.width * SCALE;
-    const targetCenterX = measureLeftPx + (measureWidthPx / 2);
+    const targetCenterX = (activeHeadX !== null && activeHeadX !== undefined)
+      ? (activeHeadX * SCALE)
+      : (measureLeftPx + (measureWidthPx / 2));
     const pillW = pill.offsetWidth || 180;
     const leftPx = Math.max(4, Math.min(containerW - pillW - 4, targetCenterX - pillW / 2));
     const topPx = bounds.sysEl.offsetTop + Math.max(2, Math.round(bounds.topLineY * SCALE) - 44);
@@ -1347,7 +1357,7 @@ export class ScoreRenderer {
     }
 
     if (coachMeta && this.showCoachBanner) {
-      this.updateCoachBanner(measureIdx, coachMeta);
+      this.updateCoachBanner(measureIdx, coachMeta, entry ? entry.headX : null);
     } else if (!this.showCoachBanner) {
       this.clearCoachBanner();
     }
