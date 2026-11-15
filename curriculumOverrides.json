@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-15T13:08:54.794Z",
+  "updatedAt": "2026-11-15T13:11:31.128Z",
   "repo": "odin-hash/learn-and-master-guitar-studio",
   "branch": "main",
   "modelPreference": "auto",
@@ -27656,7 +27656,7 @@
       "targetExerciseId": "lb-s3-8th-ex1",
       "modelUsed": "manual-editor",
       "pageTitle": "Eighth Note Exercises 1-6 (Lesson Book p. 17 - Strings 1 & 2)",
-      "extractedAt": "2026-11-15T13:08:20.932Z",
+      "extractedAt": "2026-11-15T13:11:24.928Z",
       "mathWarnings": [],
       "exercises": [
         {
@@ -29314,14 +29314,14 @@
                 {
                   "beat": 4,
                   "eventIndex": 6,
-                  "note": "High E",
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "note": "D",
+                  "concertPitch": "D4",
+                  "vexKey": "d/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 1,
-                  "fret": 0,
-                  "finger": 0,
+                  "string": 2,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Down",
                   "duration": 0.5,
                   "isDotted": false,
@@ -29331,19 +29331,19 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 3"
                 },
                 {
                   "beat": 4.5,
                   "eventIndex": 7,
-                  "note": "High E",
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "note": "D",
+                  "concertPitch": "D4",
+                  "vexKey": "d/5",
                   "symbol": "1/8",
                   "type": "play",
-                  "string": 1,
-                  "fret": 0,
-                  "finger": 0,
+                  "string": 2,
+                  "fret": 3,
+                  "finger": 3,
                   "pick": "Up",
                   "duration": 0.5,
                   "isDotted": false,
@@ -29353,7 +29353,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 3"
                 }
               ]
             },
@@ -29364,14 +29364,14 @@
                 {
                   "beat": 1,
                   "eventIndex": 0,
-                  "note": "High E",
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "note": "C",
+                  "concertPitch": "C4",
+                  "vexKey": "c/5",
                   "symbol": "1/4",
                   "type": "play",
-                  "string": 1,
-                  "fret": 0,
-                  "finger": 0,
+                  "string": 2,
+                  "fret": 1,
+                  "finger": 1,
                   "pick": "Down",
                   "duration": 1,
                   "isDotted": false,
@@ -29381,7 +29381,7 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 1"
                 },
                 {
                   "beat": 2,
@@ -29402,14 +29402,14 @@
                 {
                   "beat": 3,
                   "eventIndex": 2,
-                  "note": "High E",
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "note": "C",
+                  "concertPitch": "C4",
+                  "vexKey": "c/5",
                   "symbol": "1/2",
                   "type": "play",
-                  "string": 1,
-                  "fret": 0,
-                  "finger": 0,
+                  "string": 2,
+                  "fret": 1,
+                  "finger": 1,
                   "pick": "Down",
                   "duration": 2,
                   "isDotted": false,
@@ -29419,19 +29419,19 @@
                   "isStart": true,
                   "isSustain": false,
                   "chordChange": null,
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 1"
                 },
                 {
                   "beat": 4,
                   "eventIndex": 2,
-                  "note": "High E",
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "note": "C",
+                  "concertPitch": "C4",
+                  "vexKey": "c/5",
                   "symbol": "1/2",
                   "type": "sustain",
-                  "string": 1,
-                  "fret": 0,
-                  "finger": 0,
+                  "string": 2,
+                  "fret": 1,
+                  "finger": 1,
                   "pick": "-",
                   "duration": 2,
                   "isDotted": false,
@@ -29993,29 +29993,29 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 1,
-                  "fret": 0,
+                  "string": 2,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 0,
+                  "finger": 3,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
                   "durationBeats": 0.5,
                   "type": "play",
                   "isChord": false,
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "concertPitch": "D4",
+                  "vexKey": "d/5",
                   "accidental": null,
-                  "note": "High E",
+                  "note": "D",
                   "vexDuration": "8",
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 1,
-                      "fret": 0
+                      "str": 2,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 1, Fret 0",
+                  "tip": "String 2, Fret 3",
                   "isAutoFillRest": false
                 },
                 {
@@ -30024,29 +30024,30 @@
                   "isRest": false,
                   "duration": "8",
                   "isDotted": false,
-                  "string": 1,
-                  "fret": 0,
+                  "string": 2,
+                  "fret": 3,
                   "preferFlat": false,
-                  "finger": 0,
+                  "finger": 3,
                   "pick": "Up",
                   "tieFromPrev": false,
                   "tieToNext": false,
                   "durationBeats": 0.5,
                   "type": "play",
                   "isChord": false,
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "concertPitch": "D4",
+                  "vexKey": "d/5",
                   "accidental": null,
-                  "note": "High E",
+                  "note": "D",
                   "vexDuration": "8",
                   "symbol": "1/8",
                   "positions": [
                     {
-                      "str": 1,
-                      "fret": 0
+                      "str": 2,
+                      "fret": 3
                     }
                   ],
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 3",
+                  "isAutoFillRest": false
                 }
               ]
             },
@@ -30063,29 +30064,30 @@
                   "isRest": false,
                   "duration": "q",
                   "isDotted": false,
-                  "string": 1,
-                  "fret": 0,
+                  "string": 2,
+                  "fret": 1,
                   "preferFlat": false,
-                  "finger": 0,
+                  "finger": 1,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
                   "durationBeats": 1,
                   "type": "play",
                   "isChord": false,
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "concertPitch": "C4",
+                  "vexKey": "c/5",
                   "accidental": null,
-                  "note": "High E",
+                  "note": "C",
                   "vexDuration": "q",
                   "symbol": "1/4",
                   "positions": [
                     {
-                      "str": 1,
-                      "fret": 0
+                      "str": 2,
+                      "fret": 1
                     }
                   ],
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 1",
+                  "isAutoFillRest": false
                 },
                 {
                   "beat": 2,
@@ -30115,29 +30117,30 @@
                   "isRest": false,
                   "duration": "h",
                   "isDotted": false,
-                  "string": 1,
-                  "fret": 0,
+                  "string": 2,
+                  "fret": 1,
                   "preferFlat": false,
-                  "finger": 0,
+                  "finger": 1,
                   "pick": "Down",
                   "tieFromPrev": false,
                   "tieToNext": false,
                   "durationBeats": 2,
                   "type": "play",
                   "isChord": false,
-                  "concertPitch": "E4",
-                  "vexKey": "e/5",
+                  "concertPitch": "C4",
+                  "vexKey": "c/5",
                   "accidental": null,
-                  "note": "High E",
+                  "note": "C",
                   "vexDuration": "h",
                   "symbol": "1/2",
                   "positions": [
                     {
-                      "str": 1,
-                      "fret": 0
+                      "str": 2,
+                      "fret": 1
                     }
                   ],
-                  "tip": "String 1, Fret 0"
+                  "tip": "String 2, Fret 1",
+                  "isAutoFillRest": false
                 }
               ]
             }
