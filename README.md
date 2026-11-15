@@ -1,23 +1,41 @@
-# Learn & Master Guitar — Interactive Practice Studio & Metronome Companion
+# 🎸 Learn & Master Guitar — Interactive Practice Studio & Metronome Companion
 
-A complete interactive web companion for **Steve Krenz's *Learn & Master Guitar: Lesson Book*** (Sessions 1–20) and ***Bonus Workshop Book*** (Workshops 1–20).
+**[🚀 Launch Live Web Studio](https://odin-hash.github.io/learn-and-master-guitar-studio/)**
 
-## Key Features
-- **Complete 40-Chapter Curriculum**: All 20 Lesson Book Sessions and 20 Bonus Workshops (135+ interactive exercises, strumming patterns, scales, and dual-mode melody/chord repertoire songs).
-- **1:1 Engraved 5-Line Treble Staff & TAB**: Pixel-aligned 5-line treble staff with ledger lines for strings 5 & 6, beamed eighth notes, and click-to-seek on any beat.
-- **Sight-Reading & Practice Trainer Bar**:
-  - **Note Names Toggle**: Show or hide note letters (`E`, `F`, `G`) on the staff.
-  - **TAB Numbers Toggle**: Hide TAB numbers to practice pure standard-notation sight-reading (auto-enabled on *"More ... String Exercises"*).
-  - **Chord Voicing Switcher**: Toggle between **Full Chords**, **4-Note Beginner Chords**, and **3-Note Easy Chords** (Bonus Book p. 9 & 38).
-  - **Drill String Selector**: Transpose Session 1 finger exercises across Strings 1–6.
-- **15-Fret Interactive Fretboard (Frets 0–14)**: Displays left-hand finger numbers (`0–4`), red `X` markers on muted strings, and ghost background chord shapes during single-note melodies.
-- **Web Audio Lookahead Metronome & Guitar Pitch Synthesizer**:
-  - Synthesizes acoustic guitar note pitches and directional Down/Up chord strums in real time.
-  - 3-Speed Jam-Along Presets (**Slow / Med / Goal BPM**) tailored to each exercise.
-  - 1-Bar Count-In chime, Woodblock / Beep / Studio Drum click options, and Palm Mute Rest cues.
-- **Progress Tracking**: Check off completed exercises and *"You're Ready to Move On"* session benchmarks (saved automatically in `localStorage`).
+An interactive sight-reading, fretboard visualization, and metronome practice workstation built as a companion for Steve Krenz's *Gibson's Learn & Master Guitar* (**Lesson Book** & **Bonus Workshop Book**).
 
-## Build & Run
+---
+
+## ✨ Key Features
+
+### 1. Three Dedicated Practice Workspaces
+- **Foundation:** Essential posture, pick grip, tuning, and foundational technique primer for absolute beginners.
+- **Curriculum (`Lessons` & `Workshops`):** Organized session-by-session drills, sight-reading exercises, strumming studies, and full repertoire arrangements across the Lesson Book and Bonus Workshop Book.
+- **Metronome:** Standalone programmable practice metronome with custom time signatures (`2/4`, `3/4`, `4/4`, `5/4`, `6/8`), subdivisions (`Quarter`, `Eighth`, `Triplets`), tap tempo, and visual beat indicators.
+
+### 2. Interactive Score, PDF Reference & Split View
+- **1:1 Engraved 5-Line Treble Staff & 6-Line TAB:** Single-line horizontal stave rendering with beamed eighth notes, ties, dotted rhythms, pick-direction arrows (`↓` / `↑`), left-hand fingerings, and click-to-seek on any beat.
+- **Synchronized Split-View PDF Reader:** View the interactive notation side-by-side with the synced textbook page (`pdf.js` canvas viewer with touch scrolling for iPad, desktop, and mobile) or load a local PDF file.
+
+### 3. Sight-Reading & Fretboard Trainer Controls
+- **Note Names Toggle:** Switch between `Off`, `Above Note`, or `Inside Notehead` to gradually wean off letter prompts.
+- **Tab Visibility Modes:** Switch between `Show Both`, `Staff Only` (pure standard-notation sight-reading), or `Blur Tab` (hover/peek only when stuck).
+- **Fretboard Voicing Switcher:** Toggle the 15-fret interactive fretboard (`Open` to `Fret 14`) between single-note **`Melody Notes`** and **`Full Chords`**, **`4-Note Chords`**, or **`3-Note Chords`** (matching Workshop Book p. 9).
+- **Live Coach & Rhythm Guide:** Real-time floating pluck/strum instructions (`Pluck 1st String (E, Open String)`) and beat-aligned playback cursor.
+
+### 4. Web Audio Synthesizer & Jam-Along Engine
+- **Real-Time Acoustic Synth & Click Options:** Synthesizes guitar pitches, directional chord strums, Woodblock (`1200/800 Hz`) clicks, and rest-click cues.
+- **3-Speed Practice Presets:** Instant **Slow**, **Med**, and **Goal BPM** targets tailored to each exercise, plus loop-all / play-once modes and a **1-Bar Count-In**.
+- **Progress Tracking:** Mark exercises as completed (`✓ Mark Done`) with automatic session progress tracking saved in `localStorage`.
+
+### 5. Maintainer Studio & AI OMR Editor (`Admin Mode`)
+- **Visual Note & Measure Editor:** Edit pitches, string/fret pairs, durations, rests, dots, ties, chord symbols, pick directions, and bar structures directly in the browser.
+- **Gemini Vision PDF Extractor:** Extract or append multi-page exercises directly from the rendered PDF page with 50-step Undo/Redo history and one-click GitHub API cloud commits (`Save Live`).
+
+---
+
+## 🛠️ Build & Run Locally
+
 ```powershell
 # 1. Compile and generate exercises.js from scripts/MasterCourseGenerator.cs
 csc.exe /out:MasterCourseGenerator.exe scripts\MasterCourseGenerator.cs
@@ -26,11 +44,12 @@ csc.exe /out:MasterCourseGenerator.exe scripts\MasterCourseGenerator.cs
 # 2. Bundle into standalone index.html
 .\scripts\bundle.ps1
 
-# 3. Launch local server
+# 3. Launch local development server
 .\scripts\server.ps1
 ```
 
 ---
 
 ## ⚠️ Legal & Educational Disclaimer
-This project is an **independent, unofficial, fan-made open-source practice tool and metronome workstation** built for educational and sight-reading practice purposes. It is **not** affiliated with, endorsed by, or sponsored by Steve Krenz, Legacy Learning Systems, or Gibson Brands, Inc. All trademarks and course titles belong to their respective owners. Students should purchase and use the official *Learn & Master Guitar* textbooks and media alongside this practice tool.
+
+This project is an independent, unofficial, fan-made open-source practice tool and metronome workstation built for educational and sight-reading practice purposes. It is not affiliated with, endorsed by, or sponsored by Steve Krenz, Legacy Learning Systems, or Gibson Brands, Inc. All trademarks and course titles belong to their respective owners. Students should purchase and use the official Learn & Master Guitar textbooks and media alongside this practice tool.
