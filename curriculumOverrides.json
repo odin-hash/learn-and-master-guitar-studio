@@ -1,10 +1,10 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-15T14:23:07.135Z",
+  "updatedAt": "2026-11-15T15:55:37.364Z",
   "repo": "odin-hash/learn-and-master-guitar-studio",
   "branch": "main",
   "modelPreference": "auto",
-  "extractedPageCount": 9,
+  "extractedPageCount": 10,
   "extractedPages": {
     "bonusWorkshop_p24": {
       "pageKey": "bonusWorkshop_p24",
@@ -37817,12 +37817,886 @@
           "exerciseNumberInTopic": 3
         }
       ]
+    },
+    "lessonBook_p22": {
+      "pageKey": "lessonBook_p22",
+      "bookCategory": "lessonBook",
+      "rawPdfPage": 22,
+      "bookPage": 19,
+      "targetTopicId": "lessonBook_s3_t3",
+      "targetExerciseId": "lb-s3-str4-ex2",
+      "modelUsed": "manual-editor",
+      "pageTitle": "Fourth String Notes & Exercises (D - E - F) (Lesson Book p. 19-20)",
+      "extractedAt": "2026-11-15T15:55:29.668Z",
+      "mathWarnings": [],
+      "exercises": [
+        {
+          "id": "lb-s3-str4-ex2",
+          "title": "Exercise 1: 4th String Half Notes (4 Bars)",
+          "description": "Instructions: Read and play each note in an even rhythm on string 4. Count aloud with the metronome. Press firmly with the correct left-hand finger and use alternate picking.",
+          "timeSignature": [
+            4,
+            4
+          ],
+          "defaultBpm": 65,
+          "concepts": [
+            "String 4",
+            "Half Notes",
+            "Reading"
+          ],
+          "tabData": [
+            {
+              "measure": 1,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D (2 Beats)"
+                },
+                {
+                  "beat": 2,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E (2 Beats)"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 2,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F (2 Beats)"
+                },
+                {
+                  "beat": 2,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E (2 Beats)"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 3,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D (2 Beats)"
+                },
+                {
+                  "beat": 2,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F (2 Beats)"
+                },
+                {
+                  "beat": 4,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 4,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E (2 Beats)"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D (2 Beats)"
+                },
+                {
+                  "beat": 4,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            }
+          ],
+          "verificationStatus": "pending-pdf-transcription",
+          "topicId": "lessonBook_s3_t3",
+          "topicTitle": "Fourth String Notes & Exercises (D - E - F) (Lesson Book p. 19-20)",
+          "pdfPage": 19,
+          "exerciseNumberInTopic": 1
+        },
+        {
+          "id": "lb-s3-str4-ex3",
+          "title": "Exercise 2: 4th String Quarter, Half & Whole Notes (5 Bars)",
+          "description": "Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.",
+          "timeSignature": [
+            4,
+            4
+          ],
+          "defaultBpm": 65,
+          "concepts": [
+            "Repertoire Melody",
+            "Sight-Reading",
+            "Chord Accompaniment"
+          ],
+          "tabData": [
+            {
+              "measure": 1,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 2,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 3,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                }
+              ]
+            },
+            {
+              "measure": 2,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 3,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 4,
+                  "note": "D",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 3,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 3,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 4,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 4,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 3,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                }
+              ]
+            },
+            {
+              "measure": 5,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/1",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 4,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 2,
+                  "note": "D",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "D",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 4,
+                  "note": "D",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            }
+          ],
+          "verificationStatus": "pending-pdf-transcription",
+          "topicId": "lessonBook_s3_t3",
+          "topicTitle": "Fourth String Notes & Exercises (D - E - F) (Lesson Book p. 19-20)",
+          "pdfPage": 19,
+          "exerciseNumberInTopic": 2
+        },
+        {
+          "id": "lb-s3-str4-ex4",
+          "title": "Exercise 3: More Fourth String Exercises (Sight-Reading p. 19)",
+          "description": "Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.",
+          "timeSignature": [
+            4,
+            4
+          ],
+          "defaultBpm": 65,
+          "concepts": [
+            "Repertoire Melody",
+            "Sight-Reading",
+            "Chord Accompaniment"
+          ],
+          "tabData": [
+            {
+              "measure": 1,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 2,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 3,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 2,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 3,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 2,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 4,
+                  "note": "F",
+                  "symbol": "1/2",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 2,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            },
+            {
+              "measure": 3,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 2,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                },
+                {
+                  "beat": 3,
+                  "note": "D",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 0,
+                  "finger": 0,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "D"
+                },
+                {
+                  "beat": 4,
+                  "note": "E",
+                  "symbol": "1/4",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 2,
+                  "finger": 2,
+                  "pick": "Down",
+                  "duration": 1,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "E"
+                }
+              ]
+            },
+            {
+              "measure": 4,
+              "beats": [
+                {
+                  "beat": 1,
+                  "note": "F",
+                  "symbol": "1/1",
+                  "type": "play",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "Down",
+                  "duration": 4,
+                  "isStart": true,
+                  "isSustain": false,
+                  "tip": "F"
+                },
+                {
+                  "beat": 2,
+                  "note": "F",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 3,
+                  "note": "F",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                },
+                {
+                  "beat": 4,
+                  "note": "F",
+                  "symbol": "1/1",
+                  "type": "sustain",
+                  "string": 4,
+                  "fret": 3,
+                  "finger": 3,
+                  "pick": "-",
+                  "duration": 4,
+                  "isStart": false,
+                  "isSustain": true,
+                  "tip": "Hold"
+                }
+              ]
+            }
+          ],
+          "verificationStatus": "pending-pdf-transcription",
+          "topicId": "lessonBook_s3_t3",
+          "topicTitle": "Fourth String Notes & Exercises (D - E - F) (Lesson Book p. 19-20)",
+          "pdfPage": 19,
+          "exerciseNumberInTopic": 3
+        }
+      ]
     }
   },
   "deletedExerciseIds": [
     "lb-s3-ties-ex1",
     "lb-s3-dot-ex1",
-    "lb-s3-rests-ex1"
+    "lb-s3-rests-ex1",
+    "lb-s3-str4-ex1"
   ],
   "deletedTopicIds": [
     "lessonBook_s3_t0"
