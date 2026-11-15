@@ -11,10 +11,21 @@ try {
     while ($listener.IsListening) {
         try {
             $context = $listener.GetContext()
-            $requestUrl = $context.Request.Url.AbsolutePath.TrimStart('/')
+            $rawPath = $context.Request.Url.AbsolutePath.TrimStart('/')
+            $requestUrl = [System.Uri]::UnescapeDataString($rawPath)
             if ([string]::IsNullOrEmpty($requestUrl)) { $requestUrl = "index.html" }
 
             $response = $context.Response
+            $response.AddHeader("Access-Control-Allow-Origin", "*")
+            $response.AddHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+            $response.AddHeader("Access-Control-Allow-Headers", "*")
+
+            if ($context.Request.HttpMethod -eq "OPTIONS") {
+                $response.StatusCode = 200
+                $response.Close()
+                continue
+            }
+
             if ($requestUrl -eq "favicon.ico") {
                 $response.StatusCode = 204
                 $response.Close()
@@ -35,8 +46,12 @@ try {
                 $bytes = [System.IO.File]::ReadAllBytes($filePath)
                 $response.ContentType = $mime
                 $response.ContentLength64 = $bytes.Length
-                $response.OutputStream.Write($bytes, 0, $bytes.Length)
-                $response.OutputStream.Flush()
+                $response.AddHeader("Accept-Ranges", "bytes")
+
+                if ($context.Request.HttpMethod -ne "HEAD") {
+                    $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                    $response.OutputStream.Flush()
+                }
                 $response.Close()
             } else {
                 $response.StatusCode = 404

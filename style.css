@@ -744,7 +744,6 @@ button.acc-topic-btn.is-active-topic {
 /* Inline Pinned Deck & Book Page Sheet Alignment (Responsive Full Width) */
 .guide-drawer,
 .canvas-subbar,
-.studio-pinned-deck .tutor-scaffolding-bar,
 .fretboard-stage {
   max-width: 1320px;
   width: min(96%, 1320px);
@@ -756,9 +755,22 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .studio-pinned-deck .tutor-scaffolding-bar {
+  max-width: 1320px;
+  width: min(96%, 1320px);
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 0;
-  padding: 5px 10px;
-  gap: 6px 8px;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px 10px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 6px 10px !important;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .studio-pinned-deck .tutor-assist-group {
@@ -786,13 +798,13 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 12px;
-  height: 44px;
-  min-height: 44px;
-  max-height: 44px;
+  gap: 8px;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 0 0 1px 0;
+  padding: 0 4px 1px 4px;
   border-bottom: 1px solid var(--border-hairline);
 }
 
@@ -807,15 +819,15 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
 }
 
-/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 185px) */
+/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 148px) */
 .telemetry-slot-pitch {
-  width: 185px !important;
-  min-width: 185px !important;
-  max-width: 185px !important;
+  width: 148px !important;
+  min-width: 148px !important;
+  max-width: 148px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 5px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -825,10 +837,10 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 28px;
-  min-width: 28px;
-  max-width: 28px;
-  height: 28px;
+  width: 26px !important;
+  min-width: 26px !important;
+  max-width: 26px !important;
+  height: 26px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -845,7 +857,7 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-primary,
 .telemetry-primary {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -859,11 +871,11 @@ button.acc-topic-btn.is-active-topic {
   color: var(--color-rest);
 }
 
-/* Slot 2: String • Fret • Finger (Strict fixed width 195px) */
+/* Slot 2: String • Fret • Finger (Strict fixed width 165px) */
 .telemetry-slot-instruction {
-  width: 195px !important;
-  min-width: 195px !important;
-  max-width: 195px !important;
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -876,7 +888,7 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-instruction .telemetry-secondary,
 .telemetry-secondary {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -885,11 +897,11 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
 }
 
-/* Slot 3: Down Strum / Up Strum Badge (Strict fixed width 115px) */
+/* Slot 3: Down Strum / Up Strum Pill (Strict fixed width 98px) */
 .telemetry-slot-badge {
-  width: 115px !important;
-  min-width: 115px !important;
-  max-width: 115px !important;
+  width: 98px !important;
+  min-width: 98px !important;
+  max-width: 98px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -900,12 +912,12 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .telemetry-pick-badge {
-  width: 115px !important;
-  min-width: 115px !important;
-  max-width: 115px !important;
+  width: 98px !important;
+  min-width: 98px !important;
+  max-width: 98px !important;
   box-sizing: border-box !important;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-sidebar);
@@ -946,8 +958,35 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0;
 }
 
-/* Right-side Voicing & Fretboard Controls: Pinned permanently to the right */
+/* Right-side Fretboard Control: Pinned permanently to the right */
 .notation-toggles {
+  margin-left: auto !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Fretboard stage header bar for chord voicings and string selector */
+.fretboard-header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 4px 10px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+}
+
+.fretboard-header-bar #chord-mode-group,
+.fretboard-header-bar #string-selector-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+}
   margin-left: auto !important;
   display: flex;
   align-items: center;
@@ -2740,16 +2779,133 @@ button.acc-topic-btn.is-active-topic {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: var(--bg-sidebar);
+}
+
+.pdf-nav-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.pdf-page-indicator {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.pdf-nav-sep {
+  color: var(--border-strong);
+  font-size: 11px;
+  padding: 0 1px;
+}
+
+.pdf-scroller-container {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px 48px 8px;
+  box-sizing: border-box;
+  background: var(--bg-sidebar);
+}
+
+.pdf-pages-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pdf-page-slot {
+  position: relative;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-sizing: border-box;
+  transition: box-shadow 0.15s ease;
+}
+
+.pdf-page-slot.is-active-page {
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-page-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-hairline);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pdf-page-canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+.pdf-loading-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-hairline);
+  z-index: 10;
+}
+
+.pdf-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: pdf-spin 0.8s linear infinite;
+}
+
+@keyframes pdf-spin {
+  to { transform: rotate(360deg); }
 }
 
 #pdf-viewer-frame {
-  flex: 1 1 0%;
-  width: 100%;
-  height: 100%;
-  min-height: 240px;
-  display: block;
-  border: none;
-  background: var(--bg-hover);
+  display: none !important;
 }
 
 .pdf-fallback-card {
@@ -4994,16 +5150,16 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 
   .studio-pinned-deck .tutor-scaffolding-bar {
-    height: 36px;
-    min-height: 36px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 3px 6px;
-    gap: 8px;
-    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    padding: 6px 10px !important;
+    gap: 6px 10px !important;
+    width: 100% !important;
   }
 
   .studio-pinned-deck .tutor-scaffolding-bar::-webkit-scrollbar {
@@ -5012,7 +5168,6 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 
   .studio-pinned-deck .tutor-assist-group {
     flex-shrink: 0;
-    white-space: nowrap;
   }
 }
 

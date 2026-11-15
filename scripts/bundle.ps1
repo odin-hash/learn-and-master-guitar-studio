@@ -94,6 +94,7 @@ $htmlHeader = @"
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
 $css
   </style>
@@ -225,21 +226,6 @@ $css
             </div>
 
             <div class="notation-toggles" id="studio-trainer-bar">
-              <div class="toggle-group" id="chord-mode-group" style="display:none;">
-                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
-                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
-                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
-                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
-              </div>
-              <div class="toggle-group" id="string-selector-group" style="display:none;">
-                <span class="toggle-lbl">String</span>
-                <button class="micro-pill active" data-str="1">1</button>
-                <button class="micro-pill" data-str="2">2</button>
-                <button class="micro-pill" data-str="3">3</button>
-                <button class="micro-pill" data-str="4">4</button>
-                <button class="micro-pill" data-str="5">5</button>
-                <button class="micro-pill" data-str="6">6</button>
-              </div>
               <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
             </div>
           </div>
@@ -278,6 +264,23 @@ $css
 
           <!-- Interactive Fretboard Visualizer (Pinned) -->
           <div class="fretboard-stage" id="fretboard-wrapper">
+            <div class="fretboard-header-bar" id="fretboard-header-bar">
+              <div class="toggle-group" id="chord-mode-group" style="display:none;">
+                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
+                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
+              </div>
+              <div class="toggle-group" id="string-selector-group" style="display:none;">
+                <span class="toggle-lbl">String</span>
+                <button class="micro-pill active" data-str="1">1</button>
+                <button class="micro-pill" data-str="2">2</button>
+                <button class="micro-pill" data-str="3">3</button>
+                <button class="micro-pill" data-str="4">4</button>
+                <button class="micro-pill" data-str="5">5</button>
+                <button class="micro-pill" data-str="6">6</button>
+              </div>
+            </div>
             <div id="fretboard-container"></div>
           </div>
         </div>
@@ -375,6 +378,15 @@ $css
               <input type="number" id="pdf-page-input" class="mono-input" min="1" max="160" value="1" aria-label="PDF Page Number">
             </div>
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
+            <div class="pdf-nav-zoom-group">
+              <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
+              <span class="pdf-page-indicator" id="pdf-page-indicator">1 / --</span>
+              <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
+              <span class="pdf-nav-sep">|</span>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-out" title="Zoom Out (-)" aria-label="Zoom Out">&minus;</button>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-fit" title="Fit Width">Fit</button>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-in" title="Zoom In (+)" aria-label="Zoom In">+</button>
+            </div>
           </div>
           <div class="pdf-toolbar-right">
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
@@ -435,18 +447,23 @@ $css
           </div>
         </div>
 
-        <div class="pdf-frame-wrap">
-          <iframe id="pdf-viewer-frame" title="Course Reference PDF"></iframe>
+        <div class="pdf-frame-wrap" id="pdf-frame-wrap">
+          <div class="pdf-scroller-container" id="pdf-scroller-container">
+            <div class="pdf-pages-track" id="pdf-pages-track"></div>
+            <div class="pdf-loading-indicator" id="pdf-loading-indicator" hidden>
+              <div class="pdf-spinner"></div>
+              <span id="pdf-loading-text">Loading PDF Book...</span>
+            </div>
+          </div>
+          <!-- Hidden fallback elements preserved for API compatibility -->
+          <iframe id="pdf-viewer-frame" title="Course Reference PDF" style="display:none;"></iframe>
           <div class="pdf-mobile-canvas-wrap" id="pdf-mobile-canvas-wrap" style="display:none;">
-            <div class="pdf-mobile-nav">
-              <button type="button" class="micro-pill" id="btn-pdf-prev-page" aria-label="Previous PDF Page">&lsaquo; Prev</button>
-              <span class="pdf-mobile-page-status" id="pdf-mobile-page-status">Page 1</span>
-              <button type="button" class="micro-pill" id="btn-pdf-next-page" aria-label="Next PDF Page">Next &rsaquo;</button>
-            </div>
-            <div class="pdf-canvas-scroller" id="pdf-canvas-scroller">
-              <canvas id="pdf-mobile-canvas"></canvas>
-              <div class="pdf-mobile-loading" id="pdf-mobile-loading" hidden>Loading course PDF page...</div>
-            </div>
+            <canvas id="pdf-mobile-canvas" style="display:none;"></canvas>
+            <div id="pdf-canvas-scroller" style="display:none;"></div>
+            <span id="pdf-mobile-page-status" style="display:none;"></span>
+            <button id="btn-pdf-prev-page" style="display:none;"></button>
+            <button id="btn-pdf-next-page" style="display:none;"></button>
+            <div id="pdf-mobile-loading" style="display:none;"></div>
           </div>
           <div class="pdf-fallback-card" id="pdf-fallback-card" style="display:none;">
             <div class="pdf-fallback-inner">

@@ -384,6 +384,26 @@ export class GuitarMasterApp {
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
 
+    // Continuous Canvas PDF Viewer Elements
+    this.pdfScrollerContainer = document.getElementById("pdf-scroller-container");
+    this.pdfPagesTrack = document.getElementById("pdf-pages-track");
+    this.pdfLoadingIndicator = document.getElementById("pdf-loading-indicator");
+    this.pdfLoadingText = document.getElementById("pdf-loading-text");
+    this.pdfPageIndicator = document.getElementById("pdf-page-indicator");
+    this.btnPdfPrev = document.getElementById("btn-pdf-prev");
+    this.btnPdfNext = document.getElementById("btn-pdf-next");
+    this.btnPdfZoomOut = document.getElementById("btn-pdf-zoom-out");
+    this.btnPdfZoomFit = document.getElementById("btn-pdf-zoom-fit");
+    this.btnPdfZoomIn = document.getElementById("btn-pdf-zoom-in");
+    this._pdfZoomMultiplier = 1.0;
+    this._pdfZoomMode = "fit";
+    this._pdfRenderTasks = new Map();
+    this._pdfRenderedPages = new Set();
+    this._pdfCurrentDoc = null;
+    this._pdfCurrentBaseSrc = null;
+    this._pdfObserver = null;
+    this._pdfActiveScrollObserver = null;
+
     // Admin Action Bar & Cloud Settings
     this.btnAdminSettings = document.getElementById("btn-admin-settings");
     this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
@@ -785,40 +805,37 @@ export class GuitarMasterApp {
     this.syncTutorToolbarUI();
 
     // 4. Chord Voicing, String Drill, Mark Done & Fretboard Visibility
-    const trainerBar = document.getElementById("studio-trainer-bar");
-    if (trainerBar) {
-      trainerBar.querySelectorAll("[data-chord-mode]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          this.chordMode = btn.dataset.chordMode;
-          this.userExplicitChordMode = true;
-          trainerBar.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
-          this.fretboard.setChordMode(this.chordMode);
-          if (this.currentExercise && this.currentExercise.tabData) {
-            const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
-            if (curM) {
-              const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
-              const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, this.currentBeatIndex);
-              this.updateCard(curB, curB ? curB.type === "rest" : false, this.currentBeatIndex + 1, activeChord);
-              this.fretboard.update(curB, curB ? curB.type === "rest" : false, activeChord);
-            }
+    document.querySelectorAll("[data-chord-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.chordMode = btn.dataset.chordMode;
+        this.userExplicitChordMode = true;
+        document.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
+        this.fretboard.setChordMode(this.chordMode);
+        if (this.currentExercise && this.currentExercise.tabData) {
+          const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
+          if (curM) {
+            const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
+            const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, this.currentBeatIndex);
+            this.updateCard(curB, curB ? curB.type === "rest" : false, this.currentBeatIndex + 1, activeChord);
+            this.fretboard.update(curB, curB ? curB.type === "rest" : false, activeChord);
           }
-        });
+        }
       });
+    });
 
-      trainerBar.querySelectorAll("[data-str]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const targetStr = parseInt(btn.dataset.str, 10);
-          trainerBar.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b === btn));
-          this.applyStringOverride(targetStr);
-        });
+    document.querySelectorAll("[data-str]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetStr = parseInt(btn.dataset.str, 10);
+        document.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b === btn));
+        this.applyStringOverride(targetStr);
       });
+    });
 
-      if (this.btnToggleFretboard) {
-        this.btnToggleFretboard.addEventListener("click", () => {
-          this.fretboardVisible = !this.fretboardVisible;
-          this.syncFretboardVisibilityUI();
-        });
-      }
+    if (this.btnToggleFretboard) {
+      this.btnToggleFretboard.addEventListener("click", () => {
+        this.fretboardVisible = !this.fretboardVisible;
+        this.syncFretboardVisibilityUI();
+      });
     }
 
     if (this.btnMarkDone) {
@@ -1170,131 +1187,243 @@ export class GuitarMasterApp {
     return this._pdfJsPromise;
   }
 
-  async renderMobilePdfPage(baseSrc, page, seq) {
-    if (!this.pdfMobileCanvas) return false;
-    if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = false;
-    try {
-      const pdfjsLib = await this.ensurePdfJsLoaded();
-      if (seq !== this._pdfLoadSeq) return true;
-
-      let pdfDoc = this._pdfDocCache.get(baseSrc);
-      if (!pdfDoc) {
-        pdfDoc = await pdfjsLib.getDocument(baseSrc).promise;
-        this._pdfDocCache.set(baseSrc, pdfDoc);
-      }
-      if (seq !== this._pdfLoadSeq) return true;
-
-      const totalPages = pdfDoc.numPages || 1;
-      const safePage = Math.max(1, Math.min(page, totalPages));
-      this.pdfCurrentPage = safePage;
-      if (this.pdfPageInput) this.pdfPageInput.value = safePage;
-      if (this.pdfMobilePageStatus) {
-        this.pdfMobilePageStatus.textContent = `Page ${safePage} / ${totalPages}`;
-      }
-      if (this.btnPdfPrevPage) this.btnPdfPrevPage.disabled = safePage <= 1;
-      if (this.btnPdfNextPage) this.btnPdfNextPage.disabled = safePage >= totalPages;
-
-      const pdfPage = await pdfDoc.getPage(safePage);
-      if (seq !== this._pdfLoadSeq) return true;
-
-      const baseVp = pdfPage.getViewport({ scale: 1 });
-      const scrollerW = (this.pdfCanvasScroller && this.pdfCanvasScroller.clientWidth)
-        ? Math.max(260, this.pdfCanvasScroller.clientWidth - 20)
-        : Math.max(280, window.innerWidth - 28);
-      const cssScale = scrollerW / baseVp.width;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-      const vp = pdfPage.getViewport({ scale: cssScale * dpr });
-
-      if (this._pdfRenderTask && typeof this._pdfRenderTask.cancel === "function") {
-        try { this._pdfRenderTask.cancel(); } catch (e) {}
-      }
-
-      const canvas = this.pdfMobileCanvas;
-      const ctx = canvas.getContext("2d");
-      canvas.width = Math.floor(vp.width);
-      canvas.height = Math.floor(vp.height);
-      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
-      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
-
-      this._pdfRenderTask = pdfPage.render({ canvasContext: ctx, viewport: vp });
-      await this._pdfRenderTask.promise;
-      if (seq !== this._pdfLoadSeq) return true;
-
-      if (this.pdfCanvasScroller) this.pdfCanvasScroller.scrollTop = 0;
-      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
-      return true;
-    } catch (err) {
-      if (err && err.name === "RenderingCancelledException") return true;
-      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
-      return false;
-    }
-  }
-
   async loadPdfFrame() {
-    if (!this.pdfViewerFrame) return;
     const seq = ++this._pdfLoadSeq;
     const filename = this.getPdfFilename(this.pdfBookCategory);
     const displayFilename = filename.replace(/^assets\//, "");
     const customUrl = this.customPdfUrls[this.pdfBookCategory];
     const baseSrc = customUrl || this.resolveAssetUrl(filename);
-    const page = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
-    const fullUrl = `${baseSrc}#page=${page}&view=FitH&navpanes=0`;
+    const targetPage = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
+    const fullUrl = `${baseSrc}#page=${targetPage}&view=FitH&navpanes=0`;
 
     if (this.pdfOpenNewTab) this.pdfOpenNewTab.href = fullUrl;
     if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = displayFilename;
 
-    if (!customUrl && (window.location.protocol === "http:" || window.location.protocol === "https:")) {
-      try {
-        const res = await fetch(baseSrc, { method: "HEAD" });
-        if (seq !== this._pdfLoadSeq) return;
-        if (!res.ok) {
-          if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "flex";
-          if (this.pdfMobileCanvasWrap) this.pdfMobileCanvasWrap.style.display = "none";
-          this.pdfViewerFrame.removeAttribute("src");
-          this._loadedPdfUrl = null;
-          return;
-        }
-      } catch (e) {}
+    if (this.btnPdfLesson) this.btnPdfLesson.classList.toggle("active", this.pdfBookCategory === "lessonBook");
+    if (this.btnPdfWorkshop) this.btnPdfWorkshop.classList.toggle("active", this.pdfBookCategory === "bonusWorkshop");
+    if (this.pdfPageInput) this.pdfPageInput.value = targetPage;
+
+    // If the same baseSrc is already loaded into this.pdfPagesTrack:
+    if (this._pdfCurrentBaseSrc === baseSrc && this._pdfCurrentDoc && this.pdfPagesTrack && this.pdfPagesTrack.children.length > 0) {
+      if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      this.scrollToPdfPage(targetPage, true);
+      return;
     }
 
     if (seq !== this._pdfLoadSeq) return;
     if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
-
-    // Mobile & Tablet browsers render PDF pages inline via pdf.js canvas instead of native embed "Open" box
-    if (this.isMobileOrTouchPdfDevice() && this.pdfMobileCanvasWrap && this.pdfMobileCanvas) {
-      this.pdfViewerFrame.style.display = "none";
-      this.pdfMobileCanvasWrap.style.display = "flex";
-      const ok = await this.renderMobilePdfPage(baseSrc, page, seq);
-      if (ok || seq !== this._pdfLoadSeq) return;
-      // Graceful fallback to iframe if pdf.js CDN fails offline
-      this.pdfMobileCanvasWrap.style.display = "none";
-      this.pdfViewerFrame.style.display = "block";
-    } else if (this.pdfMobileCanvasWrap) {
-      this.pdfMobileCanvasWrap.style.display = "none";
-      this.pdfViewerFrame.style.display = "block";
+    if (this.pdfLoadingIndicator) {
+      this.pdfLoadingIndicator.hidden = false;
+      if (this.pdfLoadingText) this.pdfLoadingText.textContent = `Loading ${displayFilename}...`;
     }
 
-    const currentAttr = this.pdfViewerFrame.getAttribute("src") || "";
-    if (currentAttr === fullUrl || this._loadedPdfUrl === fullUrl) {
-      this.pdfViewerFrame.style.display = "block";
-      return;
-    }
+    try {
+      const pdfjsLib = await this.ensurePdfJsLoaded();
+      if (seq !== this._pdfLoadSeq) return;
 
-    const currentBase = currentAttr.split("#")[0];
-    this._loadedPdfUrl = fullUrl;
-    this._pendingPdfUrl = fullUrl;
-    if (currentAttr && currentBase === baseSrc) {
-      // Chromium PDF viewer ignores fragment-only #page= changes unless src resets cleanly first
-      clearTimeout(this._pdfFrameReloadTimer);
-      this.pdfViewerFrame.src = "about:blank";
-      this._pdfFrameReloadTimer = setTimeout(() => {
-        if (!this.pdfViewerFrame || !this._pendingPdfUrl) return;
-        this.pdfViewerFrame.style.display = "block";
-        this.pdfViewerFrame.src = this._pendingPdfUrl;
-      }, 24);
-    } else {
-      this.pdfViewerFrame.style.display = "block";
-      this.pdfViewerFrame.src = fullUrl;
+      let pdfDoc = this._pdfDocCache.get(baseSrc);
+      if (!pdfDoc) {
+        pdfDoc = await pdfjsLib.getDocument({
+          url: baseSrc,
+          cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+          cMapPacked: true
+        }).promise;
+        this._pdfDocCache.set(baseSrc, pdfDoc);
+      }
+      if (seq !== this._pdfLoadSeq) return;
+
+      this._pdfCurrentDoc = pdfDoc;
+      this._pdfCurrentBaseSrc = baseSrc;
+      this._pdfRenderedPages.clear();
+
+      const totalPages = pdfDoc.numPages || 1;
+      if (this.pdfPageIndicator) {
+        this.pdfPageIndicator.textContent = `${targetPage} / ${totalPages}`;
+      }
+      if (this.pdfPageInput) {
+        this.pdfPageInput.max = totalPages;
+      }
+
+      await this.buildPdfPagesTrack(pdfDoc, targetPage, seq);
+
+      if (seq !== this._pdfLoadSeq) return;
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      this.scrollToPdfPage(targetPage, false);
+    } catch (err) {
+      console.error("[PdfViewer] Failed to load PDF:", err);
+      if (seq !== this._pdfLoadSeq) return;
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "flex";
+    }
+  }
+
+  async buildPdfPagesTrack(pdfDoc, initialPage, seq) {
+    if (!this.pdfPagesTrack) return;
+    this.pdfPagesTrack.innerHTML = "";
+
+    // Cancel any active render tasks
+    if (this._pdfRenderTasks) {
+      this._pdfRenderTasks.forEach(task => {
+        try { if (task && typeof task.cancel === "function") task.cancel(); } catch (e) {}
+      });
+      this._pdfRenderTasks.clear();
+    }
+    this._pdfRenderedPages.clear();
+
+    const totalPages = pdfDoc.numPages || 1;
+    const firstPage = await pdfDoc.getPage(1);
+    if (seq !== this._pdfLoadSeq) return;
+
+    const baseVp = firstPage.getViewport({ scale: 1 });
+    const naturalAspect = baseVp.height / baseVp.width;
+    const scrollerW = (this.pdfScrollerContainer && this.pdfScrollerContainer.clientWidth)
+      ? Math.max(260, this.pdfScrollerContainer.clientWidth - 28)
+      : Math.max(280, (window.innerWidth / 2) - 30);
+    const fitWidth = Math.min(scrollerW, 960);
+    const baseCssWidth = fitWidth * (this._pdfZoomMultiplier || 1.0);
+    const baseCssHeight = Math.floor(baseCssWidth * naturalAspect);
+    this._pdfBaseCssWidth = baseCssWidth;
+
+    const frag = document.createDocumentFragment();
+    for (let p = 1; p <= totalPages; p++) {
+      const slot = document.createElement("div");
+      slot.className = `pdf-page-slot ${p === initialPage ? "is-active-page" : ""}`;
+      slot.id = `pdf-page-slot-${p}`;
+      slot.dataset.pageNumber = String(p);
+      slot.style.width = `${Math.floor(baseCssWidth)}px`;
+      slot.style.minHeight = `${baseCssHeight}px`;
+
+      const badge = document.createElement("div");
+      badge.className = "pdf-page-badge";
+      badge.textContent = `Page ${p}`;
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "pdf-page-canvas";
+      canvas.id = `pdf-page-canvas-${p}`;
+      canvas.width = 1;
+      canvas.height = 1;
+
+      slot.appendChild(badge);
+      slot.appendChild(canvas);
+      frag.appendChild(slot);
+    }
+    this.pdfPagesTrack.appendChild(frag);
+
+    // Observer 1: Render pages when intersecting viewport (with 500px pre-render buffer)
+    if (this._pdfObserver) {
+      this._pdfObserver.disconnect();
+    }
+    this._pdfObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const p = parseInt(entry.target.dataset.pageNumber, 10);
+          this.renderPdfCanvasPage(pdfDoc, p);
+        }
+      });
+    }, {
+      root: this.pdfScrollerContainer,
+      rootMargin: "500px 0px"
+    });
+
+    // Observer 2: Track active page in center of scroller
+    if (this._pdfActiveScrollObserver) {
+      this._pdfActiveScrollObserver.disconnect();
+    }
+    this._pdfActiveScrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const p = parseInt(entry.target.dataset.pageNumber, 10);
+          this.pdfCurrentPage = p;
+          if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
+            this.pdfPageInput.value = p;
+          }
+          if (this.pdfPageIndicator) {
+            this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+          }
+          if (this.btnPdfPrev) this.btnPdfPrev.disabled = p <= 1;
+          if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
+          this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => {
+            if (s !== entry.target) s.classList.remove("is-active-page");
+          });
+          entry.target.classList.add("is-active-page");
+        }
+      });
+    }, {
+      root: this.pdfScrollerContainer,
+      threshold: 0.35
+    });
+
+    this.pdfPagesTrack.querySelectorAll(".pdf-page-slot").forEach(slot => {
+      this._pdfObserver.observe(slot);
+      this._pdfActiveScrollObserver.observe(slot);
+    });
+  }
+
+  async renderPdfCanvasPage(pdfDoc, pageNum) {
+    if (this._pdfRenderedPages.has(pageNum)) return;
+    const canvas = document.getElementById(`pdf-page-canvas-${pageNum}`);
+    const slot = document.getElementById(`pdf-page-slot-${pageNum}`);
+    if (!canvas || !slot) return;
+
+    // Check if task is already running
+    if (this._pdfRenderTasks.has(pageNum)) return;
+
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const baseVp = page.getViewport({ scale: 1 });
+      const targetCssWidth = parseFloat(slot.style.width) || this._pdfBaseCssWidth || 600;
+      const cssScale = targetCssWidth / baseVp.width;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const vp = page.getViewport({ scale: cssScale * dpr });
+
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
+      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
+      slot.style.minHeight = `${Math.floor(vp.height / dpr)}px`;
+
+      const ctx = canvas.getContext("2d");
+      const renderTask = page.render({ canvasContext: ctx, viewport: vp });
+      this._pdfRenderTasks.set(pageNum, renderTask);
+
+      await renderTask.promise;
+      this._pdfRenderTasks.delete(pageNum);
+      this._pdfRenderedPages.add(pageNum);
+      slot.classList.add("is-rendered");
+    } catch (err) {
+      this._pdfRenderTasks.delete(pageNum);
+      if (err && err.name === "RenderingCancelledException") return;
+      console.warn(`[PdfViewer] Error rendering page ${pageNum}:`, err);
+    }
+  }
+
+  scrollToPdfPage(targetPage, smooth = true) {
+    if (!this.pdfPagesTrack || !this.pdfScrollerContainer) return;
+    const totalPages = (this._pdfCurrentDoc && this._pdfCurrentDoc.numPages) || 1;
+    const p = Math.max(1, Math.min(targetPage, totalPages));
+    this.pdfCurrentPage = p;
+    if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
+      this.pdfPageInput.value = p;
+    }
+    if (this.pdfPageIndicator) {
+      this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+    }
+    const slot = document.getElementById(`pdf-page-slot-${p}`);
+    if (slot) {
+      slot.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+      if (this._pdfCurrentDoc) {
+        this.renderPdfCanvasPage(this._pdfCurrentDoc, p);
+      }
+    }
+  }
+
+  setPdfZoom(multiplier, mode = "custom") {
+    this._pdfZoomMode = mode;
+    this._pdfZoomMultiplier = Math.max(0.4, Math.min(multiplier, 2.5));
+    if (mode === "fit") this._pdfZoomMultiplier = 1.0;
+    if (this._pdfCurrentDoc) {
+      this.buildPdfPagesTrack(this._pdfCurrentDoc, this.pdfCurrentPage, ++this._pdfLoadSeq);
     }
   }
 
@@ -5038,15 +5167,72 @@ export class GuitarMasterApp {
       });
     }
 
-    if (this.btnToggleGuide && this.studioGuidePanel) {
-      this.btnToggleGuide.addEventListener("click", () => {
-        const willShow = this.studioGuidePanel.hasAttribute("hidden");
-        if (willShow) {
-          this.studioGuidePanel.removeAttribute("hidden");
-        } else {
-          this.studioGuidePanel.setAttribute("hidden", "");
+    // Item 4: Touch-friendly Admin Mode toggle for iPad & touch devices
+    // Supports triple-tap and 1.5s long-press on top-right info icon (btnToggleGuide)
+    if (this.btnToggleGuide) {
+      let tapCount = 0;
+      let lastTapTime = 0;
+      let longPressTimer = null;
+      let longPressTriggered = false;
+
+      const triggerAdminToggle = (reason) => {
+        const nextState = !this.adminMode;
+        this.setAdminMode(nextState);
+        try {
+          if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        } catch (e) {}
+        console.log(`[AdminMode] Toggled via ${reason} to:`, nextState);
+      };
+
+      this.btnToggleGuide.addEventListener("pointerdown", () => {
+        longPressTriggered = false;
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true;
+          triggerAdminToggle("long-press (1.5s)");
+        }, 1500);
+      });
+
+      const clearLongPress = () => {
+        clearTimeout(longPressTimer);
+      };
+      this.btnToggleGuide.addEventListener("pointerup", clearLongPress);
+      this.btnToggleGuide.addEventListener("pointercancel", clearLongPress);
+      this.btnToggleGuide.addEventListener("pointerleave", clearLongPress);
+
+      this.btnToggleGuide.addEventListener("click", (e) => {
+        if (longPressTriggered) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
         }
-        this.btnToggleGuide.classList.toggle("active", willShow);
+
+        const now = Date.now();
+        if (now - lastTapTime < 550) {
+          tapCount++;
+        } else {
+          tapCount = 1;
+        }
+        lastTapTime = now;
+
+        if (tapCount >= 3) {
+          tapCount = 0;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          triggerAdminToggle("triple-tap");
+          return;
+        }
+
+        // Standard single click toggles Steve Krenz Notes guide drawer
+        if (this.studioGuidePanel) {
+          const willShow = this.studioGuidePanel.hasAttribute("hidden");
+          if (willShow) {
+            this.studioGuidePanel.removeAttribute("hidden");
+          } else {
+            this.studioGuidePanel.setAttribute("hidden", "");
+          }
+          this.btnToggleGuide.classList.toggle("active", willShow);
+        }
       });
     }
 
@@ -5089,7 +5275,7 @@ export class GuitarMasterApp {
       });
     }
 
-    // Zone 3: PDF Controls
+    // Zone 3: PDF Controls & Continuous Canvas Viewer
     if (this.btnPdfLesson) {
       this.btnPdfLesson.addEventListener("click", () => {
         this.pdfBookCategory = "lessonBook";
@@ -5108,8 +5294,20 @@ export class GuitarMasterApp {
     }
     if (this.pdfPageInput) {
       this.pdfPageInput.addEventListener("change", () => {
-        this.pdfCurrentPage = Math.max(1, parseInt(this.pdfPageInput.value, 10) || 1);
-        this.loadPdfFrame();
+        const val = parseInt(this.pdfPageInput.value, 10);
+        if (!isNaN(val)) {
+          this.scrollToPdfPage(val, true);
+        }
+      });
+      this.pdfPageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.pdfPageInput.blur();
+          const val = parseInt(this.pdfPageInput.value, 10);
+          if (!isNaN(val)) {
+            this.scrollToPdfPage(val, true);
+          }
+        }
       });
     }
     if (this.btnPdfSync) {
@@ -5117,18 +5315,39 @@ export class GuitarMasterApp {
         if (this.currentExercise) this.syncPdfToExercise(this.currentExercise);
       });
     }
+    if (this.btnPdfPrev) {
+      this.btnPdfPrev.addEventListener("click", () => {
+        this.scrollToPdfPage(this.pdfCurrentPage - 1, true);
+      });
+    }
+    if (this.btnPdfNext) {
+      this.btnPdfNext.addEventListener("click", () => {
+        this.scrollToPdfPage(this.pdfCurrentPage + 1, true);
+      });
+    }
+    if (this.btnPdfZoomOut) {
+      this.btnPdfZoomOut.addEventListener("click", () => {
+        this.setPdfZoom((this._pdfZoomMultiplier || 1.0) * 0.85, "custom");
+      });
+    }
+    if (this.btnPdfZoomIn) {
+      this.btnPdfZoomIn.addEventListener("click", () => {
+        this.setPdfZoom((this._pdfZoomMultiplier || 1.0) * 1.18, "custom");
+      });
+    }
+    if (this.btnPdfZoomFit) {
+      this.btnPdfZoomFit.addEventListener("click", () => {
+        this.setPdfZoom(1.0, "fit");
+      });
+    }
     if (this.btnPdfPrevPage) {
       this.btnPdfPrevPage.addEventListener("click", () => {
-        this.pdfCurrentPage = Math.max(1, (parseInt(this.pdfCurrentPage, 10) || 1) - 1);
-        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
-        this.loadPdfFrame();
+        this.scrollToPdfPage(this.pdfCurrentPage - 1, true);
       });
     }
     if (this.btnPdfNextPage) {
       this.btnPdfNextPage.addEventListener("click", () => {
-        this.pdfCurrentPage = (parseInt(this.pdfCurrentPage, 10) || 1) + 1;
-        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
-        this.loadPdfFrame();
+        this.scrollToPdfPage(this.pdfCurrentPage + 1, true);
       });
     }
 
@@ -5354,11 +5573,13 @@ export class GuitarMasterApp {
         }
         if (
           (this.paneMode === "pdf" || this.paneMode === "split") &&
-          this.isMobileOrTouchPdfDevice() &&
-          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 24
+          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 40 &&
+          this._pdfCurrentDoc
         ) {
           this._lastPdfRenderWidth = window.innerWidth;
-          this.loadPdfFrame();
+          if (this._pdfZoomMode === "fit") {
+            this.buildPdfPagesTrack(this._pdfCurrentDoc, this.pdfCurrentPage, ++this._pdfLoadSeq);
+          }
         }
       }, 120);
     });

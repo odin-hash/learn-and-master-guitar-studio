@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
 /* ==========================================================================
    LEARN & MASTER GUITAR - EDITORIAL MONOCHROME WORKSPACE (Linear / Notei)
@@ -755,7 +756,6 @@ button.acc-topic-btn.is-active-topic {
 /* Inline Pinned Deck & Book Page Sheet Alignment (Responsive Full Width) */
 .guide-drawer,
 .canvas-subbar,
-.studio-pinned-deck .tutor-scaffolding-bar,
 .fretboard-stage {
   max-width: 1320px;
   width: min(96%, 1320px);
@@ -767,9 +767,22 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .studio-pinned-deck .tutor-scaffolding-bar {
+  max-width: 1320px;
+  width: min(96%, 1320px);
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 0;
-  padding: 5px 10px;
-  gap: 6px 8px;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px 10px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 6px 10px !important;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .studio-pinned-deck .tutor-assist-group {
@@ -797,13 +810,13 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 12px;
-  height: 44px;
-  min-height: 44px;
-  max-height: 44px;
+  gap: 8px;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 0 0 1px 0;
+  padding: 0 4px 1px 4px;
   border-bottom: 1px solid var(--border-hairline);
 }
 
@@ -818,15 +831,15 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
 }
 
-/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 185px) */
+/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 148px) */
 .telemetry-slot-pitch {
-  width: 185px !important;
-  min-width: 185px !important;
-  max-width: 185px !important;
+  width: 148px !important;
+  min-width: 148px !important;
+  max-width: 148px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 5px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -836,10 +849,10 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 28px;
-  min-width: 28px;
-  max-width: 28px;
-  height: 28px;
+  width: 26px !important;
+  min-width: 26px !important;
+  max-width: 26px !important;
+  height: 26px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -856,7 +869,7 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-primary,
 .telemetry-primary {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -870,11 +883,11 @@ button.acc-topic-btn.is-active-topic {
   color: var(--color-rest);
 }
 
-/* Slot 2: String • Fret • Finger (Strict fixed width 195px) */
+/* Slot 2: String • Fret • Finger (Strict fixed width 165px) */
 .telemetry-slot-instruction {
-  width: 195px !important;
-  min-width: 195px !important;
-  max-width: 195px !important;
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -887,7 +900,7 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-instruction .telemetry-secondary,
 .telemetry-secondary {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -896,11 +909,11 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
 }
 
-/* Slot 3: Down Strum / Up Strum Badge (Strict fixed width 115px) */
+/* Slot 3: Down Strum / Up Strum Pill (Strict fixed width 98px) */
 .telemetry-slot-badge {
-  width: 115px !important;
-  min-width: 115px !important;
-  max-width: 115px !important;
+  width: 98px !important;
+  min-width: 98px !important;
+  max-width: 98px !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -911,12 +924,12 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .telemetry-pick-badge {
-  width: 115px !important;
-  min-width: 115px !important;
-  max-width: 115px !important;
+  width: 98px !important;
+  min-width: 98px !important;
+  max-width: 98px !important;
   box-sizing: border-box !important;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-sidebar);
@@ -957,8 +970,35 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0;
 }
 
-/* Right-side Voicing & Fretboard Controls: Pinned permanently to the right */
+/* Right-side Fretboard Control: Pinned permanently to the right */
 .notation-toggles {
+  margin-left: auto !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Fretboard stage header bar for chord voicings and string selector */
+.fretboard-header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 4px 10px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+}
+
+.fretboard-header-bar #chord-mode-group,
+.fretboard-header-bar #string-selector-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+}
   margin-left: auto !important;
   display: flex;
   align-items: center;
@@ -2751,16 +2791,133 @@ button.acc-topic-btn.is-active-topic {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: var(--bg-sidebar);
+}
+
+.pdf-nav-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.pdf-page-indicator {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.pdf-nav-sep {
+  color: var(--border-strong);
+  font-size: 11px;
+  padding: 0 1px;
+}
+
+.pdf-scroller-container {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px 48px 8px;
+  box-sizing: border-box;
+  background: var(--bg-sidebar);
+}
+
+.pdf-pages-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pdf-page-slot {
+  position: relative;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-sizing: border-box;
+  transition: box-shadow 0.15s ease;
+}
+
+.pdf-page-slot.is-active-page {
+  box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-page-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-hairline);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pdf-page-canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+.pdf-loading-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-hairline);
+  z-index: 10;
+}
+
+.pdf-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: pdf-spin 0.8s linear infinite;
+}
+
+@keyframes pdf-spin {
+  to { transform: rotate(360deg); }
 }
 
 #pdf-viewer-frame {
-  flex: 1 1 0%;
-  width: 100%;
-  height: 100%;
-  min-height: 240px;
-  display: block;
-  border: none;
-  background: var(--bg-hover);
+  display: none !important;
 }
 
 .pdf-fallback-card {
@@ -5005,16 +5162,16 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 
   .studio-pinned-deck .tutor-scaffolding-bar {
-    height: 36px;
-    min-height: 36px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 3px 6px;
-    gap: 8px;
-    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    padding: 6px 10px !important;
+    gap: 6px 10px !important;
+    width: 100% !important;
   }
 
   .studio-pinned-deck .tutor-scaffolding-bar::-webkit-scrollbar {
@@ -5023,7 +5180,6 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 
   .studio-pinned-deck .tutor-assist-group {
     flex-shrink: 0;
-    white-space: nowrap;
   }
 }
 
@@ -5900,21 +6056,6 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
             </div>
 
             <div class="notation-toggles" id="studio-trainer-bar">
-              <div class="toggle-group" id="chord-mode-group" style="display:none;">
-                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
-                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
-                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
-                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
-              </div>
-              <div class="toggle-group" id="string-selector-group" style="display:none;">
-                <span class="toggle-lbl">String</span>
-                <button class="micro-pill active" data-str="1">1</button>
-                <button class="micro-pill" data-str="2">2</button>
-                <button class="micro-pill" data-str="3">3</button>
-                <button class="micro-pill" data-str="4">4</button>
-                <button class="micro-pill" data-str="5">5</button>
-                <button class="micro-pill" data-str="6">6</button>
-              </div>
               <button class="micro-pill active" id="btn-toggle-fretboard" title="Show/Hide Fretboard">Fretboard</button>
             </div>
           </div>
@@ -5953,6 +6094,23 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 
           <!-- Interactive Fretboard Visualizer (Pinned) -->
           <div class="fretboard-stage" id="fretboard-wrapper">
+            <div class="fretboard-header-bar" id="fretboard-header-bar">
+              <div class="toggle-group" id="chord-mode-group" style="display:none;">
+                <button class="micro-pill active" data-chord-mode="melody" title="Melody Notes — Show only the active melody note on fretboard">Melody Notes</button>
+                <button class="micro-pill" data-chord-mode="full" title="Full Chords — Standard 5 & 6-String Chord Shapes">Full Chords</button>
+                <button class="micro-pill" data-chord-mode="easy4" title="4-Note Chords — Simplified 4-String Shapes">4-Note Chords</button>
+                <button class="micro-pill" data-chord-mode="easy3" title="3-Note Chords — Easy 3-String Shapes">3-Note Chords</button>
+              </div>
+              <div class="toggle-group" id="string-selector-group" style="display:none;">
+                <span class="toggle-lbl">String</span>
+                <button class="micro-pill active" data-str="1">1</button>
+                <button class="micro-pill" data-str="2">2</button>
+                <button class="micro-pill" data-str="3">3</button>
+                <button class="micro-pill" data-str="4">4</button>
+                <button class="micro-pill" data-str="5">5</button>
+                <button class="micro-pill" data-str="6">6</button>
+              </div>
+            </div>
             <div id="fretboard-container"></div>
           </div>
         </div>
@@ -6050,6 +6208,15 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
               <input type="number" id="pdf-page-input" class="mono-input" min="1" max="160" value="1" aria-label="PDF Page Number">
             </div>
             <button class="micro-pill" id="btn-pdf-sync" title="Jump to this exercise's book page">Sync</button>
+            <div class="pdf-nav-zoom-group">
+              <button type="button" class="micro-pill" id="btn-pdf-prev" title="Previous Page (&lsaquo;)" aria-label="Previous Page">&lsaquo;</button>
+              <span class="pdf-page-indicator" id="pdf-page-indicator">1 / --</span>
+              <button type="button" class="micro-pill" id="btn-pdf-next" title="Next Page (&rsaquo;)" aria-label="Next Page">&rsaquo;</button>
+              <span class="pdf-nav-sep">|</span>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-out" title="Zoom Out (-)" aria-label="Zoom Out">&minus;</button>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-fit" title="Fit Width">Fit</button>
+              <button type="button" class="micro-pill" id="btn-pdf-zoom-in" title="Zoom In (+)" aria-label="Zoom In">+</button>
+            </div>
           </div>
           <div class="pdf-toolbar-right">
             <button type="button" class="micro-pill admin-only-control" id="btn-admin-settings" title="Admin Settings: Gemini OMR API Key &amp; GitHub Live Push PAT">
@@ -6110,18 +6277,23 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
           </div>
         </div>
 
-        <div class="pdf-frame-wrap">
-          <iframe id="pdf-viewer-frame" title="Course Reference PDF"></iframe>
+        <div class="pdf-frame-wrap" id="pdf-frame-wrap">
+          <div class="pdf-scroller-container" id="pdf-scroller-container">
+            <div class="pdf-pages-track" id="pdf-pages-track"></div>
+            <div class="pdf-loading-indicator" id="pdf-loading-indicator" hidden>
+              <div class="pdf-spinner"></div>
+              <span id="pdf-loading-text">Loading PDF Book...</span>
+            </div>
+          </div>
+          <!-- Hidden fallback elements preserved for API compatibility -->
+          <iframe id="pdf-viewer-frame" title="Course Reference PDF" style="display:none;"></iframe>
           <div class="pdf-mobile-canvas-wrap" id="pdf-mobile-canvas-wrap" style="display:none;">
-            <div class="pdf-mobile-nav">
-              <button type="button" class="micro-pill" id="btn-pdf-prev-page" aria-label="Previous PDF Page">&lsaquo; Prev</button>
-              <span class="pdf-mobile-page-status" id="pdf-mobile-page-status">Page 1</span>
-              <button type="button" class="micro-pill" id="btn-pdf-next-page" aria-label="Next PDF Page">Next &rsaquo;</button>
-            </div>
-            <div class="pdf-canvas-scroller" id="pdf-canvas-scroller">
-              <canvas id="pdf-mobile-canvas"></canvas>
-              <div class="pdf-mobile-loading" id="pdf-mobile-loading" hidden>Loading course PDF page...</div>
-            </div>
+            <canvas id="pdf-mobile-canvas" style="display:none;"></canvas>
+            <div id="pdf-canvas-scroller" style="display:none;"></div>
+            <span id="pdf-mobile-page-status" style="display:none;"></span>
+            <button id="btn-pdf-prev-page" style="display:none;"></button>
+            <button id="btn-pdf-next-page" style="display:none;"></button>
+            <div id="pdf-mobile-loading" style="display:none;"></div>
           </div>
           <div class="pdf-fallback-card" id="pdf-fallback-card" style="display:none;">
             <div class="pdf-fallback-inner">
@@ -19340,6 +19512,26 @@ class GuitarMasterApp {
     this.pdfFallbackCard = document.getElementById("pdf-fallback-card");
     this.pdfMissingFilename = document.getElementById("pdf-missing-filename");
 
+    // Continuous Canvas PDF Viewer Elements
+    this.pdfScrollerContainer = document.getElementById("pdf-scroller-container");
+    this.pdfPagesTrack = document.getElementById("pdf-pages-track");
+    this.pdfLoadingIndicator = document.getElementById("pdf-loading-indicator");
+    this.pdfLoadingText = document.getElementById("pdf-loading-text");
+    this.pdfPageIndicator = document.getElementById("pdf-page-indicator");
+    this.btnPdfPrev = document.getElementById("btn-pdf-prev");
+    this.btnPdfNext = document.getElementById("btn-pdf-next");
+    this.btnPdfZoomOut = document.getElementById("btn-pdf-zoom-out");
+    this.btnPdfZoomFit = document.getElementById("btn-pdf-zoom-fit");
+    this.btnPdfZoomIn = document.getElementById("btn-pdf-zoom-in");
+    this._pdfZoomMultiplier = 1.0;
+    this._pdfZoomMode = "fit";
+    this._pdfRenderTasks = new Map();
+    this._pdfRenderedPages = new Set();
+    this._pdfCurrentDoc = null;
+    this._pdfCurrentBaseSrc = null;
+    this._pdfObserver = null;
+    this._pdfActiveScrollObserver = null;
+
     // Admin Action Bar & Cloud Settings
     this.btnAdminSettings = document.getElementById("btn-admin-settings");
     this.btnExtractPdfPage = document.getElementById("btn-extract-pdf-page");
@@ -19741,40 +19933,37 @@ class GuitarMasterApp {
     this.syncTutorToolbarUI();
 
     // 4. Chord Voicing, String Drill, Mark Done & Fretboard Visibility
-    const trainerBar = document.getElementById("studio-trainer-bar");
-    if (trainerBar) {
-      trainerBar.querySelectorAll("[data-chord-mode]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          this.chordMode = btn.dataset.chordMode;
-          this.userExplicitChordMode = true;
-          trainerBar.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
-          this.fretboard.setChordMode(this.chordMode);
-          if (this.currentExercise && this.currentExercise.tabData) {
-            const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
-            if (curM) {
-              const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
-              const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, this.currentBeatIndex);
-              this.updateCard(curB, curB ? curB.type === "rest" : false, this.currentBeatIndex + 1, activeChord);
-              this.fretboard.update(curB, curB ? curB.type === "rest" : false, activeChord);
-            }
+    document.querySelectorAll("[data-chord-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.chordMode = btn.dataset.chordMode;
+        this.userExplicitChordMode = true;
+        document.querySelectorAll("[data-chord-mode]").forEach(b => b.classList.toggle("active", b === btn));
+        this.fretboard.setChordMode(this.chordMode);
+        if (this.currentExercise && this.currentExercise.tabData) {
+          const curM = this.currentExercise.tabData[this.currentMeasureIndex] || this.currentExercise.tabData[0];
+          if (curM) {
+            const curB = curM.beats ? (curM.beats[this.currentBeatIndex] || curM.beats[0]) : null;
+            const activeChord = this.getActiveChord(this.currentExercise, this.currentMeasureIndex, this.currentBeatIndex);
+            this.updateCard(curB, curB ? curB.type === "rest" : false, this.currentBeatIndex + 1, activeChord);
+            this.fretboard.update(curB, curB ? curB.type === "rest" : false, activeChord);
           }
-        });
+        }
       });
+    });
 
-      trainerBar.querySelectorAll("[data-str]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const targetStr = parseInt(btn.dataset.str, 10);
-          trainerBar.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b === btn));
-          this.applyStringOverride(targetStr);
-        });
+    document.querySelectorAll("[data-str]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const targetStr = parseInt(btn.dataset.str, 10);
+        document.querySelectorAll("[data-str]").forEach(b => b.classList.toggle("active", b === btn));
+        this.applyStringOverride(targetStr);
       });
+    });
 
-      if (this.btnToggleFretboard) {
-        this.btnToggleFretboard.addEventListener("click", () => {
-          this.fretboardVisible = !this.fretboardVisible;
-          this.syncFretboardVisibilityUI();
-        });
-      }
+    if (this.btnToggleFretboard) {
+      this.btnToggleFretboard.addEventListener("click", () => {
+        this.fretboardVisible = !this.fretboardVisible;
+        this.syncFretboardVisibilityUI();
+      });
     }
 
     if (this.btnMarkDone) {
@@ -20126,131 +20315,243 @@ class GuitarMasterApp {
     return this._pdfJsPromise;
   }
 
-  async renderMobilePdfPage(baseSrc, page, seq) {
-    if (!this.pdfMobileCanvas) return false;
-    if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = false;
-    try {
-      const pdfjsLib = await this.ensurePdfJsLoaded();
-      if (seq !== this._pdfLoadSeq) return true;
-
-      let pdfDoc = this._pdfDocCache.get(baseSrc);
-      if (!pdfDoc) {
-        pdfDoc = await pdfjsLib.getDocument(baseSrc).promise;
-        this._pdfDocCache.set(baseSrc, pdfDoc);
-      }
-      if (seq !== this._pdfLoadSeq) return true;
-
-      const totalPages = pdfDoc.numPages || 1;
-      const safePage = Math.max(1, Math.min(page, totalPages));
-      this.pdfCurrentPage = safePage;
-      if (this.pdfPageInput) this.pdfPageInput.value = safePage;
-      if (this.pdfMobilePageStatus) {
-        this.pdfMobilePageStatus.textContent = `Page ${safePage} / ${totalPages}`;
-      }
-      if (this.btnPdfPrevPage) this.btnPdfPrevPage.disabled = safePage <= 1;
-      if (this.btnPdfNextPage) this.btnPdfNextPage.disabled = safePage >= totalPages;
-
-      const pdfPage = await pdfDoc.getPage(safePage);
-      if (seq !== this._pdfLoadSeq) return true;
-
-      const baseVp = pdfPage.getViewport({ scale: 1 });
-      const scrollerW = (this.pdfCanvasScroller && this.pdfCanvasScroller.clientWidth)
-        ? Math.max(260, this.pdfCanvasScroller.clientWidth - 20)
-        : Math.max(280, window.innerWidth - 28);
-      const cssScale = scrollerW / baseVp.width;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-      const vp = pdfPage.getViewport({ scale: cssScale * dpr });
-
-      if (this._pdfRenderTask && typeof this._pdfRenderTask.cancel === "function") {
-        try { this._pdfRenderTask.cancel(); } catch (e) {}
-      }
-
-      const canvas = this.pdfMobileCanvas;
-      const ctx = canvas.getContext("2d");
-      canvas.width = Math.floor(vp.width);
-      canvas.height = Math.floor(vp.height);
-      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
-      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
-
-      this._pdfRenderTask = pdfPage.render({ canvasContext: ctx, viewport: vp });
-      await this._pdfRenderTask.promise;
-      if (seq !== this._pdfLoadSeq) return true;
-
-      if (this.pdfCanvasScroller) this.pdfCanvasScroller.scrollTop = 0;
-      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
-      return true;
-    } catch (err) {
-      if (err && err.name === "RenderingCancelledException") return true;
-      if (this.pdfMobileLoading) this.pdfMobileLoading.hidden = true;
-      return false;
-    }
-  }
-
   async loadPdfFrame() {
-    if (!this.pdfViewerFrame) return;
     const seq = ++this._pdfLoadSeq;
     const filename = this.getPdfFilename(this.pdfBookCategory);
     const displayFilename = filename.replace(/^assets\//, "");
     const customUrl = this.customPdfUrls[this.pdfBookCategory];
     const baseSrc = customUrl || this.resolveAssetUrl(filename);
-    const page = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
-    const fullUrl = `${baseSrc}#page=${page}&view=FitH&navpanes=0`;
+    const targetPage = Math.max(1, parseInt(this.pdfCurrentPage, 10) || 1);
+    const fullUrl = `${baseSrc}#page=${targetPage}&view=FitH&navpanes=0`;
 
     if (this.pdfOpenNewTab) this.pdfOpenNewTab.href = fullUrl;
     if (this.pdfMissingFilename) this.pdfMissingFilename.textContent = displayFilename;
 
-    if (!customUrl && (window.location.protocol === "http:" || window.location.protocol === "https:")) {
-      try {
-        const res = await fetch(baseSrc, { method: "HEAD" });
-        if (seq !== this._pdfLoadSeq) return;
-        if (!res.ok) {
-          if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "flex";
-          if (this.pdfMobileCanvasWrap) this.pdfMobileCanvasWrap.style.display = "none";
-          this.pdfViewerFrame.removeAttribute("src");
-          this._loadedPdfUrl = null;
-          return;
-        }
-      } catch (e) {}
+    if (this.btnPdfLesson) this.btnPdfLesson.classList.toggle("active", this.pdfBookCategory === "lessonBook");
+    if (this.btnPdfWorkshop) this.btnPdfWorkshop.classList.toggle("active", this.pdfBookCategory === "bonusWorkshop");
+    if (this.pdfPageInput) this.pdfPageInput.value = targetPage;
+
+    // If the same baseSrc is already loaded into this.pdfPagesTrack:
+    if (this._pdfCurrentBaseSrc === baseSrc && this._pdfCurrentDoc && this.pdfPagesTrack && this.pdfPagesTrack.children.length > 0) {
+      if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      this.scrollToPdfPage(targetPage, true);
+      return;
     }
 
     if (seq !== this._pdfLoadSeq) return;
     if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
-
-    // Mobile & Tablet browsers render PDF pages inline via pdf.js canvas instead of native embed "Open" box
-    if (this.isMobileOrTouchPdfDevice() && this.pdfMobileCanvasWrap && this.pdfMobileCanvas) {
-      this.pdfViewerFrame.style.display = "none";
-      this.pdfMobileCanvasWrap.style.display = "flex";
-      const ok = await this.renderMobilePdfPage(baseSrc, page, seq);
-      if (ok || seq !== this._pdfLoadSeq) return;
-      // Graceful fallback to iframe if pdf.js CDN fails offline
-      this.pdfMobileCanvasWrap.style.display = "none";
-      this.pdfViewerFrame.style.display = "block";
-    } else if (this.pdfMobileCanvasWrap) {
-      this.pdfMobileCanvasWrap.style.display = "none";
-      this.pdfViewerFrame.style.display = "block";
+    if (this.pdfLoadingIndicator) {
+      this.pdfLoadingIndicator.hidden = false;
+      if (this.pdfLoadingText) this.pdfLoadingText.textContent = `Loading ${displayFilename}...`;
     }
 
-    const currentAttr = this.pdfViewerFrame.getAttribute("src") || "";
-    if (currentAttr === fullUrl || this._loadedPdfUrl === fullUrl) {
-      this.pdfViewerFrame.style.display = "block";
-      return;
-    }
+    try {
+      const pdfjsLib = await this.ensurePdfJsLoaded();
+      if (seq !== this._pdfLoadSeq) return;
 
-    const currentBase = currentAttr.split("#")[0];
-    this._loadedPdfUrl = fullUrl;
-    this._pendingPdfUrl = fullUrl;
-    if (currentAttr && currentBase === baseSrc) {
-      // Chromium PDF viewer ignores fragment-only #page= changes unless src resets cleanly first
-      clearTimeout(this._pdfFrameReloadTimer);
-      this.pdfViewerFrame.src = "about:blank";
-      this._pdfFrameReloadTimer = setTimeout(() => {
-        if (!this.pdfViewerFrame || !this._pendingPdfUrl) return;
-        this.pdfViewerFrame.style.display = "block";
-        this.pdfViewerFrame.src = this._pendingPdfUrl;
-      }, 24);
-    } else {
-      this.pdfViewerFrame.style.display = "block";
-      this.pdfViewerFrame.src = fullUrl;
+      let pdfDoc = this._pdfDocCache.get(baseSrc);
+      if (!pdfDoc) {
+        pdfDoc = await pdfjsLib.getDocument({
+          url: baseSrc,
+          cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+          cMapPacked: true
+        }).promise;
+        this._pdfDocCache.set(baseSrc, pdfDoc);
+      }
+      if (seq !== this._pdfLoadSeq) return;
+
+      this._pdfCurrentDoc = pdfDoc;
+      this._pdfCurrentBaseSrc = baseSrc;
+      this._pdfRenderedPages.clear();
+
+      const totalPages = pdfDoc.numPages || 1;
+      if (this.pdfPageIndicator) {
+        this.pdfPageIndicator.textContent = `${targetPage} / ${totalPages}`;
+      }
+      if (this.pdfPageInput) {
+        this.pdfPageInput.max = totalPages;
+      }
+
+      await this.buildPdfPagesTrack(pdfDoc, targetPage, seq);
+
+      if (seq !== this._pdfLoadSeq) return;
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      this.scrollToPdfPage(targetPage, false);
+    } catch (err) {
+      console.error("[PdfViewer] Failed to load PDF:", err);
+      if (seq !== this._pdfLoadSeq) return;
+      if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
+      if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "flex";
+    }
+  }
+
+  async buildPdfPagesTrack(pdfDoc, initialPage, seq) {
+    if (!this.pdfPagesTrack) return;
+    this.pdfPagesTrack.innerHTML = "";
+
+    // Cancel any active render tasks
+    if (this._pdfRenderTasks) {
+      this._pdfRenderTasks.forEach(task => {
+        try { if (task && typeof task.cancel === "function") task.cancel(); } catch (e) {}
+      });
+      this._pdfRenderTasks.clear();
+    }
+    this._pdfRenderedPages.clear();
+
+    const totalPages = pdfDoc.numPages || 1;
+    const firstPage = await pdfDoc.getPage(1);
+    if (seq !== this._pdfLoadSeq) return;
+
+    const baseVp = firstPage.getViewport({ scale: 1 });
+    const naturalAspect = baseVp.height / baseVp.width;
+    const scrollerW = (this.pdfScrollerContainer && this.pdfScrollerContainer.clientWidth)
+      ? Math.max(260, this.pdfScrollerContainer.clientWidth - 28)
+      : Math.max(280, (window.innerWidth / 2) - 30);
+    const fitWidth = Math.min(scrollerW, 960);
+    const baseCssWidth = fitWidth * (this._pdfZoomMultiplier || 1.0);
+    const baseCssHeight = Math.floor(baseCssWidth * naturalAspect);
+    this._pdfBaseCssWidth = baseCssWidth;
+
+    const frag = document.createDocumentFragment();
+    for (let p = 1; p <= totalPages; p++) {
+      const slot = document.createElement("div");
+      slot.className = `pdf-page-slot ${p === initialPage ? "is-active-page" : ""}`;
+      slot.id = `pdf-page-slot-${p}`;
+      slot.dataset.pageNumber = String(p);
+      slot.style.width = `${Math.floor(baseCssWidth)}px`;
+      slot.style.minHeight = `${baseCssHeight}px`;
+
+      const badge = document.createElement("div");
+      badge.className = "pdf-page-badge";
+      badge.textContent = `Page ${p}`;
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "pdf-page-canvas";
+      canvas.id = `pdf-page-canvas-${p}`;
+      canvas.width = 1;
+      canvas.height = 1;
+
+      slot.appendChild(badge);
+      slot.appendChild(canvas);
+      frag.appendChild(slot);
+    }
+    this.pdfPagesTrack.appendChild(frag);
+
+    // Observer 1: Render pages when intersecting viewport (with 500px pre-render buffer)
+    if (this._pdfObserver) {
+      this._pdfObserver.disconnect();
+    }
+    this._pdfObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const p = parseInt(entry.target.dataset.pageNumber, 10);
+          this.renderPdfCanvasPage(pdfDoc, p);
+        }
+      });
+    }, {
+      root: this.pdfScrollerContainer,
+      rootMargin: "500px 0px"
+    });
+
+    // Observer 2: Track active page in center of scroller
+    if (this._pdfActiveScrollObserver) {
+      this._pdfActiveScrollObserver.disconnect();
+    }
+    this._pdfActiveScrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const p = parseInt(entry.target.dataset.pageNumber, 10);
+          this.pdfCurrentPage = p;
+          if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
+            this.pdfPageInput.value = p;
+          }
+          if (this.pdfPageIndicator) {
+            this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+          }
+          if (this.btnPdfPrev) this.btnPdfPrev.disabled = p <= 1;
+          if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
+          this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => {
+            if (s !== entry.target) s.classList.remove("is-active-page");
+          });
+          entry.target.classList.add("is-active-page");
+        }
+      });
+    }, {
+      root: this.pdfScrollerContainer,
+      threshold: 0.35
+    });
+
+    this.pdfPagesTrack.querySelectorAll(".pdf-page-slot").forEach(slot => {
+      this._pdfObserver.observe(slot);
+      this._pdfActiveScrollObserver.observe(slot);
+    });
+  }
+
+  async renderPdfCanvasPage(pdfDoc, pageNum) {
+    if (this._pdfRenderedPages.has(pageNum)) return;
+    const canvas = document.getElementById(`pdf-page-canvas-${pageNum}`);
+    const slot = document.getElementById(`pdf-page-slot-${pageNum}`);
+    if (!canvas || !slot) return;
+
+    // Check if task is already running
+    if (this._pdfRenderTasks.has(pageNum)) return;
+
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const baseVp = page.getViewport({ scale: 1 });
+      const targetCssWidth = parseFloat(slot.style.width) || this._pdfBaseCssWidth || 600;
+      const cssScale = targetCssWidth / baseVp.width;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const vp = page.getViewport({ scale: cssScale * dpr });
+
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
+      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
+      slot.style.minHeight = `${Math.floor(vp.height / dpr)}px`;
+
+      const ctx = canvas.getContext("2d");
+      const renderTask = page.render({ canvasContext: ctx, viewport: vp });
+      this._pdfRenderTasks.set(pageNum, renderTask);
+
+      await renderTask.promise;
+      this._pdfRenderTasks.delete(pageNum);
+      this._pdfRenderedPages.add(pageNum);
+      slot.classList.add("is-rendered");
+    } catch (err) {
+      this._pdfRenderTasks.delete(pageNum);
+      if (err && err.name === "RenderingCancelledException") return;
+      console.warn(`[PdfViewer] Error rendering page ${pageNum}:`, err);
+    }
+  }
+
+  scrollToPdfPage(targetPage, smooth = true) {
+    if (!this.pdfPagesTrack || !this.pdfScrollerContainer) return;
+    const totalPages = (this._pdfCurrentDoc && this._pdfCurrentDoc.numPages) || 1;
+    const p = Math.max(1, Math.min(targetPage, totalPages));
+    this.pdfCurrentPage = p;
+    if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
+      this.pdfPageInput.value = p;
+    }
+    if (this.pdfPageIndicator) {
+      this.pdfPageIndicator.textContent = `${p} / ${totalPages}`;
+    }
+    const slot = document.getElementById(`pdf-page-slot-${p}`);
+    if (slot) {
+      slot.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+      if (this._pdfCurrentDoc) {
+        this.renderPdfCanvasPage(this._pdfCurrentDoc, p);
+      }
+    }
+  }
+
+  setPdfZoom(multiplier, mode = "custom") {
+    this._pdfZoomMode = mode;
+    this._pdfZoomMultiplier = Math.max(0.4, Math.min(multiplier, 2.5));
+    if (mode === "fit") this._pdfZoomMultiplier = 1.0;
+    if (this._pdfCurrentDoc) {
+      this.buildPdfPagesTrack(this._pdfCurrentDoc, this.pdfCurrentPage, ++this._pdfLoadSeq);
     }
   }
 
@@ -23994,15 +24295,72 @@ class GuitarMasterApp {
       });
     }
 
-    if (this.btnToggleGuide && this.studioGuidePanel) {
-      this.btnToggleGuide.addEventListener("click", () => {
-        const willShow = this.studioGuidePanel.hasAttribute("hidden");
-        if (willShow) {
-          this.studioGuidePanel.removeAttribute("hidden");
-        } else {
-          this.studioGuidePanel.setAttribute("hidden", "");
+    // Item 4: Touch-friendly Admin Mode toggle for iPad & touch devices
+    // Supports triple-tap and 1.5s long-press on top-right info icon (btnToggleGuide)
+    if (this.btnToggleGuide) {
+      let tapCount = 0;
+      let lastTapTime = 0;
+      let longPressTimer = null;
+      let longPressTriggered = false;
+
+      const triggerAdminToggle = (reason) => {
+        const nextState = !this.adminMode;
+        this.setAdminMode(nextState);
+        try {
+          if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        } catch (e) {}
+        console.log(`[AdminMode] Toggled via ${reason} to:`, nextState);
+      };
+
+      this.btnToggleGuide.addEventListener("pointerdown", () => {
+        longPressTriggered = false;
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true;
+          triggerAdminToggle("long-press (1.5s)");
+        }, 1500);
+      });
+
+      const clearLongPress = () => {
+        clearTimeout(longPressTimer);
+      };
+      this.btnToggleGuide.addEventListener("pointerup", clearLongPress);
+      this.btnToggleGuide.addEventListener("pointercancel", clearLongPress);
+      this.btnToggleGuide.addEventListener("pointerleave", clearLongPress);
+
+      this.btnToggleGuide.addEventListener("click", (e) => {
+        if (longPressTriggered) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
         }
-        this.btnToggleGuide.classList.toggle("active", willShow);
+
+        const now = Date.now();
+        if (now - lastTapTime < 550) {
+          tapCount++;
+        } else {
+          tapCount = 1;
+        }
+        lastTapTime = now;
+
+        if (tapCount >= 3) {
+          tapCount = 0;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          triggerAdminToggle("triple-tap");
+          return;
+        }
+
+        // Standard single click toggles Steve Krenz Notes guide drawer
+        if (this.studioGuidePanel) {
+          const willShow = this.studioGuidePanel.hasAttribute("hidden");
+          if (willShow) {
+            this.studioGuidePanel.removeAttribute("hidden");
+          } else {
+            this.studioGuidePanel.setAttribute("hidden", "");
+          }
+          this.btnToggleGuide.classList.toggle("active", willShow);
+        }
       });
     }
 
@@ -24045,7 +24403,7 @@ class GuitarMasterApp {
       });
     }
 
-    // Zone 3: PDF Controls
+    // Zone 3: PDF Controls & Continuous Canvas Viewer
     if (this.btnPdfLesson) {
       this.btnPdfLesson.addEventListener("click", () => {
         this.pdfBookCategory = "lessonBook";
@@ -24064,8 +24422,20 @@ class GuitarMasterApp {
     }
     if (this.pdfPageInput) {
       this.pdfPageInput.addEventListener("change", () => {
-        this.pdfCurrentPage = Math.max(1, parseInt(this.pdfPageInput.value, 10) || 1);
-        this.loadPdfFrame();
+        const val = parseInt(this.pdfPageInput.value, 10);
+        if (!isNaN(val)) {
+          this.scrollToPdfPage(val, true);
+        }
+      });
+      this.pdfPageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.pdfPageInput.blur();
+          const val = parseInt(this.pdfPageInput.value, 10);
+          if (!isNaN(val)) {
+            this.scrollToPdfPage(val, true);
+          }
+        }
       });
     }
     if (this.btnPdfSync) {
@@ -24073,18 +24443,39 @@ class GuitarMasterApp {
         if (this.currentExercise) this.syncPdfToExercise(this.currentExercise);
       });
     }
+    if (this.btnPdfPrev) {
+      this.btnPdfPrev.addEventListener("click", () => {
+        this.scrollToPdfPage(this.pdfCurrentPage - 1, true);
+      });
+    }
+    if (this.btnPdfNext) {
+      this.btnPdfNext.addEventListener("click", () => {
+        this.scrollToPdfPage(this.pdfCurrentPage + 1, true);
+      });
+    }
+    if (this.btnPdfZoomOut) {
+      this.btnPdfZoomOut.addEventListener("click", () => {
+        this.setPdfZoom((this._pdfZoomMultiplier || 1.0) * 0.85, "custom");
+      });
+    }
+    if (this.btnPdfZoomIn) {
+      this.btnPdfZoomIn.addEventListener("click", () => {
+        this.setPdfZoom((this._pdfZoomMultiplier || 1.0) * 1.18, "custom");
+      });
+    }
+    if (this.btnPdfZoomFit) {
+      this.btnPdfZoomFit.addEventListener("click", () => {
+        this.setPdfZoom(1.0, "fit");
+      });
+    }
     if (this.btnPdfPrevPage) {
       this.btnPdfPrevPage.addEventListener("click", () => {
-        this.pdfCurrentPage = Math.max(1, (parseInt(this.pdfCurrentPage, 10) || 1) - 1);
-        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
-        this.loadPdfFrame();
+        this.scrollToPdfPage(this.pdfCurrentPage - 1, true);
       });
     }
     if (this.btnPdfNextPage) {
       this.btnPdfNextPage.addEventListener("click", () => {
-        this.pdfCurrentPage = (parseInt(this.pdfCurrentPage, 10) || 1) + 1;
-        if (this.pdfPageInput) this.pdfPageInput.value = this.pdfCurrentPage;
-        this.loadPdfFrame();
+        this.scrollToPdfPage(this.pdfCurrentPage + 1, true);
       });
     }
 
@@ -24310,11 +24701,13 @@ class GuitarMasterApp {
         }
         if (
           (this.paneMode === "pdf" || this.paneMode === "split") &&
-          this.isMobileOrTouchPdfDevice() &&
-          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 24
+          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 40 &&
+          this._pdfCurrentDoc
         ) {
           this._lastPdfRenderWidth = window.innerWidth;
-          this.loadPdfFrame();
+          if (this._pdfZoomMode === "fit") {
+            this.buildPdfPagesTrack(this._pdfCurrentDoc, this.pdfCurrentPage, ++this._pdfLoadSeq);
+          }
         }
       }, 120);
     });
