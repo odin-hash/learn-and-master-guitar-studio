@@ -3872,7 +3872,7 @@ export const GUITAR_COURSES = {
   ],
   freeMetronome: {
     id: 'free-metronome',
-    title: 'Guitar Studio Free Metronome',
+    title: 'Practice Metronome',
     timeSignature: [4, 4],
     defaultBpm: 60,
     isMetronomeOnly: true,

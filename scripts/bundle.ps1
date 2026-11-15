@@ -114,6 +114,7 @@ $css
       <div class="segmented-control app-mode-switch" id="app-mode-tabs" role="tablist" aria-label="Workspace Section">
         <button class="seg-btn active" data-app-mode="primer" id="btn-mode-primer" role="tab" aria-selected="true"><span class="lbl-desktop">Foundations Primer</span><span class="lbl-mobile">Primer</span></button>
         <button class="seg-btn" data-app-mode="studio" id="btn-mode-studio" role="tab" aria-selected="false"><span class="lbl-desktop">Curriculum Studio</span><span class="lbl-mobile">Studio</span></button>
+        <button class="seg-btn" data-app-mode="metronome" id="btn-mode-metronome" role="tab" aria-selected="false"><span class="lbl-desktop">Practice Metronome</span><span class="lbl-mobile">Metronome</span></button>
       </div>
 
       <div class="topbar-studio-only topbar-studio-crumb">
@@ -180,7 +181,7 @@ $css
         <div class="drawer-book-tabs">
           <button class="drawer-book-btn active" id="choice-lesson-book" data-book="lessonBook">Lessons</button>
           <button class="drawer-book-btn" id="choice-workshop-book" data-book="bonusWorkshop">Workshops</button>
-          <button class="drawer-book-btn" id="choice-free-mode" data-book="freeMode">Free</button>
+          <button class="drawer-book-btn" id="choice-free-mode" data-book="freeMode">Metronome</button>
         </div>
         <div class="drawer-search-wrap">
           <svg class="drawer-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -312,7 +313,7 @@ $css
         <!-- ZEN FREE METRONOME STAGE (Visible only in Free Metronome mode) -->
         <section class="free-metronome-stage" id="free-metronome-stage" aria-label="Free Practice Metronome">
           <div class="free-met-header-block">
-            <div class="free-met-kicker">FREE PRACTICE METRONOME</div>
+            <div class="free-met-kicker">PRACTICE METRONOME</div>
 
             <div class="free-met-tempo-row">
               <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-minus5" aria-label="Decrease Tempo by 5">&minus;5</button>

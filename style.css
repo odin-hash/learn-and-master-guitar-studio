@@ -314,34 +314,45 @@ button, input, select {
 
 .drawer-book-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 2px;
-  background: var(--bg-hover);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--bg-hover, #F3F2EE);
+  border: 1px solid var(--border-hairline, #E4E4E7);
   border-radius: 6px;
-  padding: 2px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .drawer-book-btn {
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-muted, #71717A);
   font-size: 11px;
   font-weight: 500;
-  padding: 4px 6px;
+  padding: 6px 4px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .drawer-book-btn:hover {
-  color: var(--text-primary);
+  color: var(--text-primary, #18181B);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .drawer-book-btn.selected,
 .drawer-book-btn.active {
-  background: var(--bg-surface);
-  color: var(--text-primary);
+  background: var(--bg-surface, #FFFFFF);
+  color: var(--text-primary, #18181B);
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .drawer-search-wrap {
@@ -1943,9 +1954,11 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  flex: 1 1 300px;
+  flex: 1 1 auto;
   min-width: min(100%, 280px);
   max-width: 100%;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -1976,6 +1989,8 @@ button.acc-topic-btn.is-active-topic {
   min-width: 0;
   flex: 1 1 auto;
   max-width: 100%;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -1988,6 +2003,8 @@ button.acc-topic-btn.is-active-topic {
   word-break: normal;
   overflow-wrap: break-word;
   white-space: normal;
+  height: auto;
+  min-height: 0;
 }
 
 .topic-ex-sub {
@@ -1998,6 +2015,8 @@ button.acc-topic-btn.is-active-topic {
   line-height: 1.4;
   word-break: normal;
   overflow-wrap: break-word;
+  height: auto;
+  min-height: 0;
 }
 
 .topic-ex-head-right {
@@ -2008,28 +2027,43 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0;
   margin-left: auto;
   align-self: flex-start;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
 @container (max-width: 650px), .workspace-body[data-pane-mode="split"] {
   .topic-ex-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .topic-ex-head-left,
   .topic-ex-title-wrap,
   .topic-ex-title,
   .topic-ex-sub {
-    width: 100%;
-    min-width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    flex-grow: 0 !important;
   }
 
   .topic-ex-head-right {
-    width: 100%;
-    justify-content: flex-start;
-    margin-left: 0;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    gap: 6px !important;
   }
 }
 
@@ -3012,7 +3046,9 @@ body[data-app-mode="primer"] .transport-dock {
 }
 
 body[data-app-mode="studio"] .topbar-primer-only,
-body[data-app-mode="studio"] .primer-view {
+body[data-app-mode="studio"] .primer-view,
+body[data-app-mode="metronome"] .topbar-primer-only,
+body[data-app-mode="metronome"] .primer-view {
   display: none !important;
 }
 
@@ -4911,29 +4947,45 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
     font-size: 20px;
   }
 
-  /* Fix crushed 1-word-per-line exercise headers on narrow phones */
+  /* Fix crushed 1-word-per-line exercise headers & eliminate blank gap on narrow phones */
   .topic-exercise-block {
     padding: 12px;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .topic-ex-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .topic-ex-head-left,
   .topic-ex-title-wrap,
   .topic-ex-title,
   .topic-ex-sub {
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    flex-grow: 0 !important;
   }
 
   .topic-ex-head-right {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 6px;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
   }
 
   /* Bottom Transport Dock Fit + Floating Mobile Audio Popover */

@@ -932,14 +932,30 @@ export class GuitarMasterApp {
   }
 
   setAppMode(mode) {
-    if (!["primer", "studio"].includes(mode)) mode = "primer";
+    if (!["primer", "studio", "metronome"].includes(mode)) mode = "primer";
+    const prevMode = this.appMode;
     this.appMode = mode;
 
     if (mode === "primer" && this.isPlaying) {
       this.stop();
     }
-    if (mode === "studio" && this.foundationsPrimer) {
+    if ((mode === "studio" || mode === "metronome") && this.foundationsPrimer) {
       this.foundationsPrimer.closeSandbox();
+    }
+
+    if (mode === "metronome") {
+      if (this.currentExercise && this.currentExercise.id !== "free-metronome" && this.currentExercise.bookCategory !== "freeMetronome") {
+        this.lastLessonExId = this.currentExercise.id;
+        this.lastLessonBookCategory = this.currentBookCategory || "lessonBook";
+      }
+      this.setBookCategory("freeMetronome");
+      this.loadExercise("free-metronome");
+      this.setDrawerOpen(false);
+    } else if (mode === "studio" && prevMode === "metronome") {
+      const targetCat = this.lastLessonBookCategory || "lessonBook";
+      const targetId = this.lastLessonExId || "lb-s2-str1-ex1";
+      this.setBookCategory(targetCat);
+      this.loadExercise(targetId);
     }
 
     if (typeof document !== "undefined" && document.body) {
@@ -2920,14 +2936,17 @@ export class GuitarMasterApp {
       const activeId = this.currentExercise ? this.currentExercise.id : "";
       this.sessionsAccordion.innerHTML = `
         <div class="acc-session is-open">
-          <div class="acc-topic-label">Free Metronome Studio</div>
+          <div class="acc-topic-label">Practice Metronome</div>
           <button class="acc-ex-item ${activeId === 'free-metronome' ? 'is-active' : ''}" data-ex-id="free-metronome">
-            <span class="acc-ex-title">Free 4/4 Programmable Metronome</span>
+            <span class="acc-ex-title">Programmable Metronome</span>
           </button>
         </div>
       `;
       this.sessionsAccordion.querySelectorAll(".acc-ex-item").forEach(btn => {
-        btn.addEventListener("click", () => this.loadExercise(btn.dataset.exId));
+        btn.addEventListener("click", () => {
+          this.loadExercise(btn.dataset.exId);
+          if (window.innerWidth <= 1024) this.setDrawerOpen(false);
+        });
       });
       return;
     }
@@ -3468,6 +3487,37 @@ export class GuitarMasterApp {
     if (typeof document !== "undefined" && document.body) {
       document.body.dataset.freeMetronome = isFreeMet ? "true" : "false";
     }
+    if (isFreeMet) {
+      if (this.appMode !== "primer") {
+        this.appMode = "metronome";
+        if (typeof document !== "undefined" && document.body) {
+          document.body.dataset.appMode = "metronome";
+        }
+        if (this.appModeTabs) {
+          this.appModeTabs.querySelectorAll(".seg-btn").forEach(btn => {
+            const isActive = btn.dataset.appMode === "metronome";
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+      }
+    } else {
+      this.lastLessonExId = found.id;
+      this.lastLessonBookCategory = found.bookCategory;
+      if (this.appMode === "metronome") {
+        this.appMode = "studio";
+        if (typeof document !== "undefined" && document.body) {
+          document.body.dataset.appMode = "studio";
+        }
+        if (this.appModeTabs) {
+          this.appModeTabs.querySelectorAll(".seg-btn").forEach(btn => {
+            const isActive = btn.dataset.appMode === "studio";
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+      }
+    }
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
     }
@@ -3863,8 +3913,8 @@ export class GuitarMasterApp {
       }
     }
     if (this.freeMetStatusCue && !this.isPlaying) {
-      const desc = next === "accent" ? "1200 Hz Accent" : (next === "muted" ? "Muted (Silent Drill)" : "800 Hz Normal Pulse");
-      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1} set to ${desc}`;
+      const desc = next === "accent" ? "Accent" : (next === "muted" ? "Muted (Silent Drill)" : "Normal Beat");
+      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1}: ${desc}`;
     }
   }
 
@@ -4432,16 +4482,12 @@ export class GuitarMasterApp {
       if (this.freeMetStatusCue && isFreeExPage) {
         if (isRest || beatMode === "muted") {
           this.freeMetStatusCue.textContent = subBeat > 0
-            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted (Silent Timing Drill)`
-            : `Beat ${primaryBeat + 1} · Muted (Silent Timing Drill)`;
+            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted`
+            : `Beat ${primaryBeat + 1} · Muted`;
         } else if (subBeat > 0) {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} ${subLabel} · 660 Hz Subdivision`;
-        } else if (isAccent || beatMode === "accent") {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1200 Hz Accent`;
-        } else if (isSecondary || beatMode === "secondary") {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1000 Hz Secondary Accent`;
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} (${subLabel})`;
         } else {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 800 Hz Pulse`;
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1}`;
         }
       }
 
@@ -4686,7 +4732,7 @@ export class GuitarMasterApp {
         }
         state = {
           ...state,
-          appMode: paramMode || (paramExId || params.get("pane") ? "studio" : state.appMode),
+          appMode: paramMode || (paramExId === "free-metronome" || inferredBook === "freeMetronome" ? "metronome" : (paramExId || params.get("pane") ? "studio" : state.appMode)),
           paneMode: params.get("pane") || state.paneMode,
           book: inferredBook,
           exId: paramExId || state.exId
@@ -4746,7 +4792,7 @@ export class GuitarMasterApp {
     if (!validPanes.includes(state.paneMode)) {
       state.paneMode = "score";
     }
-    const validModes = ["primer", "studio"];
+    const validModes = ["primer", "studio", "metronome"];
     if (!validModes.includes(state.appMode)) {
       state.appMode = "primer";
     }
@@ -4867,18 +4913,21 @@ export class GuitarMasterApp {
 
     // Zone 2: Left Drawer Book Tabs & Search
     if (this.choiceLessonBook) {
-      this.choiceLessonBook.addEventListener("click", () => this.setBookCategory("lessonBook"));
+      this.choiceLessonBook.addEventListener("click", () => {
+        if (this.appMode === "metronome") this.setAppMode("studio");
+        this.setBookCategory("lessonBook");
+      });
     }
     if (this.choiceWorkshopBook) {
-      this.choiceWorkshopBook.addEventListener("click", () => this.setBookCategory("bonusWorkshop"));
+      this.choiceWorkshopBook.addEventListener("click", () => {
+        if (this.appMode === "metronome") this.setAppMode("studio");
+        this.setBookCategory("bonusWorkshop");
+      });
     }
     if (this.choiceFreeMode) {
       this.choiceFreeMode.addEventListener("click", () => {
-        this.setBookCategory("freeMetronome");
-        this.loadExercise("free-metronome");
-        if (window.innerWidth <= 1024) {
-          this.setDrawerOpen(false);
-        }
+        this.setAppMode("metronome");
+        this.setDrawerOpen(false);
       });
     }
 

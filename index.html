@@ -325,34 +325,45 @@ button, input, select {
 
 .drawer-book-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 2px;
-  background: var(--bg-hover);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--bg-hover, #F3F2EE);
+  border: 1px solid var(--border-hairline, #E4E4E7);
   border-radius: 6px;
-  padding: 2px;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .drawer-book-btn {
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-muted, #71717A);
   font-size: 11px;
   font-weight: 500;
-  padding: 4px 6px;
+  padding: 6px 4px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .drawer-book-btn:hover {
-  color: var(--text-primary);
+  color: var(--text-primary, #18181B);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .drawer-book-btn.selected,
 .drawer-book-btn.active {
-  background: var(--bg-surface);
-  color: var(--text-primary);
+  background: var(--bg-surface, #FFFFFF);
+  color: var(--text-primary, #18181B);
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .drawer-search-wrap {
@@ -1954,9 +1965,11 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  flex: 1 1 300px;
+  flex: 1 1 auto;
   min-width: min(100%, 280px);
   max-width: 100%;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -1987,6 +2000,8 @@ button.acc-topic-btn.is-active-topic {
   min-width: 0;
   flex: 1 1 auto;
   max-width: 100%;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
@@ -1999,6 +2014,8 @@ button.acc-topic-btn.is-active-topic {
   word-break: normal;
   overflow-wrap: break-word;
   white-space: normal;
+  height: auto;
+  min-height: 0;
 }
 
 .topic-ex-sub {
@@ -2009,6 +2026,8 @@ button.acc-topic-btn.is-active-topic {
   line-height: 1.4;
   word-break: normal;
   overflow-wrap: break-word;
+  height: auto;
+  min-height: 0;
 }
 
 .topic-ex-head-right {
@@ -2019,28 +2038,43 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0;
   margin-left: auto;
   align-self: flex-start;
+  height: auto;
+  min-height: 0;
   box-sizing: border-box;
 }
 
 @container (max-width: 650px), .workspace-body[data-pane-mode="split"] {
   .topic-ex-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .topic-ex-head-left,
   .topic-ex-title-wrap,
   .topic-ex-title,
   .topic-ex-sub {
-    width: 100%;
-    min-width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    flex-grow: 0 !important;
   }
 
   .topic-ex-head-right {
-    width: 100%;
-    justify-content: flex-start;
-    margin-left: 0;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    gap: 6px !important;
   }
 }
 
@@ -3023,7 +3057,9 @@ body[data-app-mode="primer"] .transport-dock {
 }
 
 body[data-app-mode="studio"] .topbar-primer-only,
-body[data-app-mode="studio"] .primer-view {
+body[data-app-mode="studio"] .primer-view,
+body[data-app-mode="metronome"] .topbar-primer-only,
+body[data-app-mode="metronome"] .primer-view {
   display: none !important;
 }
 
@@ -4922,29 +4958,45 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
     font-size: 20px;
   }
 
-  /* Fix crushed 1-word-per-line exercise headers on narrow phones */
+  /* Fix crushed 1-word-per-line exercise headers & eliminate blank gap on narrow phones */
   .topic-exercise-block {
     padding: 12px;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .topic-ex-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .topic-ex-head-left,
   .topic-ex-title-wrap,
   .topic-ex-title,
   .topic-ex-sub {
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    flex-grow: 0 !important;
   }
 
   .topic-ex-head-right {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 6px;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
   }
 
   /* Bottom Transport Dock Fit + Floating Mobile Audio Popover */
@@ -5560,6 +5612,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
       <div class="segmented-control app-mode-switch" id="app-mode-tabs" role="tablist" aria-label="Workspace Section">
         <button class="seg-btn active" data-app-mode="primer" id="btn-mode-primer" role="tab" aria-selected="true"><span class="lbl-desktop">Foundations Primer</span><span class="lbl-mobile">Primer</span></button>
         <button class="seg-btn" data-app-mode="studio" id="btn-mode-studio" role="tab" aria-selected="false"><span class="lbl-desktop">Curriculum Studio</span><span class="lbl-mobile">Studio</span></button>
+        <button class="seg-btn" data-app-mode="metronome" id="btn-mode-metronome" role="tab" aria-selected="false"><span class="lbl-desktop">Practice Metronome</span><span class="lbl-mobile">Metronome</span></button>
       </div>
 
       <div class="topbar-studio-only topbar-studio-crumb">
@@ -5626,7 +5679,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
         <div class="drawer-book-tabs">
           <button class="drawer-book-btn active" id="choice-lesson-book" data-book="lessonBook">Lessons</button>
           <button class="drawer-book-btn" id="choice-workshop-book" data-book="bonusWorkshop">Workshops</button>
-          <button class="drawer-book-btn" id="choice-free-mode" data-book="freeMode">Free</button>
+          <button class="drawer-book-btn" id="choice-free-mode" data-book="freeMode">Metronome</button>
         </div>
         <div class="drawer-search-wrap">
           <svg class="drawer-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -5758,7 +5811,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
         <!-- ZEN FREE METRONOME STAGE (Visible only in Free Metronome mode) -->
         <section class="free-metronome-stage" id="free-metronome-stage" aria-label="Free Practice Metronome">
           <div class="free-met-header-block">
-            <div class="free-met-kicker">FREE PRACTICE METRONOME</div>
+            <div class="free-met-kicker">PRACTICE METRONOME</div>
 
             <div class="free-met-tempo-row">
               <button type="button" class="free-met-step-btn is-jump" id="free-met-bpm-minus5" aria-label="Decrease Tempo by 5">&minus;5</button>
@@ -9961,7 +10014,7 @@ const GUITAR_COURSES = {
   ],
   freeMetronome: {
     id: 'free-metronome',
-    title: 'Guitar Studio Free Metronome',
+    title: 'Practice Metronome',
     timeSignature: [4, 4],
     defaultBpm: 60,
     isMetronomeOnly: true,
@@ -19574,14 +19627,30 @@ class GuitarMasterApp {
   }
 
   setAppMode(mode) {
-    if (!["primer", "studio"].includes(mode)) mode = "primer";
+    if (!["primer", "studio", "metronome"].includes(mode)) mode = "primer";
+    const prevMode = this.appMode;
     this.appMode = mode;
 
     if (mode === "primer" && this.isPlaying) {
       this.stop();
     }
-    if (mode === "studio" && this.foundationsPrimer) {
+    if ((mode === "studio" || mode === "metronome") && this.foundationsPrimer) {
       this.foundationsPrimer.closeSandbox();
+    }
+
+    if (mode === "metronome") {
+      if (this.currentExercise && this.currentExercise.id !== "free-metronome" && this.currentExercise.bookCategory !== "freeMetronome") {
+        this.lastLessonExId = this.currentExercise.id;
+        this.lastLessonBookCategory = this.currentBookCategory || "lessonBook";
+      }
+      this.setBookCategory("freeMetronome");
+      this.loadExercise("free-metronome");
+      this.setDrawerOpen(false);
+    } else if (mode === "studio" && prevMode === "metronome") {
+      const targetCat = this.lastLessonBookCategory || "lessonBook";
+      const targetId = this.lastLessonExId || "lb-s2-str1-ex1";
+      this.setBookCategory(targetCat);
+      this.loadExercise(targetId);
     }
 
     if (typeof document !== "undefined" && document.body) {
@@ -21562,14 +21631,17 @@ class GuitarMasterApp {
       const activeId = this.currentExercise ? this.currentExercise.id : "";
       this.sessionsAccordion.innerHTML = `
         <div class="acc-session is-open">
-          <div class="acc-topic-label">Free Metronome Studio</div>
+          <div class="acc-topic-label">Practice Metronome</div>
           <button class="acc-ex-item ${activeId === 'free-metronome' ? 'is-active' : ''}" data-ex-id="free-metronome">
-            <span class="acc-ex-title">Free 4/4 Programmable Metronome</span>
+            <span class="acc-ex-title">Programmable Metronome</span>
           </button>
         </div>
       `;
       this.sessionsAccordion.querySelectorAll(".acc-ex-item").forEach(btn => {
-        btn.addEventListener("click", () => this.loadExercise(btn.dataset.exId));
+        btn.addEventListener("click", () => {
+          this.loadExercise(btn.dataset.exId);
+          if (window.innerWidth <= 1024) this.setDrawerOpen(false);
+        });
       });
       return;
     }
@@ -22110,6 +22182,37 @@ class GuitarMasterApp {
     if (typeof document !== "undefined" && document.body) {
       document.body.dataset.freeMetronome = isFreeMet ? "true" : "false";
     }
+    if (isFreeMet) {
+      if (this.appMode !== "primer") {
+        this.appMode = "metronome";
+        if (typeof document !== "undefined" && document.body) {
+          document.body.dataset.appMode = "metronome";
+        }
+        if (this.appModeTabs) {
+          this.appModeTabs.querySelectorAll(".seg-btn").forEach(btn => {
+            const isActive = btn.dataset.appMode === "metronome";
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+      }
+    } else {
+      this.lastLessonExId = found.id;
+      this.lastLessonBookCategory = found.bookCategory;
+      if (this.appMode === "metronome") {
+        this.appMode = "studio";
+        if (typeof document !== "undefined" && document.body) {
+          document.body.dataset.appMode = "studio";
+        }
+        if (this.appModeTabs) {
+          this.appModeTabs.querySelectorAll(".seg-btn").forEach(btn => {
+            const isActive = btn.dataset.appMode === "studio";
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+      }
+    }
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
     }
@@ -22505,8 +22608,8 @@ class GuitarMasterApp {
       }
     }
     if (this.freeMetStatusCue && !this.isPlaying) {
-      const desc = next === "accent" ? "1200 Hz Accent" : (next === "muted" ? "Muted (Silent Drill)" : "800 Hz Normal Pulse");
-      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1} set to ${desc}`;
+      const desc = next === "accent" ? "Accent" : (next === "muted" ? "Muted (Silent Drill)" : "Normal Beat");
+      this.freeMetStatusCue.textContent = `Beat ${beatIdx + 1}: ${desc}`;
     }
   }
 
@@ -23074,16 +23177,12 @@ class GuitarMasterApp {
       if (this.freeMetStatusCue && isFreeExPage) {
         if (isRest || beatMode === "muted") {
           this.freeMetStatusCue.textContent = subBeat > 0
-            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted (Silent Timing Drill)`
-            : `Beat ${primaryBeat + 1} · Muted (Silent Timing Drill)`;
+            ? `Beat ${primaryBeat + 1} (${subLabel}) · Muted`
+            : `Beat ${primaryBeat + 1} · Muted`;
         } else if (subBeat > 0) {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} ${subLabel} · 660 Hz Subdivision`;
-        } else if (isAccent || beatMode === "accent") {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1200 Hz Accent`;
-        } else if (isSecondary || beatMode === "secondary") {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 1000 Hz Secondary Accent`;
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} (${subLabel})`;
         } else {
-          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1} · 800 Hz Pulse`;
+          this.freeMetStatusCue.textContent = `Beat ${primaryBeat + 1}`;
         }
       }
 
@@ -23328,7 +23427,7 @@ class GuitarMasterApp {
         }
         state = {
           ...state,
-          appMode: paramMode || (paramExId || params.get("pane") ? "studio" : state.appMode),
+          appMode: paramMode || (paramExId === "free-metronome" || inferredBook === "freeMetronome" ? "metronome" : (paramExId || params.get("pane") ? "studio" : state.appMode)),
           paneMode: params.get("pane") || state.paneMode,
           book: inferredBook,
           exId: paramExId || state.exId
@@ -23388,7 +23487,7 @@ class GuitarMasterApp {
     if (!validPanes.includes(state.paneMode)) {
       state.paneMode = "score";
     }
-    const validModes = ["primer", "studio"];
+    const validModes = ["primer", "studio", "metronome"];
     if (!validModes.includes(state.appMode)) {
       state.appMode = "primer";
     }
@@ -23509,18 +23608,21 @@ class GuitarMasterApp {
 
     // Zone 2: Left Drawer Book Tabs & Search
     if (this.choiceLessonBook) {
-      this.choiceLessonBook.addEventListener("click", () => this.setBookCategory("lessonBook"));
+      this.choiceLessonBook.addEventListener("click", () => {
+        if (this.appMode === "metronome") this.setAppMode("studio");
+        this.setBookCategory("lessonBook");
+      });
     }
     if (this.choiceWorkshopBook) {
-      this.choiceWorkshopBook.addEventListener("click", () => this.setBookCategory("bonusWorkshop"));
+      this.choiceWorkshopBook.addEventListener("click", () => {
+        if (this.appMode === "metronome") this.setAppMode("studio");
+        this.setBookCategory("bonusWorkshop");
+      });
     }
     if (this.choiceFreeMode) {
       this.choiceFreeMode.addEventListener("click", () => {
-        this.setBookCategory("freeMetronome");
-        this.loadExercise("free-metronome");
-        if (window.innerWidth <= 1024) {
-          this.setDrawerOpen(false);
-        }
+        this.setAppMode("metronome");
+        this.setDrawerOpen(false);
       });
     }
 
