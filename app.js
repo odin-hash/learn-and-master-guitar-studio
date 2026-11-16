@@ -3764,7 +3764,6 @@ export class GuitarMasterApp {
       this.lastActiveWorkshopBookExId = found.id;
     }
 
-    const isFreeMet = found.bookCategory === "freeMetronome" || found.id === "free-metronome" || Boolean(found.isMetronomeOnly);
     if (isFreeMet) {
       this.applyFreeTimeSignatureToExercise(this.currentExercise);
     }
