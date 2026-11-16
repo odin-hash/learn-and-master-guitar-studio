@@ -28,8 +28,8 @@ export class FretboardVisualizer {
             <div class="string-header-blank">String</div>
             <div class="fret-col-title nut-title">Open</div>
             ${this.frets.filter(f => f > 0).map(f => {
-              if (f === 12) return `<div class="fret-col-title fret-inlay">${f} &bull;&bull;</div>`;
-              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f} &bull;</div>`;
+              if (f === 12) return `<div class="fret-col-title fret-inlay">${f}&nbsp;&bull;&bull;</div>`;
+              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f}&nbsp;&bull;</div>`;
               return `<div class="fret-col-title">${f}</div>`;
             }).join("")}
           </div>

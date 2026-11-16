@@ -1063,6 +1063,9 @@ export class GuitarMasterApp {
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : mode;
     }
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.paneMode = isFreeMet ? "score" : mode;
+    }
     if (this.workspaceViewTabs) {
       this.workspaceViewTabs.querySelectorAll(".seg-btn").forEach(btn => {
         const isActive = btn.dataset.pane === mode;
@@ -3892,6 +3895,9 @@ export class GuitarMasterApp {
     }
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
+    }
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
     }
 
     this.updateDoneButtonUI();

@@ -831,24 +831,28 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
   padding: 0 4px 1px 4px;
   border-bottom: 1px solid var(--border-hairline);
+  container-type: inline-size;
+  container-name: subbar;
 }
 
 .telemetry-inline {
-  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(95px, 130px) minmax(115px, 150px) minmax(76px, 95px);
+  gap: 6px;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  flex-wrap: nowrap;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   box-sizing: border-box;
 }
 
-/* Slot 1: Note Icon + Beat & Pitch Name (Strict fixed width 148px) */
+/* Slot 1: Note Icon + Beat & Pitch Name (Flexible inside grid track) */
 .telemetry-slot-pitch {
-  width: 148px !important;
-  min-width: 148px !important;
-  max-width: 148px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -856,16 +860,15 @@ button.acc-topic-btn.is-active-topic {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  flex-shrink: 0 !important;
   font-variant-numeric: tabular-nums !important;
 }
 
 .telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 26px !important;
-  min-width: 26px !important;
-  max-width: 26px !important;
-  height: 26px !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  height: 24px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -882,7 +885,7 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-primary,
 .telemetry-primary {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -896,18 +899,17 @@ button.acc-topic-btn.is-active-topic {
   color: var(--color-rest);
 }
 
-/* Slot 2: String • Fret • Finger (Strict fixed width 165px) */
+/* Slot 2: String • Fret • Finger (Flexible inside grid track) */
 .telemetry-slot-instruction {
-  width: 165px !important;
-  min-width: 165px !important;
-  max-width: 165px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  flex-shrink: 0 !important;
   font-variant-numeric: tabular-nums !important;
 }
 
@@ -922,24 +924,23 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
 }
 
-/* Slot 3: Down Strum / Up Strum Pill (Strict fixed width 98px) */
+/* Slot 3: Down Strum / Up Strum Pill (Flexible inside grid track) */
 .telemetry-slot-badge {
-  width: 98px !important;
-  min-width: 98px !important;
-  max-width: 98px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  flex-shrink: 0 !important;
   white-space: nowrap !important;
   font-variant-numeric: tabular-nums !important;
 }
 
 .telemetry-pick-badge {
-  width: 98px !important;
-  min-width: 98px !important;
-  max-width: 98px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   font-family: var(--font-mono);
   font-size: 10px;
@@ -985,65 +986,109 @@ button.acc-topic-btn.is-active-topic {
 
 /* Right-side Fretboard Control: Pinned permanently to the right */
 .notation-toggles {
-  margin-left: auto !important;
-  display: flex;
-  align-items: center;
+  margin-left: 8px !important;
+  display: flex !important;
+  align-items: center !important;
   gap: 8px;
   flex-wrap: nowrap !important;
-  flex-shrink: 0 !important;
-}
-
-#btn-toggle-fretboard {
+  flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   white-space: nowrap !important;
 }
 
-@container scorepane (max-width: 520px) {
+#btn-toggle-fretboard {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+@container (max-width: 520px) {
   .canvas-subbar {
     gap: 4px !important;
     padding: 0 2px 1px 2px !important;
   }
   .telemetry-inline {
+    grid-template-columns: minmax(88px, 118px) minmax(105px, 138px) minmax(70px, 86px) !important;
     gap: 4px !important;
-    min-width: 0 !important;
-    flex-shrink: 1 !important;
   }
   .telemetry-slot-pitch {
-    width: 125px !important;
-    min-width: 125px !important;
-    max-width: 125px !important;
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-primary {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 22px !important;
-    min-width: 22px !important;
-    max-width: 22px !important;
-    height: 22px !important;
-  }
-  .telemetry-slot-instruction {
-    width: 145px !important;
-    min-width: 145px !important;
-    max-width: 145px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    height: 20px !important;
   }
   .telemetry-slot-instruction .telemetry-secondary {
-    font-size: 10.5px !important;
+    font-size: 10px !important;
   }
   .telemetry-slot-badge,
   .telemetry-pick-badge {
-    width: 88px !important;
-    min-width: 88px !important;
-    max-width: 88px !important;
-    font-size: 9.5px !important;
+    font-size: 9px !important;
     padding: 1px 3px !important;
   }
   .notation-toggles {
-    margin-left: auto !important;
+    margin-left: 6px !important;
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
   }
   #btn-toggle-fretboard {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Also apply compact rules whenever Split View is active on screens <= 1100px */
+@media (max-width: 1100px) {
+  .workspace-body[data-pane-mode="split"] .canvas-subbar,
+  body[data-pane-mode="split"] .canvas-subbar {
+    gap: 4px !important;
+    padding: 0 2px 1px 2px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-inline,
+  body[data-pane-mode="split"] .telemetry-inline {
+    grid-template-columns: minmax(88px, 118px) minmax(105px, 138px) minmax(70px, 86px) !important;
+    gap: 4px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-slot-pitch,
+  body[data-pane-mode="split"] .telemetry-slot-pitch {
+    font-size: 11px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-primary,
+  body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-primary {
+    font-size: 11px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph,
+  body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph {
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    height: 20px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary,
+  body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary {
+    font-size: 10px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .telemetry-slot-badge,
+  .workspace-body[data-pane-mode="split"] .telemetry-pick-badge,
+  body[data-pane-mode="split"] .telemetry-slot-badge,
+  body[data-pane-mode="split"] .telemetry-pick-badge {
+    font-size: 9px !important;
+    padding: 1px 3px !important;
+  }
+  .workspace-body[data-pane-mode="split"] .notation-toggles,
+  body[data-pane-mode="split"] .notation-toggles {
+    margin-left: 6px !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+  }
+  .workspace-body[data-pane-mode="split"] #btn-toggle-fretboard,
+  body[data-pane-mode="split"] #btn-toggle-fretboard {
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
   }
 }
@@ -1054,46 +1099,41 @@ button.acc-topic-btn.is-active-topic {
     padding: 0 2px 1px 2px !important;
   }
   .telemetry-inline {
+    grid-template-columns: minmax(88px, 118px) minmax(105px, 138px) minmax(70px, 86px) !important;
     gap: 4px !important;
-    min-width: 0 !important;
-    flex-shrink: 1 !important;
   }
   .telemetry-slot-pitch {
-    width: 125px !important;
-    min-width: 125px !important;
-    max-width: 125px !important;
+    width: 100% !important;
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-primary {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 22px !important;
-    min-width: 22px !important;
-    max-width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    height: 20px !important;
   }
   .telemetry-slot-instruction {
-    width: 145px !important;
-    min-width: 145px !important;
-    max-width: 145px !important;
+    width: 100% !important;
   }
   .telemetry-slot-instruction .telemetry-secondary {
-    font-size: 10.5px !important;
+    font-size: 10px !important;
   }
   .telemetry-slot-badge,
   .telemetry-pick-badge {
-    width: 88px !important;
-    min-width: 88px !important;
-    max-width: 88px !important;
-    font-size: 9.5px !important;
+    width: 100% !important;
+    font-size: 9px !important;
     padding: 1px 3px !important;
   }
   .notation-toggles {
-    margin-left: auto !important;
+    margin-left: 6px !important;
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
   }
   #btn-toggle-fretboard {
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
   }
 }
@@ -1260,7 +1300,7 @@ button.acc-topic-btn.is-active-topic {
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px !important;
   font-weight: 500;
   color: var(--text-muted);
   text-align: center;
@@ -1268,6 +1308,9 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
+  white-space: nowrap !important;
+  letter-spacing: -0.3px !important;
+  overflow: hidden;
 }
 
 .fret-col-title:last-child {
@@ -1286,6 +1329,8 @@ button.acc-topic-btn.is-active-topic {
 .fret-col-title.fret-inlay {
   color: var(--text-primary);
   font-weight: 600;
+  white-space: nowrap !important;
+  letter-spacing: -0.3px !important;
 }
 
 .fretboard-neck-board.is-muted-state {
@@ -3349,6 +3394,9 @@ button.acc-topic-btn.is-active-topic {
   background: var(--bg-surface);
   height: 30px;
   overflow: hidden;
+  flex-shrink: 0 !important;
+  min-width: 108px !important;
+  white-space: nowrap !important;
 }
 
 .dock-step-btn {
@@ -3446,7 +3494,8 @@ button.acc-topic-btn.is-active-topic {
   border: 1px solid var(--border-hairline);
   padding: 4px 8px;
   border-radius: 6px;
-  white-space: nowrap;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .time-pill-badge.is-clickable {
@@ -5175,6 +5224,93 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   .jam-speed-presets,
   .dock-select-wrap .dock-lbl {
     display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .jam-speed-presets {
+    display: none !important;
+  }
+  .transport-dock {
+    gap: 6px !important;
+    padding: 0 8px !important;
+  }
+  .transport-left,
+  .transport-center,
+  .transport-right {
+    gap: 5px !important;
+    flex-shrink: 0 !important;
+  }
+  .transport-play-btn {
+    padding: 0 10px !important;
+    height: 30px !important;
+    font-size: 11.5px !important;
+    gap: 4px !important;
+  }
+  .dock-metronome-cluster {
+    gap: 4px !important;
+    padding: 0 2px 0 0 !important;
+  }
+  .dock-metronome-btn {
+    padding: 0 7px !important;
+    font-size: 11px !important;
+    height: 28px !important;
+  }
+  .beat-dots-sequence {
+    gap: 4px !important;
+    padding: 0 4px 0 1px !important;
+  }
+  .beat-dot-item {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  .dock-pill-btn {
+    padding: 0 7px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+  .bpm-control-cluster {
+    height: 28px !important;
+    min-width: 108px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  .bpm-readout-wrap {
+    padding: 0 4px !important;
+  }
+  .bpm-mono-input {
+    width: 32px !important;
+    font-size: 12px !important;
+  }
+  .bpm-unit {
+    font-size: 9.5px !important;
+  }
+  .time-pill-badge {
+    padding: 3px 6px !important;
+    font-size: 11px !important;
+    height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  .dock-select-wrap {
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 11px !important;
+  }
+  .dock-select-wrap .dock-lbl {
+    display: none !important;
+  }
+  .dock-select {
+    font-size: 11px !important;
+    max-width: 95px !important;
+  }
+  .dock-toggle-pill {
+    height: 28px !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
   }
 }
 
@@ -14467,8 +14603,8 @@ class FretboardVisualizer {
             <div class="string-header-blank">String</div>
             <div class="fret-col-title nut-title">Open</div>
             ${this.frets.filter(f => f > 0).map(f => {
-              if (f === 12) return `<div class="fret-col-title fret-inlay">${f} &bull;&bull;</div>`;
-              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f} &bull;</div>`;
+              if (f === 12) return `<div class="fret-col-title fret-inlay">${f}&nbsp;&bull;&bull;</div>`;
+              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f}&nbsp;&bull;</div>`;
               return `<div class="fret-col-title">${f}</div>`;
             }).join("")}
           </div>
@@ -20430,6 +20566,9 @@ class GuitarMasterApp {
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : mode;
     }
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.paneMode = isFreeMet ? "score" : mode;
+    }
     if (this.workspaceViewTabs) {
       this.workspaceViewTabs.querySelectorAll(".seg-btn").forEach(btn => {
         const isActive = btn.dataset.pane === mode;
@@ -23259,6 +23398,9 @@ class GuitarMasterApp {
     }
     if (this.workspaceBody) {
       this.workspaceBody.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
+    }
+    if (typeof document !== "undefined" && document.body) {
+      document.body.dataset.paneMode = isFreeMet ? "score" : (this.paneMode || "score");
     }
 
     this.updateDoneButtonUI();
