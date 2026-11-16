@@ -294,6 +294,10 @@ export class ScoreRenderer {
       }
     }
 
+    if (this.tabVisibilityMode !== "blur") {
+      this._tabPeeked = false;
+    }
+
     const ts = exercise.timeSignature || [4, 4];
     this.timeSignature = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
 

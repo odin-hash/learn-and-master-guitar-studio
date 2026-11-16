@@ -640,6 +640,8 @@ button.acc-topic-btn.is-active-topic {
   overflow: hidden;
   padding: 0;
   gap: 0;
+  container-type: inline-size;
+  container-name: scorepane;
 }
 
 .studio-pinned-deck {
@@ -979,6 +981,111 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0 !important;
 }
 
+#btn-toggle-fretboard {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+@container scorepane (max-width: 520px) {
+  .canvas-subbar {
+    gap: 4px !important;
+    padding: 0 2px 1px 2px !important;
+  }
+  .telemetry-inline {
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  .telemetry-slot-pitch {
+    width: 125px !important;
+    min-width: 125px !important;
+    max-width: 125px !important;
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-primary {
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-glyph {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+  }
+  .telemetry-slot-instruction {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+  }
+  .telemetry-slot-instruction .telemetry-secondary {
+    font-size: 10.5px !important;
+  }
+  .telemetry-slot-badge,
+  .telemetry-pick-badge {
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    font-size: 9.5px !important;
+    padding: 1px 3px !important;
+  }
+  .notation-toggles {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+  #btn-toggle-fretboard {
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .canvas-subbar {
+    gap: 4px !important;
+    padding: 0 2px 1px 2px !important;
+  }
+  .telemetry-inline {
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  .telemetry-slot-pitch {
+    width: 125px !important;
+    min-width: 125px !important;
+    max-width: 125px !important;
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-primary {
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-glyph {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+  }
+  .telemetry-slot-instruction {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+  }
+  .telemetry-slot-instruction .telemetry-secondary {
+    font-size: 10.5px !important;
+  }
+  .telemetry-slot-badge,
+  .telemetry-pick-badge {
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    font-size: 9.5px !important;
+    padding: 1px 3px !important;
+  }
+  .notation-toggles {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+  #btn-toggle-fretboard {
+    flex-shrink: 0 !important;
+  }
+}
+
 /* Fretboard stage header bar for chord voicings and string selector */
 .fretboard-header-bar {
   display: flex;
@@ -1095,55 +1202,6 @@ button.acc-topic-btn.is-active-topic {
   padding: 2px 0 4px;
 }
 
-.fretboard-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.fretboard-header-row th {
-  height: 22px;
-  padding: 0;
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--border-hairline);
-  box-sizing: border-box;
-}
-
-.string-header-blank {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: left !important;
-  padding-left: 8px !important;
-}
-
-.fret-col-title {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.fret-col-title.nut-title {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.fret-col-title.fret-inlay {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
 .fretboard-neck-board {
   position: relative;
   width: 100%;
@@ -1152,6 +1210,70 @@ button.acc-topic-btn.is-active-topic {
   border-radius: 6px;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.fretboard-header-row,
+.fret-string-row {
+  display: grid !important;
+  grid-template-columns: 82px 46px repeat(14, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.fretboard-header-row {
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.string-header-blank {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: left !important;
+  padding-left: 8px !important;
+  width: 82px;
+  min-width: 82px;
+  max-width: 82px;
+  border-right: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+}
+
+.fret-col-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  border-right: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.fret-col-title:last-child {
+  border-right: none;
+}
+
+.fret-col-title.nut-title {
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
+  color: var(--text-primary);
+  font-weight: 600;
+  border-right: 2px solid var(--text-primary);
+}
+
+.fret-col-title.fret-inlay {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .fretboard-neck-board.is-muted-state {
@@ -1163,9 +1285,16 @@ button.acc-topic-btn.is-active-topic {
   min-height: 28px;
   max-height: 28px;
   box-sizing: border-box;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.fret-string-row:last-child {
+  border-bottom: none;
 }
 
 .string-title {
+  display: flex;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 500;
@@ -1174,10 +1303,12 @@ button.acc-topic-btn.is-active-topic {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-hairline);
   height: 28px;
-  vertical-align: middle;
   text-align: left;
   z-index: 2;
   box-sizing: border-box;
+  width: 82px;
+  min-width: 82px;
+  max-width: 82px;
 }
 
 .fret-space {
@@ -1189,9 +1320,17 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
   border-right: 1px solid var(--border-hairline);
   position: relative;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   z-index: 2;
+  min-width: 0;
+  width: 100%;
+}
+
+.fret-space:last-child {
+  border-right: none;
 }
 
 /* Realistic crisp acoustic string hairline across every fret cell vertically centered at 50% */
@@ -1215,6 +1354,9 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .fret-space.nut-space {
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
   background: rgba(255, 255, 255, 0.55);
   border-right: 2px solid var(--text-primary);
 }

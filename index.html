@@ -652,6 +652,8 @@ button.acc-topic-btn.is-active-topic {
   overflow: hidden;
   padding: 0;
   gap: 0;
+  container-type: inline-size;
+  container-name: scorepane;
 }
 
 .studio-pinned-deck {
@@ -991,6 +993,111 @@ button.acc-topic-btn.is-active-topic {
   flex-shrink: 0 !important;
 }
 
+#btn-toggle-fretboard {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+@container scorepane (max-width: 520px) {
+  .canvas-subbar {
+    gap: 4px !important;
+    padding: 0 2px 1px 2px !important;
+  }
+  .telemetry-inline {
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  .telemetry-slot-pitch {
+    width: 125px !important;
+    min-width: 125px !important;
+    max-width: 125px !important;
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-primary {
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-glyph {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+  }
+  .telemetry-slot-instruction {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+  }
+  .telemetry-slot-instruction .telemetry-secondary {
+    font-size: 10.5px !important;
+  }
+  .telemetry-slot-badge,
+  .telemetry-pick-badge {
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    font-size: 9.5px !important;
+    padding: 1px 3px !important;
+  }
+  .notation-toggles {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+  #btn-toggle-fretboard {
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .canvas-subbar {
+    gap: 4px !important;
+    padding: 0 2px 1px 2px !important;
+  }
+  .telemetry-inline {
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  .telemetry-slot-pitch {
+    width: 125px !important;
+    min-width: 125px !important;
+    max-width: 125px !important;
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-primary {
+    font-size: 11px !important;
+  }
+  .telemetry-slot-pitch .telemetry-glyph {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 22px !important;
+  }
+  .telemetry-slot-instruction {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+  }
+  .telemetry-slot-instruction .telemetry-secondary {
+    font-size: 10.5px !important;
+  }
+  .telemetry-slot-badge,
+  .telemetry-pick-badge {
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    font-size: 9.5px !important;
+    padding: 1px 3px !important;
+  }
+  .notation-toggles {
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+  #btn-toggle-fretboard {
+    flex-shrink: 0 !important;
+  }
+}
+
 /* Fretboard stage header bar for chord voicings and string selector */
 .fretboard-header-bar {
   display: flex;
@@ -1107,55 +1214,6 @@ button.acc-topic-btn.is-active-topic {
   padding: 2px 0 4px;
 }
 
-.fretboard-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.fretboard-header-row th {
-  height: 22px;
-  padding: 0;
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--border-hairline);
-  box-sizing: border-box;
-}
-
-.string-header-blank {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: left !important;
-  padding-left: 8px !important;
-}
-
-.fret-col-title {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.fret-col-title.nut-title {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.fret-col-title.fret-inlay {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
 .fretboard-neck-board {
   position: relative;
   width: 100%;
@@ -1164,6 +1222,70 @@ button.acc-topic-btn.is-active-topic {
   border-radius: 6px;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.fretboard-header-row,
+.fret-string-row {
+  display: grid !important;
+  grid-template-columns: 82px 46px repeat(14, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.fretboard-header-row {
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.string-header-blank {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: left !important;
+  padding-left: 8px !important;
+  width: 82px;
+  min-width: 82px;
+  max-width: 82px;
+  border-right: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+}
+
+.fret-col-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  border-right: 1px solid var(--border-hairline);
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.fret-col-title:last-child {
+  border-right: none;
+}
+
+.fret-col-title.nut-title {
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
+  color: var(--text-primary);
+  font-weight: 600;
+  border-right: 2px solid var(--text-primary);
+}
+
+.fret-col-title.fret-inlay {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .fretboard-neck-board.is-muted-state {
@@ -1175,9 +1297,16 @@ button.acc-topic-btn.is-active-topic {
   min-height: 28px;
   max-height: 28px;
   box-sizing: border-box;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.fret-string-row:last-child {
+  border-bottom: none;
 }
 
 .string-title {
+  display: flex;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 500;
@@ -1186,10 +1315,12 @@ button.acc-topic-btn.is-active-topic {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-hairline);
   height: 28px;
-  vertical-align: middle;
   text-align: left;
   z-index: 2;
   box-sizing: border-box;
+  width: 82px;
+  min-width: 82px;
+  max-width: 82px;
 }
 
 .fret-space {
@@ -1201,9 +1332,17 @@ button.acc-topic-btn.is-active-topic {
   box-sizing: border-box;
   border-right: 1px solid var(--border-hairline);
   position: relative;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   z-index: 2;
+  min-width: 0;
+  width: 100%;
+}
+
+.fret-space:last-child {
+  border-right: none;
 }
 
 /* Realistic crisp acoustic string hairline across every fret cell vertically centered at 50% */
@@ -1227,6 +1366,9 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .fret-space.nut-space {
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
   background: rgba(255, 255, 255, 0.55);
   border-right: 2px solid var(--text-primary);
 }
@@ -7505,13 +7647,15 @@ const GUITAR_COURSES = {
     {
       sessionNumber: 5,
       sessionTitle: "Session 5: Basic Open Chords",
-      sessionSubtitle: "Open Chords & Exercises 1-7, Morning Has Broken, America the Beautiful (p. 31)",
+      sessionSubtitle: "Open Chords & Exercises 1-7, Morning Has Broken, America the Beautiful (p. 32)",
       topics: [
         {
-          topicTitle: "Open Chords & Chord Exercises 1-7 (Lesson Book p. 31-34)",
+          topicTitle: "Open Chords & Chord Exercises 1-7 (Lesson Book p. 32-34)",
+          pdfPage: 32,
           exercises: [
             {
   id: 'lb-s5-ch-c-g', title: 'Chord Exercise 1: C, Am, Dm, G7 Progression',
+  pdfPage: 32,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7527,6 +7671,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-g-d7', title: 'Chord Exercise 2: G, Em, C, D7 Progression',
+  pdfPage: 32,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 68, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7542,6 +7687,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-d-a7', title: 'Chord Exercise 3: D, G, A, A7 Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7557,6 +7703,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-em-am', title: 'Chord Exercise 4: Em, Am, D7, G Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7572,6 +7719,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-e-a', title: 'Chord Exercise 5: A, D, E, E7 Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7587,6 +7735,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-dm-a7', title: 'Chord Exercise 6: Dm, Gm, A7 Progression',
+  pdfPage: 34,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7598,6 +7747,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-all', title: 'Chord Exercise 7: All Open Chords Master Workout',
+  pdfPage: 34,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 72, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7618,6 +7768,7 @@ const GUITAR_COURSES = {
           exercises: [
             {
   id: 'lb-s5-song-morning-mel', title: 'Song: Morning Has Broken - Melody in C (3/4 Waltz, p. 35)',
+  pdfPage: 35,
   description: 'Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.',
   timeSignature: [3, 4], defaultBpm: 85, concepts: ['Repertoire Melody', 'Sight-Reading', 'Chord Accompaniment'],
   tabData: [
@@ -7643,6 +7794,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-morning', title: 'Song: Morning Has Broken - Chords (CD #2 Tracks 2, 3, 4)',
+  pdfPage: 35,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [3, 4], defaultBpm: 55, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -7667,6 +7819,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-america-mel', title: 'Song: America the Beautiful - Melody in G (p. 36)',
+  pdfPage: 36,
   description: 'Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.',
   timeSignature: [4, 4], defaultBpm: 75, concepts: ['Repertoire Melody', 'Sight-Reading', 'Chord Accompaniment'],
   tabData: [
@@ -7690,6 +7843,7 @@ const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-america', title: 'Song: America the Beautiful - Chords (CD #2 Tracks 5, 6, 7)',
+  pdfPage: 36,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 60, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -12331,6 +12485,10 @@ class ScoreRenderer {
       }
     }
 
+    if (this.tabVisibilityMode !== "blur") {
+      this._tabPeeked = false;
+    }
+
     const ts = exercise.timeSignature || [4, 4];
     this.timeSignature = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
 
@@ -14305,39 +14463,28 @@ class FretboardVisualizer {
     this.container.innerHTML = `
       <div class="fretboard-card" style="width: 100%; box-sizing: border-box; overflow-x: auto;">
         <div class="fretboard-neck-board" id="fretboard-neck-board" style="position: relative; width: 100%; box-sizing: border-box;">
-          <table class="fretboard-table" style="width: 100%; table-layout: fixed; border-collapse: collapse;">
-            <colgroup>
-              <col style="width: 88px;">
-              <col style="width: 48px;">
-              <col span="14">
-            </colgroup>
-            <thead>
-              <tr class="fretboard-header-row">
-                <th class="string-header-blank">String</th>
-                <th class="fret-col-title nut-title">Open</th>
-                ${this.frets.filter(f => f > 0).map(f => {
-                  if (f === 12) return `<th class="fret-col-title fret-inlay">${f} &bull;&bull;</th>`;
-                  if (inlayFrets.has(f)) return `<th class="fret-col-title fret-inlay">${f} &bull;</th>`;
-                  return `<th class="fret-col-title">${f}</th>`;
-                }).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${this.strings.map(s => `
-                <tr class="fret-string-row" data-string="${s.num}">
-                  <td class="string-title">${s.label}</td>
-                  <td class="fret-space nut-space" data-string="${s.num}" data-fret="0">
-                    <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
-                  </td>
-                  ${this.frets.filter(f => f > 0).map(f => `
-                    <td class="fret-space" data-string="${s.num}" data-fret="${f}">
-                      <div class="finger-marker" id="fret-dot-${s.num}-${f}"></div>
-                    </td>
-                  `).join("")}
-                </tr>
+          <div class="fretboard-header-row">
+            <div class="string-header-blank">String</div>
+            <div class="fret-col-title nut-title">Open</div>
+            ${this.frets.filter(f => f > 0).map(f => {
+              if (f === 12) return `<div class="fret-col-title fret-inlay">${f} &bull;&bull;</div>`;
+              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f} &bull;</div>`;
+              return `<div class="fret-col-title">${f}</div>`;
+            }).join("")}
+          </div>
+          ${this.strings.map(s => `
+            <div class="fret-string-row" data-string="${s.num}">
+              <div class="string-title">${s.label}</div>
+              <div class="fret-space nut-space" data-string="${s.num}" data-fret="0">
+                <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
+              </div>
+              ${this.frets.filter(f => f > 0).map(f => `
+                <div class="fret-space" data-string="${s.num}" data-fret="${f}">
+                  <div class="finger-marker" id="fret-dot-${s.num}-${f}"></div>
+                </div>
               `).join("")}
-            </tbody>
-          </table>
+            </div>
+          `).join("")}
           <div class="mute-damp-overlay" id="mute-damp-overlay">
             <div class="mute-damp-badge">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
@@ -20236,6 +20383,18 @@ class GuitarMasterApp {
         this.activeTopicRenderers.forEach(entry => {
           if (entry.renderer) entry.renderer.render();
         });
+        if (this.currentExercise && (this.paneMode === "pdf" || this.paneMode === "split")) {
+          this.syncPdfToExercise(this.currentExercise);
+          const target = this.pdfCurrentPage || this.bookPageToPdfPage(this.extractPageNumberFromExercise(this.currentExercise), this.pdfBookCategory);
+          if (target) {
+            this.scrollToPdfPage(target, false);
+            setTimeout(() => {
+              if (this.pdfCurrentPage === target) {
+                this.scrollToPdfPage(target, false);
+              }
+            }, 80);
+          }
+        }
       });
     }
 
@@ -20279,7 +20438,20 @@ class GuitarMasterApp {
       });
     }
     if (!isFreeMet && (mode === "pdf" || mode === "split")) {
-      this.loadPdfFrame();
+      requestAnimationFrame(() => {
+        this.loadPdfFrame();
+        if (this.currentExercise) {
+          const target = this.pdfCurrentPage || this.bookPageToPdfPage(this.extractPageNumberFromExercise(this.currentExercise), this.pdfBookCategory);
+          if (target) {
+            this.scrollToPdfPage(target, false);
+            setTimeout(() => {
+              if (this.pdfCurrentPage === target) {
+                this.scrollToPdfPage(target, false);
+              }
+            }, 80);
+          }
+        }
+      });
     }
     this.saveState();
   }
@@ -20453,7 +20625,9 @@ class GuitarMasterApp {
     if (this._pdfCurrentBaseSrc === baseSrc && this._pdfCurrentDoc && this.pdfPagesTrack && this.pdfPagesTrack.children.length > 0) {
       if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
       if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
-      this.scrollToPdfPage(targetPage, true);
+      requestAnimationFrame(() => {
+        this.scrollToPdfPage(targetPage, false);
+      });
       return;
     }
 

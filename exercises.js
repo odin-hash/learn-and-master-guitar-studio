@@ -949,13 +949,15 @@ export const GUITAR_COURSES = {
     {
       sessionNumber: 5,
       sessionTitle: "Session 5: Basic Open Chords",
-      sessionSubtitle: "Open Chords & Exercises 1-7, Morning Has Broken, America the Beautiful (p. 31)",
+      sessionSubtitle: "Open Chords & Exercises 1-7, Morning Has Broken, America the Beautiful (p. 32)",
       topics: [
         {
-          topicTitle: "Open Chords & Chord Exercises 1-7 (Lesson Book p. 31-34)",
+          topicTitle: "Open Chords & Chord Exercises 1-7 (Lesson Book p. 32-34)",
+          pdfPage: 32,
           exercises: [
             {
   id: 'lb-s5-ch-c-g', title: 'Chord Exercise 1: C, Am, Dm, G7 Progression',
+  pdfPage: 32,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -971,6 +973,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-g-d7', title: 'Chord Exercise 2: G, Em, C, D7 Progression',
+  pdfPage: 32,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 68, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -986,6 +989,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-d-a7', title: 'Chord Exercise 3: D, G, A, A7 Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1001,6 +1005,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-em-am', title: 'Chord Exercise 4: Em, Am, D7, G Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1016,6 +1021,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-e-a', title: 'Chord Exercise 5: A, D, E, E7 Progression',
+  pdfPage: 33,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 70, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1031,6 +1037,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-dm-a7', title: 'Chord Exercise 6: Dm, Gm, A7 Progression',
+  pdfPage: 34,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 65, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1042,6 +1049,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-ch-all', title: 'Chord Exercise 7: All Open Chords Master Workout',
+  pdfPage: 34,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 72, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1062,6 +1070,7 @@ export const GUITAR_COURSES = {
           exercises: [
             {
   id: 'lb-s5-song-morning-mel', title: 'Song: Morning Has Broken - Melody in C (3/4 Waltz, p. 35)',
+  pdfPage: 35,
   description: 'Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.',
   timeSignature: [3, 4], defaultBpm: 85, concepts: ['Repertoire Melody', 'Sight-Reading', 'Chord Accompaniment'],
   tabData: [
@@ -1087,6 +1096,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-morning', title: 'Song: Morning Has Broken - Chords (CD #2 Tracks 2, 3, 4)',
+  pdfPage: 35,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [3, 4], defaultBpm: 55, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [
@@ -1111,6 +1121,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-america-mel', title: 'Song: America the Beautiful - Melody in G (p. 36)',
+  pdfPage: 36,
   description: 'Instructions: Play through the single-note melody first with clean fretting and steady timing, then practice strumming the chord changes above each measure.',
   timeSignature: [4, 4], defaultBpm: 75, concepts: ['Repertoire Melody', 'Sight-Reading', 'Chord Accompaniment'],
   tabData: [
@@ -1134,6 +1145,7 @@ export const GUITAR_COURSES = {
 },
             {
   id: 'lb-s5-song-america', title: 'Song: America the Beautiful - Chords (CD #2 Tracks 5, 6, 7)',
+  pdfPage: 36,
   description: 'Instructions: Strum down cleanly across all indicated strings. Keep fingertips upright so they don\'t mute adjacent open strings. Transition smoothly on beat 1 without hesitating.',
   timeSignature: [4, 4], defaultBpm: 60, concepts: ['Chords', 'Rhythm Strumming', 'Smooth Transitions'],
   tabData: [

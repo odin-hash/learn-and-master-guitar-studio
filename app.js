@@ -1016,6 +1016,18 @@ export class GuitarMasterApp {
         this.activeTopicRenderers.forEach(entry => {
           if (entry.renderer) entry.renderer.render();
         });
+        if (this.currentExercise && (this.paneMode === "pdf" || this.paneMode === "split")) {
+          this.syncPdfToExercise(this.currentExercise);
+          const target = this.pdfCurrentPage || this.bookPageToPdfPage(this.extractPageNumberFromExercise(this.currentExercise), this.pdfBookCategory);
+          if (target) {
+            this.scrollToPdfPage(target, false);
+            setTimeout(() => {
+              if (this.pdfCurrentPage === target) {
+                this.scrollToPdfPage(target, false);
+              }
+            }, 80);
+          }
+        }
       });
     }
 
@@ -1059,7 +1071,20 @@ export class GuitarMasterApp {
       });
     }
     if (!isFreeMet && (mode === "pdf" || mode === "split")) {
-      this.loadPdfFrame();
+      requestAnimationFrame(() => {
+        this.loadPdfFrame();
+        if (this.currentExercise) {
+          const target = this.pdfCurrentPage || this.bookPageToPdfPage(this.extractPageNumberFromExercise(this.currentExercise), this.pdfBookCategory);
+          if (target) {
+            this.scrollToPdfPage(target, false);
+            setTimeout(() => {
+              if (this.pdfCurrentPage === target) {
+                this.scrollToPdfPage(target, false);
+              }
+            }, 80);
+          }
+        }
+      });
     }
     this.saveState();
   }
@@ -1233,7 +1258,9 @@ export class GuitarMasterApp {
     if (this._pdfCurrentBaseSrc === baseSrc && this._pdfCurrentDoc && this.pdfPagesTrack && this.pdfPagesTrack.children.length > 0) {
       if (this.pdfFallbackCard) this.pdfFallbackCard.style.display = "none";
       if (this.pdfLoadingIndicator) this.pdfLoadingIndicator.hidden = true;
-      this.scrollToPdfPage(targetPage, true);
+      requestAnimationFrame(() => {
+        this.scrollToPdfPage(targetPage, false);
+      });
       return;
     }
 

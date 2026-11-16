@@ -24,39 +24,28 @@ export class FretboardVisualizer {
     this.container.innerHTML = `
       <div class="fretboard-card" style="width: 100%; box-sizing: border-box; overflow-x: auto;">
         <div class="fretboard-neck-board" id="fretboard-neck-board" style="position: relative; width: 100%; box-sizing: border-box;">
-          <table class="fretboard-table" style="width: 100%; table-layout: fixed; border-collapse: collapse;">
-            <colgroup>
-              <col style="width: 88px;">
-              <col style="width: 48px;">
-              <col span="14">
-            </colgroup>
-            <thead>
-              <tr class="fretboard-header-row">
-                <th class="string-header-blank">String</th>
-                <th class="fret-col-title nut-title">Open</th>
-                ${this.frets.filter(f => f > 0).map(f => {
-                  if (f === 12) return `<th class="fret-col-title fret-inlay">${f} &bull;&bull;</th>`;
-                  if (inlayFrets.has(f)) return `<th class="fret-col-title fret-inlay">${f} &bull;</th>`;
-                  return `<th class="fret-col-title">${f}</th>`;
-                }).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${this.strings.map(s => `
-                <tr class="fret-string-row" data-string="${s.num}">
-                  <td class="string-title">${s.label}</td>
-                  <td class="fret-space nut-space" data-string="${s.num}" data-fret="0">
-                    <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
-                  </td>
-                  ${this.frets.filter(f => f > 0).map(f => `
-                    <td class="fret-space" data-string="${s.num}" data-fret="${f}">
-                      <div class="finger-marker" id="fret-dot-${s.num}-${f}"></div>
-                    </td>
-                  `).join("")}
-                </tr>
+          <div class="fretboard-header-row">
+            <div class="string-header-blank">String</div>
+            <div class="fret-col-title nut-title">Open</div>
+            ${this.frets.filter(f => f > 0).map(f => {
+              if (f === 12) return `<div class="fret-col-title fret-inlay">${f} &bull;&bull;</div>`;
+              if (inlayFrets.has(f)) return `<div class="fret-col-title fret-inlay">${f} &bull;</div>`;
+              return `<div class="fret-col-title">${f}</div>`;
+            }).join("")}
+          </div>
+          ${this.strings.map(s => `
+            <div class="fret-string-row" data-string="${s.num}">
+              <div class="string-title">${s.label}</div>
+              <div class="fret-space nut-space" data-string="${s.num}" data-fret="0">
+                <div class="finger-marker" id="fret-dot-${s.num}-0"></div>
+              </div>
+              ${this.frets.filter(f => f > 0).map(f => `
+                <div class="fret-space" data-string="${s.num}" data-fret="${f}">
+                  <div class="finger-marker" id="fret-dot-${s.num}-${f}"></div>
+                </div>
               `).join("")}
-            </tbody>
-          </table>
+            </div>
+          `).join("")}
           <div class="mute-damp-overlay" id="mute-damp-overlay">
             <div class="mute-damp-badge">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
