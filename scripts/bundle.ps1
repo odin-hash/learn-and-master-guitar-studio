@@ -214,7 +214,7 @@ $css
           <div class="canvas-subbar">
             <div class="telemetry-inline mode-play" id="note-active-card">
               <div class="telemetry-slot-pitch" id="telemetry-slot-pitch">
-                <div class="telemetry-glyph" id="note-glyph-large"></div>
+                <div class="telemetry-glyph" id="note-glyph-large"><svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="#C2410C"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="#C2410C"/></svg></div>
                 <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
               </div>
               <div class="telemetry-slot-instruction" id="telemetry-slot-instruction">
@@ -620,7 +620,7 @@ $css
       <label class="dock-select-wrap" title="Percussive Metronome Click Voice">
         <span class="dock-lbl">Click</span>
         <select id="select-sound" class="dock-select">
-          <option value="woodblock" selected>Woodblock (1200/800 Hz)</option>
+          <option value="woodblock" selected>Woodblock</option>
           <option value="click">Crisp Click</option>
           <option value="drum">Rim Tick</option>
           <option value="silent">Mute Click</option>
@@ -643,7 +643,7 @@ $css
 
       <label class="dock-toggle-pill" title="Play 1-Bar Percussive Count-In before exercise playback starts">
         <input type="checkbox" id="toggle-count-in">
-        <span>Count-In: 1 Bar</span>
+        <span id="label-count-in">Count-In</span>
       </label>
     </div>
   </footer>

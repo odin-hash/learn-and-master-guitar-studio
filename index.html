@@ -854,9 +854,10 @@ button.acc-topic-btn.is-active-topic {
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
-  gap: 5px !important;
+  gap: 6px !important;
+  line-height: 1 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -865,21 +866,23 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 24px !important;
-  min-width: 24px !important;
-  max-width: 24px !important;
-  height: 24px !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
   overflow: visible;
 }
 
 .telemetry-glyph svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+  display: block !important;
+  width: 14px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
   overflow: visible;
 }
 
@@ -890,6 +893,9 @@ button.acc-topic-btn.is-active-topic {
   color: var(--text-primary);
   letter-spacing: -0.01em;
   white-space: nowrap;
+  line-height: 1 !important;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
@@ -1018,10 +1024,10 @@ button.acc-topic-btn.is-active-topic {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .telemetry-slot-instruction .telemetry-secondary {
     font-size: 10px !important;
@@ -1064,10 +1070,10 @@ button.acc-topic-btn.is-active-topic {
   }
   .workspace-body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph,
   body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .workspace-body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary,
   body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary {
@@ -1110,10 +1116,10 @@ button.acc-topic-btn.is-active-topic {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .telemetry-slot-instruction {
     width: 100% !important;
@@ -3213,8 +3219,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  gap: 12px;
+  padding: 0 14px;
+  gap: 8px;
   z-index: 40;
 }
 
@@ -3224,20 +3230,32 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0 !important;
 }
 
 .transport-left {
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
 }
 
 .transport-center {
-  flex: 0 1 auto;
+  flex: 0 0 auto !important;
   margin: 0 auto;
   min-width: 0;
 }
 
 .transport-right {
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
+}
+
+.transport-play-btn,
+.dock-metronome-cluster,
+.dock-pill-btn,
+.bpm-control-cluster,
+.jam-speed-presets,
+.time-pill-badge,
+.dock-select-wrap,
+.dock-toggle-pill {
+  flex-shrink: 0 !important;
 }
 
 .transport-play-btn {
@@ -3385,30 +3403,44 @@ button.acc-topic-btn.is-active-topic {
   color: var(--accent);
 }
 
-/* BPM Control Cluster */
+/* BPM Control Cluster: tight, non-stretching pill with 24x24 buttons and zero empty gap */
 .bpm-control-cluster {
-  display: inline-flex;
-  align-items: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  width: auto !important;
+  min-width: max-content !important;
+  padding: 0 6px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
   background: var(--bg-surface);
-  height: 30px;
-  overflow: hidden;
-  flex-shrink: 0 !important;
-  min-width: 108px !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
 }
 
 .dock-step-btn {
-  width: 26px;
-  height: 100%;
-  border: none;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  border: none !important;
+  border-radius: 4px !important;
   background: transparent;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
 }
 
 .dock-step-btn:hover {
@@ -3417,24 +3449,26 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .bpm-readout-wrap {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  padding: 0 6px;
-  border-left: 1px solid var(--border-hairline);
-  border-right: 1px solid var(--border-hairline);
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 2px !important;
+  padding: 0 2px !important;
+  border-left: none !important;
+  border-right: none !important;
+  flex-shrink: 0 !important;
 }
 
 .bpm-mono-input {
-  width: 36px;
+  width: 28px !important;
   border: none;
   background: transparent;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12.5px !important;
   font-weight: 700;
   color: var(--text-primary);
   text-align: right;
   outline: none;
+  padding: 0 !important;
   -moz-appearance: textfield;
 }
 
@@ -3446,9 +3480,10 @@ button.acc-topic-btn.is-active-topic {
 
 .bpm-unit {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9.5px !important;
+  font-weight: 600;
   color: var(--text-muted);
+  flex-shrink: 0 !important;
 }
 
 .jam-speed-presets {
@@ -5227,7 +5262,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .jam-speed-presets {
     display: none !important;
   }
@@ -5272,15 +5307,27 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .bpm-control-cluster {
     height: 28px !important;
-    min-width: 108px !important;
+    width: auto !important;
+    min-width: max-content !important;
+    padding: 0 6px !important;
+    gap: 4px !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
+  .dock-step-btn {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    flex-shrink: 0 !important;
+  }
   .bpm-readout-wrap {
-    padding: 0 4px !important;
+    padding: 0 2px !important;
+    gap: 2px !important;
+    border: none !important;
   }
   .bpm-mono-input {
-    width: 32px !important;
+    width: 28px !important;
     font-size: 12px !important;
   }
   .bpm-unit {
@@ -5297,7 +5344,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .dock-select-wrap {
     height: 28px !important;
-    padding: 0 4px !important;
+    padding: 0 5px !important;
     font-size: 11px !important;
   }
   .dock-select-wrap .dock-lbl {
@@ -5305,7 +5352,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .dock-select {
     font-size: 11px !important;
-    max-width: 95px !important;
+    max-width: 105px !important;
   }
   .dock-toggle-pill {
     height: 28px !important;
@@ -6386,7 +6433,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
           <div class="canvas-subbar">
             <div class="telemetry-inline mode-play" id="note-active-card">
               <div class="telemetry-slot-pitch" id="telemetry-slot-pitch">
-                <div class="telemetry-glyph" id="note-glyph-large"></div>
+                <div class="telemetry-glyph" id="note-glyph-large"><svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="#C2410C"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="#C2410C"/></svg></div>
                 <span class="telemetry-primary" id="note-header-big">E (High E Open)</span>
               </div>
               <div class="telemetry-slot-instruction" id="telemetry-slot-instruction">
@@ -6792,7 +6839,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
       <label class="dock-select-wrap" title="Percussive Metronome Click Voice">
         <span class="dock-lbl">Click</span>
         <select id="select-sound" class="dock-select">
-          <option value="woodblock" selected>Woodblock (1200/800 Hz)</option>
+          <option value="woodblock" selected>Woodblock</option>
           <option value="click">Crisp Click</option>
           <option value="drum">Rim Tick</option>
           <option value="silent">Mute Click</option>
@@ -6815,7 +6862,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
 
       <label class="dock-toggle-pill" title="Play 1-Bar Percussive Count-In before exercise playback starts">
         <input type="checkbox" id="toggle-count-in">
-        <span>Count-In: 1 Bar</span>
+        <span id="label-count-in">Count-In</span>
       </label>
     </div>
   </footer>
@@ -19992,6 +20039,21 @@ class GuitarMasterApp {
       this.workspaceBody.classList.toggle("drawer-collapsed", !this.drawerOpen);
     }
     this.syncFretboardVisibilityUI();
+    this.syncResponsiveLabels();
+  }
+
+  syncResponsiveLabels() {
+    const isVeryWide = typeof window !== "undefined" && window.innerWidth > 1200;
+    if (this.selectSound) {
+      const woodblockOpt = this.selectSound.querySelector('option[value="woodblock"]');
+      if (woodblockOpt) {
+        woodblockOpt.textContent = isVeryWide ? "Woodblock (1200/800 Hz)" : "Woodblock";
+      }
+    }
+    const countInLabel = document.getElementById("label-count-in");
+    if (countInLabel) {
+      countInLabel.textContent = isVeryWide ? "Count-In: 1 Bar" : "Count-In";
+    }
   }
 
   initDial() {
@@ -24450,30 +24512,37 @@ class GuitarMasterApp {
     });
   }
 
-  // Real VexFlow Bravura glyphs for the Studio Feedback Card (cached per symbol/state)
+  // Clean SVG vector glyphs for the Beat Status Bar (eliminates OS font metric clipping)
   getGlyphSvg(sym, dur, isRest) {
     const color = isRest ? "#DC2626" : "#C2410C";
-    const cacheKey = `${sym || "1/4"}|${dur || 1}|${isRest ? 1 : 0}|${color}`;
-    if (this._glyphCache && this._glyphCache.has(cacheKey)) {
-      return this._glyphCache.get(cacheKey);
-    }
-    if (typeof ScoreRenderer !== "undefined" && ScoreRenderer.renderInlineBravuraNote) {
-      const tmp = document.createElement("span");
-      ScoreRenderer.renderInlineBravuraNote(tmp, {
-        sym,
-        dur,
-        isRest,
-        color,
-        width: 34,
-        height: 30
-      });
-      const svgMarkup = tmp.innerHTML;
-      if (svgMarkup && this._glyphCache) {
-        this._glyphCache.set(cacheKey, svgMarkup);
+    const normSym = String(sym || "1/4").toLowerCase();
+    const d = Number(dur) || 1;
+
+    if (isRest) {
+      if (normSym === "1/1" || d >= 4) {
+        return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><line x1="1" y1="6" x2="13" y2="6" stroke="${color}" stroke-width="1.2"/><rect x="3.5" y="6" width="7" height="3.5" fill="${color}"/></svg>`;
       }
-      return svgMarkup;
+      if (normSym === "1/2" || d >= 2) {
+        return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><line x1="1" y1="10" x2="13" y2="10" stroke="${color}" stroke-width="1.2"/><rect x="3.5" y="6.5" width="7" height="3.5" fill="${color}"/></svg>`;
+      }
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><path d="M 5.5 1.5 L 8.5 5 L 4.5 8.5 L 8.5 12 C 7 13.5 5.5 14.5 5.5 15.5" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
-    return isRest ? "<span>REST</span>" : "<span>NOTE</span>";
+
+    if (normSym === "1/1" || d >= 4) {
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="7" cy="8.5" rx="5.4" ry="3.6" transform="rotate(-15 7 8.5)" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+    }
+
+    if (normSym === "1/2" || (d >= 2 && d < 4)) {
+      const isDotted = normSym === "3/4" || d >= 3;
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="none" stroke="${color}" stroke-width="1.6"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/>${isDotted ? `<circle cx="11.5" cy="12" r="1.2" fill="${color}"/>` : ""}</svg>`;
+    }
+
+    if (normSym === "1/8" || d <= 0.5) {
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.2" cy="12.2" rx="3.5" ry="2.4" transform="rotate(-20 4.2 12.2)" fill="${color}"/><rect x="7" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/><path d="M 8.2 1 C 10.5 2.5 12.5 5 11 8 C 10.2 6.5 9.2 5 8.2 4.5 Z" fill="${color}"/></svg>`;
+    }
+
+    const isDotted = normSym === "3/8" || Math.abs(d - 1.5) < 0.05;
+    return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="${color}"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/>${isDotted ? `<circle cx="11.5" cy="12" r="1.2" fill="${color}"/>` : ""}</svg>`;
   }
 
   updateCard(beatData, isRest, beatNumber, chordName = null, ev = null) {
@@ -25176,9 +25245,11 @@ class GuitarMasterApp {
     };
 
     window.addEventListener("resize", () => {
+      this.syncResponsiveLabels();
       preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
+        this.syncResponsiveLabels();
         const activeTag = document.activeElement ? document.activeElement.tagName : "";
         const isTypingInput = /^(INPUT|TEXTAREA|SELECT)$/.test(activeTag);
         if (!isTypingInput) {
@@ -25211,9 +25282,11 @@ class GuitarMasterApp {
     });
 
     window.addEventListener("orientationchange", () => {
+      this.syncResponsiveLabels();
       preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
+        this.syncResponsiveLabels();
         if ((this.paneMode === "pdf" || this.paneMode === "split") && this._pdfCurrentDoc) {
           this._lastPdfRenderWidth = window.innerWidth;
           const restorePage = lockedTargetPageOnResize || this.activePdfPageRef || this.pdfCurrentPage || 1;

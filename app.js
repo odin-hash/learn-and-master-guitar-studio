@@ -489,6 +489,21 @@ export class GuitarMasterApp {
       this.workspaceBody.classList.toggle("drawer-collapsed", !this.drawerOpen);
     }
     this.syncFretboardVisibilityUI();
+    this.syncResponsiveLabels();
+  }
+
+  syncResponsiveLabels() {
+    const isVeryWide = typeof window !== "undefined" && window.innerWidth > 1200;
+    if (this.selectSound) {
+      const woodblockOpt = this.selectSound.querySelector('option[value="woodblock"]');
+      if (woodblockOpt) {
+        woodblockOpt.textContent = isVeryWide ? "Woodblock (1200/800 Hz)" : "Woodblock";
+      }
+    }
+    const countInLabel = document.getElementById("label-count-in");
+    if (countInLabel) {
+      countInLabel.textContent = isVeryWide ? "Count-In: 1 Bar" : "Count-In";
+    }
   }
 
   initDial() {
@@ -4947,30 +4962,37 @@ export class GuitarMasterApp {
     });
   }
 
-  // Real VexFlow Bravura glyphs for the Studio Feedback Card (cached per symbol/state)
+  // Clean SVG vector glyphs for the Beat Status Bar (eliminates OS font metric clipping)
   getGlyphSvg(sym, dur, isRest) {
     const color = isRest ? "#DC2626" : "#C2410C";
-    const cacheKey = `${sym || "1/4"}|${dur || 1}|${isRest ? 1 : 0}|${color}`;
-    if (this._glyphCache && this._glyphCache.has(cacheKey)) {
-      return this._glyphCache.get(cacheKey);
-    }
-    if (typeof ScoreRenderer !== "undefined" && ScoreRenderer.renderInlineBravuraNote) {
-      const tmp = document.createElement("span");
-      ScoreRenderer.renderInlineBravuraNote(tmp, {
-        sym,
-        dur,
-        isRest,
-        color,
-        width: 34,
-        height: 30
-      });
-      const svgMarkup = tmp.innerHTML;
-      if (svgMarkup && this._glyphCache) {
-        this._glyphCache.set(cacheKey, svgMarkup);
+    const normSym = String(sym || "1/4").toLowerCase();
+    const d = Number(dur) || 1;
+
+    if (isRest) {
+      if (normSym === "1/1" || d >= 4) {
+        return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><line x1="1" y1="6" x2="13" y2="6" stroke="${color}" stroke-width="1.2"/><rect x="3.5" y="6" width="7" height="3.5" fill="${color}"/></svg>`;
       }
-      return svgMarkup;
+      if (normSym === "1/2" || d >= 2) {
+        return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><line x1="1" y1="10" x2="13" y2="10" stroke="${color}" stroke-width="1.2"/><rect x="3.5" y="6.5" width="7" height="3.5" fill="${color}"/></svg>`;
+      }
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><path d="M 5.5 1.5 L 8.5 5 L 4.5 8.5 L 8.5 12 C 7 13.5 5.5 14.5 5.5 15.5" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
-    return isRest ? "<span>REST</span>" : "<span>NOTE</span>";
+
+    if (normSym === "1/1" || d >= 4) {
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="7" cy="8.5" rx="5.4" ry="3.6" transform="rotate(-15 7 8.5)" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+    }
+
+    if (normSym === "1/2" || (d >= 2 && d < 4)) {
+      const isDotted = normSym === "3/4" || d >= 3;
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="none" stroke="${color}" stroke-width="1.6"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/>${isDotted ? `<circle cx="11.5" cy="12" r="1.2" fill="${color}"/>` : ""}</svg>`;
+    }
+
+    if (normSym === "1/8" || d <= 0.5) {
+      return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.2" cy="12.2" rx="3.5" ry="2.4" transform="rotate(-20 4.2 12.2)" fill="${color}"/><rect x="7" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/><path d="M 8.2 1 C 10.5 2.5 12.5 5 11 8 C 10.2 6.5 9.2 5 8.2 4.5 Z" fill="${color}"/></svg>`;
+    }
+
+    const isDotted = normSym === "3/8" || Math.abs(d - 1.5) < 0.05;
+    return `<svg width="14" height="16" viewBox="0 0 14 16" style="flex-shrink:0;display:block;" aria-hidden="true"><ellipse cx="4.8" cy="12.2" rx="3.8" ry="2.6" transform="rotate(-20 4.8 12.2)" fill="${color}"/><rect x="7.8" y="1" width="1.4" height="11.5" rx="0.5" fill="${color}"/>${isDotted ? `<circle cx="11.5" cy="12" r="1.2" fill="${color}"/>` : ""}</svg>`;
   }
 
   updateCard(beatData, isRest, beatNumber, chordName = null, ev = null) {
@@ -5673,9 +5695,11 @@ export class GuitarMasterApp {
     };
 
     window.addEventListener("resize", () => {
+      this.syncResponsiveLabels();
       preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
+        this.syncResponsiveLabels();
         const activeTag = document.activeElement ? document.activeElement.tagName : "";
         const isTypingInput = /^(INPUT|TEXTAREA|SELECT)$/.test(activeTag);
         if (!isTypingInput) {
@@ -5708,9 +5732,11 @@ export class GuitarMasterApp {
     });
 
     window.addEventListener("orientationchange", () => {
+      this.syncResponsiveLabels();
       preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
+        this.syncResponsiveLabels();
         if ((this.paneMode === "pdf" || this.paneMode === "split") && this._pdfCurrentDoc) {
           this._lastPdfRenderWidth = window.innerWidth;
           const restorePage = lockedTargetPageOnResize || this.activePdfPageRef || this.pdfCurrentPage || 1;

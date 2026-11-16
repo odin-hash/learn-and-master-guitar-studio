@@ -842,9 +842,10 @@ button.acc-topic-btn.is-active-topic {
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
-  gap: 5px !important;
+  gap: 6px !important;
+  line-height: 1 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -853,21 +854,23 @@ button.acc-topic-btn.is-active-topic {
 
 .telemetry-slot-pitch .telemetry-glyph,
 .telemetry-glyph {
-  width: 24px !important;
-  min-width: 24px !important;
-  max-width: 24px !important;
-  height: 24px !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
   overflow: visible;
 }
 
 .telemetry-glyph svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+  display: block !important;
+  width: 14px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
   overflow: visible;
 }
 
@@ -878,6 +881,9 @@ button.acc-topic-btn.is-active-topic {
   color: var(--text-primary);
   letter-spacing: -0.01em;
   white-space: nowrap;
+  line-height: 1 !important;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
@@ -1006,10 +1012,10 @@ button.acc-topic-btn.is-active-topic {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .telemetry-slot-instruction .telemetry-secondary {
     font-size: 10px !important;
@@ -1052,10 +1058,10 @@ button.acc-topic-btn.is-active-topic {
   }
   .workspace-body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph,
   body[data-pane-mode="split"] .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .workspace-body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary,
   body[data-pane-mode="split"] .telemetry-slot-instruction .telemetry-secondary {
@@ -1098,10 +1104,10 @@ button.acc-topic-btn.is-active-topic {
     font-size: 11px !important;
   }
   .telemetry-slot-pitch .telemetry-glyph {
-    width: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    height: 20px !important;
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    height: 16px !important;
   }
   .telemetry-slot-instruction {
     width: 100% !important;
@@ -3201,8 +3207,8 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  gap: 12px;
+  padding: 0 14px;
+  gap: 8px;
   z-index: 40;
 }
 
@@ -3212,20 +3218,32 @@ button.acc-topic-btn.is-active-topic {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0 !important;
 }
 
 .transport-left {
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
 }
 
 .transport-center {
-  flex: 0 1 auto;
+  flex: 0 0 auto !important;
   margin: 0 auto;
   min-width: 0;
 }
 
 .transport-right {
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
+}
+
+.transport-play-btn,
+.dock-metronome-cluster,
+.dock-pill-btn,
+.bpm-control-cluster,
+.jam-speed-presets,
+.time-pill-badge,
+.dock-select-wrap,
+.dock-toggle-pill {
+  flex-shrink: 0 !important;
 }
 
 .transport-play-btn {
@@ -3373,30 +3391,44 @@ button.acc-topic-btn.is-active-topic {
   color: var(--accent);
 }
 
-/* BPM Control Cluster */
+/* BPM Control Cluster: tight, non-stretching pill with 24x24 buttons and zero empty gap */
 .bpm-control-cluster {
-  display: inline-flex;
-  align-items: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  width: auto !important;
+  min-width: max-content !important;
+  padding: 0 6px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
   border: 1px solid var(--border-hairline);
   border-radius: 6px;
   background: var(--bg-surface);
-  height: 30px;
-  overflow: hidden;
-  flex-shrink: 0 !important;
-  min-width: 108px !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
 }
 
 .dock-step-btn {
-  width: 26px;
-  height: 100%;
-  border: none;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  border: none !important;
+  border-radius: 4px !important;
   background: transparent;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
 }
 
 .dock-step-btn:hover {
@@ -3405,24 +3437,26 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .bpm-readout-wrap {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  padding: 0 6px;
-  border-left: 1px solid var(--border-hairline);
-  border-right: 1px solid var(--border-hairline);
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 2px !important;
+  padding: 0 2px !important;
+  border-left: none !important;
+  border-right: none !important;
+  flex-shrink: 0 !important;
 }
 
 .bpm-mono-input {
-  width: 36px;
+  width: 28px !important;
   border: none;
   background: transparent;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12.5px !important;
   font-weight: 700;
   color: var(--text-primary);
   text-align: right;
   outline: none;
+  padding: 0 !important;
   -moz-appearance: textfield;
 }
 
@@ -3434,9 +3468,10 @@ button.acc-topic-btn.is-active-topic {
 
 .bpm-unit {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9.5px !important;
+  font-weight: 600;
   color: var(--text-muted);
+  flex-shrink: 0 !important;
 }
 
 .jam-speed-presets {
@@ -5215,7 +5250,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .jam-speed-presets {
     display: none !important;
   }
@@ -5260,15 +5295,27 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .bpm-control-cluster {
     height: 28px !important;
-    min-width: 108px !important;
+    width: auto !important;
+    min-width: max-content !important;
+    padding: 0 6px !important;
+    gap: 4px !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
+  .dock-step-btn {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    flex-shrink: 0 !important;
+  }
   .bpm-readout-wrap {
-    padding: 0 4px !important;
+    padding: 0 2px !important;
+    gap: 2px !important;
+    border: none !important;
   }
   .bpm-mono-input {
-    width: 32px !important;
+    width: 28px !important;
     font-size: 12px !important;
   }
   .bpm-unit {
@@ -5285,7 +5332,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .dock-select-wrap {
     height: 28px !important;
-    padding: 0 4px !important;
+    padding: 0 5px !important;
     font-size: 11px !important;
   }
   .dock-select-wrap .dock-lbl {
@@ -5293,7 +5340,7 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
   .dock-select {
     font-size: 11px !important;
-    max-width: 95px !important;
+    max-width: 105px !important;
   }
   .dock-toggle-pill {
     height: 28px !important;
