@@ -2104,7 +2104,10 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
 }
 
-.topic-exercise-block {
+.topic-exercise-block,
+.exercise-card {
+  display: flex !important;
+  flex-direction: column !important;
   border: 1px solid var(--border-hairline, #E4E4E7);
   border-radius: 6px;
   padding: 14px 16px 12px;
@@ -2115,6 +2118,9 @@ button.acc-topic-btn.is-active-topic {
   position: relative;
   width: 100%;
   max-width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
 }
 
 .topic-editor-slot {
@@ -2123,13 +2129,22 @@ button.acc-topic-btn.is-active-topic {
   margin-top: 6px;
 }
 
-.topic-exercise-block:hover {
+.topic-exercise-block:hover,
+.exercise-card:hover {
   border-color: var(--border-strong, #D4D4D8);
 }
 
-.topic-exercise-block.is-selected {
+.topic-exercise-block.is-selected,
+.exercise-card.is-selected {
   border-color: rgba(194, 65, 12, 0.42);
   box-shadow: inset 3px 0 0 var(--accent, #C2410C);
+}
+
+.topic-exercise-block.is-selected .topic-ex-badge,
+.exercise-card.is-selected .topic-ex-badge {
+  background: var(--accent, #C2410C);
+  border-color: var(--accent, #C2410C);
+  color: #FFFFFF;
 }
 
 .topic-ex-head {
@@ -2286,7 +2301,8 @@ button.acc-topic-btn.is-active-topic {
   cursor: pointer;
 }
 
-.topic-exercise-block.is-selected .topic-ex-select-btn {
+.topic-exercise-block.is-selected .topic-ex-select-btn,
+.exercise-card.is-selected .topic-ex-select-btn {
   border-color: rgba(194, 65, 12, 0.35);
   background: rgba(194, 65, 12, 0.08);
   color: var(--accent);
@@ -2317,7 +2333,9 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: 0;
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 1 1 auto;
   padding-top: 2px;
   overflow-x: auto;
   overflow-y: visible;
@@ -2396,16 +2414,25 @@ button.acc-topic-btn.is-active-topic {
   margin-bottom: 4px;
 }
 
+.vf-score-sheet:not(.is-tab-blurred) .vf-tab-peek-bar {
+  display: none !important;
+}
+
 .vf-peek-hint {
   font-size: 11px;
   color: var(--text-muted);
 }
 
 .vf-score-sheet.is-tab-blurred .vf-tab-blur-wrap {
-  filter: blur(5.5px);
+  filter: blur(5px);
   opacity: 0.72;
   transition: filter 0.16s ease, opacity 0.16s ease;
   cursor: pointer;
+}
+
+.vf-score-sheet:not(.is-tab-blurred) .vf-tab-blur-wrap {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 .vf-score-sheet.is-tab-blurred .vf-tab-blur-wrap:hover,
@@ -5305,7 +5332,8 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 
   /* Fix crushed 1-word-per-line exercise headers & eliminate blank gap on narrow phones */
-  .topic-exercise-block {
+  .topic-exercise-block,
+  .exercise-card {
     padding: 12px;
     height: auto !important;
     min-height: 0 !important;
@@ -12243,6 +12271,11 @@ class ScoreRenderer {
       const sheet = this.container.querySelector(".vf-score-sheet");
       if (sheet) {
         sheet.classList.toggle("is-tab-blurred", this.tabVisibilityMode === "blur");
+        if (this.tabVisibilityMode !== "blur") {
+          sheet.classList.remove("is-tab-peeked");
+          const oldPeek = sheet.querySelector(".vf-tab-peek-bar");
+          if (oldPeek) oldPeek.remove();
+        }
       }
     }
   }
@@ -19566,6 +19599,9 @@ class GuitarMasterApp {
     this._pdfCurrentBaseSrc = null;
     this._pdfObserver = null;
     this._pdfActiveScrollObserver = null;
+    this.activePdfPageRef = 1;
+    this._isProgrammaticPdfScroll = false;
+    this._programmaticPdfScrollTimer = null;
 
     // Admin Action Bar & Cloud Settings
     this.btnAdminSettings = document.getElementById("btn-admin-settings");
@@ -20424,6 +20460,12 @@ class GuitarMasterApp {
 
   async buildPdfPagesTrack(pdfDoc, initialPage, seq) {
     if (!this.pdfPagesTrack) return;
+    const targetPage = Math.max(1, parseInt(initialPage || this.activePdfPageRef || this.pdfCurrentPage || 1, 10));
+    this.activePdfPageRef = targetPage;
+    this.pdfCurrentPage = targetPage;
+    this._isProgrammaticPdfScroll = true;
+    clearTimeout(this._programmaticPdfScrollTimer);
+
     this.pdfPagesTrack.innerHTML = "";
 
     // Cancel any active render tasks
@@ -20439,30 +20481,37 @@ class GuitarMasterApp {
     const firstPage = await pdfDoc.getPage(1);
     if (seq !== this._pdfLoadSeq) return;
 
-    const baseVp = firstPage.getViewport({ scale: 1 });
-    const naturalAspect = baseVp.height / baseVp.width;
+    // Use standard 11 / 8.5 aspect ratio for sheet music book pages (prevents drift)
+    const PAGE_ASPECT = 11 / 8.5;
     const scrollerW = (this.pdfScrollerContainer && this.pdfScrollerContainer.clientWidth)
       ? Math.max(260, this.pdfScrollerContainer.clientWidth - 28)
       : Math.max(280, (window.innerWidth / 2) - 30);
     const fitWidth = Math.min(scrollerW, 960);
     const baseCssWidth = fitWidth * (this._pdfZoomMultiplier || 1.0);
-    const baseCssHeight = Math.floor(baseCssWidth * naturalAspect);
+    const baseCssHeight = Math.floor(baseCssWidth * PAGE_ASPECT);
     this._pdfBaseCssWidth = baseCssWidth;
 
     const frag = document.createDocumentFragment();
     for (let p = 1; p <= totalPages; p++) {
       const slot = document.createElement("div");
-      slot.className = `pdf-page-slot ${p === initialPage ? "is-active-page" : ""}`;
+      slot.className = `pdf-page-slot ${p === targetPage ? "is-active-page" : ""}`;
       slot.id = `pdf-page-slot-${p}`;
       slot.dataset.pageNumber = String(p);
       slot.style.width = `${Math.floor(baseCssWidth)}px`;
+      slot.style.height = `${baseCssHeight}px`;
       slot.style.minHeight = `${baseCssHeight}px`;
+      slot.style.maxHeight = `${baseCssHeight}px`;
+      slot.style.overflow = "hidden";
+      slot.style.boxSizing = "border-box";
 
       const canvas = document.createElement("canvas");
       canvas.className = "pdf-page-canvas";
       canvas.id = `pdf-page-canvas-${p}`;
       canvas.width = 1;
       canvas.height = 1;
+      canvas.style.width = `${Math.floor(baseCssWidth)}px`;
+      canvas.style.height = `${baseCssHeight}px`;
+      canvas.style.display = "block";
 
       slot.appendChild(canvas);
       frag.appendChild(slot);
@@ -20490,9 +20539,12 @@ class GuitarMasterApp {
       this._pdfActiveScrollObserver.disconnect();
     }
     this._pdfActiveScrollObserver = new IntersectionObserver((entries) => {
+      if (this._isProgrammaticPdfScroll) return;
       entries.forEach(entry => {
         if (entry.isIntersecting) {
+          if (this._isProgrammaticPdfScroll) return;
           const p = parseInt(entry.target.dataset.pageNumber, 10);
+          this.activePdfPageRef = p;
           this.pdfCurrentPage = p;
           if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
             this.pdfPageInput.value = p;
@@ -20517,6 +20569,19 @@ class GuitarMasterApp {
       this._pdfObserver.observe(slot);
       this._pdfActiveScrollObserver.observe(slot);
     });
+
+    // Immediately restore scroll position directly to targetPage slot
+    const targetSlot = document.getElementById(`pdf-page-slot-${targetPage}`);
+    if (targetSlot && this.pdfScrollerContainer) {
+      this.pdfScrollerContainer.scrollTop = targetSlot.offsetTop;
+      this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => s.classList.remove("is-active-page"));
+      targetSlot.classList.add("is-active-page");
+    }
+    this.renderPdfCanvasPage(pdfDoc, targetPage);
+
+    this._programmaticPdfScrollTimer = setTimeout(() => {
+      this._isProgrammaticPdfScroll = false;
+    }, 300);
   }
 
   async renderPdfCanvasPage(pdfDoc, pageNum) {
@@ -20532,15 +20597,15 @@ class GuitarMasterApp {
       const page = await pdfDoc.getPage(pageNum);
       const baseVp = page.getViewport({ scale: 1 });
       const targetCssWidth = parseFloat(slot.style.width) || this._pdfBaseCssWidth || 600;
+      const targetCssHeight = parseFloat(slot.style.height) || Math.floor(targetCssWidth * (11 / 8.5));
       const cssScale = targetCssWidth / baseVp.width;
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       const vp = page.getViewport({ scale: cssScale * dpr });
 
       canvas.width = Math.floor(vp.width);
       canvas.height = Math.floor(vp.height);
-      canvas.style.width = `${Math.floor(vp.width / dpr)}px`;
-      canvas.style.height = `${Math.floor(vp.height / dpr)}px`;
-      slot.style.minHeight = `${Math.floor(vp.height / dpr)}px`;
+      canvas.style.width = `${targetCssWidth}px`;
+      canvas.style.height = `${targetCssHeight}px`;
 
       const ctx = canvas.getContext("2d");
       const renderTask = page.render({ canvasContext: ctx, viewport: vp });
@@ -20561,20 +20626,41 @@ class GuitarMasterApp {
     if (!this.pdfPagesTrack || !this.pdfScrollerContainer) return;
     const totalPages = (this._pdfCurrentDoc && this._pdfCurrentDoc.numPages) || 1;
     const p = Math.max(1, Math.min(targetPage, totalPages));
+    this.activePdfPageRef = p;
     this.pdfCurrentPage = p;
+
+    this._isProgrammaticPdfScroll = true;
+    clearTimeout(this._programmaticPdfScrollTimer);
+
     if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
       this.pdfPageInput.value = p;
     }
     if (this.pdfPageIndicator) {
       this.pdfPageIndicator.textContent = `/ ${totalPages}`;
     }
+    if (this.btnPdfPrev) this.btnPdfPrev.disabled = p <= 1;
+    if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
+
     const slot = document.getElementById(`pdf-page-slot-${p}`);
-    if (slot) {
-      slot.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+    if (slot && this.pdfScrollerContainer) {
+      const targetTop = slot.offsetTop;
+      if (smooth) {
+        this.pdfScrollerContainer.scrollTo({ top: targetTop, behavior: "smooth" });
+      } else {
+        this.pdfScrollerContainer.scrollTop = targetTop;
+      }
+      this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => {
+        s.classList.remove("is-active-page");
+      });
+      slot.classList.add("is-active-page");
       if (this._pdfCurrentDoc) {
         this.renderPdfCanvasPage(this._pdfCurrentDoc, p);
       }
     }
+
+    this._programmaticPdfScrollTimer = setTimeout(() => {
+      this._isProgrammaticPdfScroll = false;
+    }, 300);
   }
 
   setPdfZoom(multiplier, mode = "custom") {
@@ -22544,7 +22630,7 @@ class GuitarMasterApp {
       const tsLabel = Array.isArray(ts) ? `${ts[0]}/${ts[1]}` : String(ts);
       const exPage = ex.pdfPage || this.extractPageNumberFromExercise(ex);
       return `
-        <section class="topic-exercise-block ${isSelected ? "is-selected" : ""}" id="topic-ex-${ex.id}" data-ex-id="${ex.id}">
+        <section class="topic-exercise-block exercise-card ${isSelected ? "is-selected" : ""}" id="topic-ex-${ex.id}" data-ex-id="${ex.id}">
           <div class="topic-ex-head" data-select-header="${ex.id}" title="Click to select for Bottom Dock playback">
             <div class="topic-ex-head-left">
               <span class="topic-ex-badge">${idx + 1}</span>
@@ -24676,15 +24762,29 @@ class GuitarMasterApp {
         }
         if (
           (this.paneMode === "pdf" || this.paneMode === "split") &&
-          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 40 &&
+          Math.abs(window.innerWidth - this._lastPdfRenderWidth) > 30 &&
           this._pdfCurrentDoc
         ) {
           this._lastPdfRenderWidth = window.innerWidth;
-          if (this._pdfZoomMode === "fit") {
-            this.buildPdfPagesTrack(this._pdfCurrentDoc, this.pdfCurrentPage, ++this._pdfLoadSeq);
-          }
+          this._isProgrammaticPdfScroll = true;
+          clearTimeout(this._programmaticPdfScrollTimer);
+          const restorePage = this.activePdfPageRef || this.pdfCurrentPage || 1;
+          this.buildPdfPagesTrack(this._pdfCurrentDoc, restorePage, ++this._pdfLoadSeq);
         }
-      }, 120);
+      }, 200);
+    });
+
+    window.addEventListener("orientationchange", () => {
+      clearTimeout(resizeSyncTimer);
+      resizeSyncTimer = setTimeout(() => {
+        if ((this.paneMode === "pdf" || this.paneMode === "split") && this._pdfCurrentDoc) {
+          this._lastPdfRenderWidth = window.innerWidth;
+          this._isProgrammaticPdfScroll = true;
+          clearTimeout(this._programmaticPdfScrollTimer);
+          const restorePage = this.activePdfPageRef || this.pdfCurrentPage || 1;
+          this.buildPdfPagesTrack(this._pdfCurrentDoc, restorePage, ++this._pdfLoadSeq);
+        }
+      }, 250);
     });
 
     const handleLocalPdfFile = (file) => {

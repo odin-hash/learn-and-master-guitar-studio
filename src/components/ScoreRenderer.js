@@ -248,6 +248,11 @@ export class ScoreRenderer {
       const sheet = this.container.querySelector(".vf-score-sheet");
       if (sheet) {
         sheet.classList.toggle("is-tab-blurred", this.tabVisibilityMode === "blur");
+        if (this.tabVisibilityMode !== "blur") {
+          sheet.classList.remove("is-tab-peeked");
+          const oldPeek = sheet.querySelector(".vf-tab-peek-bar");
+          if (oldPeek) oldPeek.remove();
+        }
       }
     }
   }

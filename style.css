@@ -2092,7 +2092,10 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
 }
 
-.topic-exercise-block {
+.topic-exercise-block,
+.exercise-card {
+  display: flex !important;
+  flex-direction: column !important;
   border: 1px solid var(--border-hairline, #E4E4E7);
   border-radius: 6px;
   padding: 14px 16px 12px;
@@ -2103,6 +2106,9 @@ button.acc-topic-btn.is-active-topic {
   position: relative;
   width: 100%;
   max-width: 100%;
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
 }
 
 .topic-editor-slot {
@@ -2111,13 +2117,22 @@ button.acc-topic-btn.is-active-topic {
   margin-top: 6px;
 }
 
-.topic-exercise-block:hover {
+.topic-exercise-block:hover,
+.exercise-card:hover {
   border-color: var(--border-strong, #D4D4D8);
 }
 
-.topic-exercise-block.is-selected {
+.topic-exercise-block.is-selected,
+.exercise-card.is-selected {
   border-color: rgba(194, 65, 12, 0.42);
   box-shadow: inset 3px 0 0 var(--accent, #C2410C);
+}
+
+.topic-exercise-block.is-selected .topic-ex-badge,
+.exercise-card.is-selected .topic-ex-badge {
+  background: var(--accent, #C2410C);
+  border-color: var(--accent, #C2410C);
+  color: #FFFFFF;
 }
 
 .topic-ex-head {
@@ -2274,7 +2289,8 @@ button.acc-topic-btn.is-active-topic {
   cursor: pointer;
 }
 
-.topic-exercise-block.is-selected .topic-ex-select-btn {
+.topic-exercise-block.is-selected .topic-ex-select-btn,
+.exercise-card.is-selected .topic-ex-select-btn {
   border-color: rgba(194, 65, 12, 0.35);
   background: rgba(194, 65, 12, 0.08);
   color: var(--accent);
@@ -2305,7 +2321,9 @@ button.acc-topic-btn.is-active-topic {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: 0;
+  height: auto !important;
+  min-height: 0 !important;
+  flex: 1 1 auto;
   padding-top: 2px;
   overflow-x: auto;
   overflow-y: visible;
@@ -2384,16 +2402,25 @@ button.acc-topic-btn.is-active-topic {
   margin-bottom: 4px;
 }
 
+.vf-score-sheet:not(.is-tab-blurred) .vf-tab-peek-bar {
+  display: none !important;
+}
+
 .vf-peek-hint {
   font-size: 11px;
   color: var(--text-muted);
 }
 
 .vf-score-sheet.is-tab-blurred .vf-tab-blur-wrap {
-  filter: blur(5.5px);
+  filter: blur(5px);
   opacity: 0.72;
   transition: filter 0.16s ease, opacity 0.16s ease;
   cursor: pointer;
+}
+
+.vf-score-sheet:not(.is-tab-blurred) .vf-tab-blur-wrap {
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 .vf-score-sheet.is-tab-blurred .vf-tab-blur-wrap:hover,
@@ -5293,7 +5320,8 @@ body[data-admin-mode="true"] .topic-ex-sub.is-empty:empty::before {
   }
 
   /* Fix crushed 1-word-per-line exercise headers & eliminate blank gap on narrow phones */
-  .topic-exercise-block {
+  .topic-exercise-block,
+  .exercise-card {
     padding: 12px;
     height: auto !important;
     min-height: 0 !important;
