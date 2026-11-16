@@ -254,7 +254,7 @@ export class GuitarMasterApp {
         topicPdfPage: 1,
         exerciseNumberInTopic: 1,
         bookCategory: "freeMetronome",
-        bookName: "Free Studio",
+        bookName: "Practice Metronome",
         sessionNumber: 0,
         sessionTitle: "Free Metronome Studio",
         topicTitle: "Unrestricted Practice"
@@ -1019,6 +1019,25 @@ export class GuitarMasterApp {
       });
     }
 
+    if (this.navCrumbSession) {
+      const isFreeMet = mode === "metronome";
+      const sep = this.navCrumbSession.parentElement ? this.navCrumbSession.parentElement.querySelector(".crumb-sep") : null;
+      if (isFreeMet) {
+        this.navCrumbSession.textContent = "";
+        this.navCrumbSession.style.display = "none";
+        if (sep) sep.style.display = "none";
+        if (this.studioExerciseTitle) this.studioExerciseTitle.textContent = "Practice Metronome";
+      } else if (this.currentExercise && this.currentExercise.bookCategory !== "freeMetronome") {
+        this.navCrumbSession.style.display = "";
+        if (sep) sep.style.display = "";
+        const bookShort = this.currentExercise.bookCategory === "bonusWorkshop"
+          ? `Workshop ${this.currentExercise.sessionNumber || ''}`
+          : `Session ${this.currentExercise.sessionNumber || ''}`;
+        this.navCrumbSession.textContent = bookShort.trim();
+        if (this.studioExerciseTitle) this.studioExerciseTitle.textContent = this.currentExercise.title;
+      }
+    }
+
     this.saveState();
   }
 
@@ -1097,8 +1116,11 @@ export class GuitarMasterApp {
 
   bookPageToPdfPage(bookPage, bookCategory = "lessonBook") {
     const cleanBookPage = Math.max(1, parseInt(bookPage, 10) || 1);
-    // Lesson Book has 3 unnumbered front-matter pages; Bonus Workshop Book has 2 front-matter pages.
-    const offset = bookCategory === "bonusWorkshop" ? 2 : 3;
+    // Lesson Book has 3 unnumbered front-matter pages (Sessions 1-4, p. 1-29 -> offset +3).
+    // Starting at Session 5 (p. 30+), an unnumbered section divider page adds +1 (offset +4),
+    // mapping Book p. 31 to PDF p. 35. Bonus Workshop Book has 2 front-matter pages (offset +2).
+    if (bookCategory === "bonusWorkshop") return cleanBookPage + 2;
+    const offset = cleanBookPage >= 30 ? 4 : 3;
     return cleanBookPage + offset;
   }
 
@@ -1270,6 +1292,11 @@ export class GuitarMasterApp {
     this._isProgrammaticPdfScroll = true;
     clearTimeout(this._programmaticPdfScrollTimer);
 
+    // Disconnect active scroll observer before rebuilding so reflow cannot trigger page drift
+    if (this._pdfActiveScrollObserver) {
+      this._pdfActiveScrollObserver.disconnect();
+    }
+
     this.pdfPagesTrack.innerHTML = "";
 
     // Cancel any active render tasks
@@ -1339,9 +1366,6 @@ export class GuitarMasterApp {
     });
 
     // Observer 2: Track active page in center of scroller
-    if (this._pdfActiveScrollObserver) {
-      this._pdfActiveScrollObserver.disconnect();
-    }
     this._pdfActiveScrollObserver = new IntersectionObserver((entries) => {
       if (this._isProgrammaticPdfScroll) return;
       entries.forEach(entry => {
@@ -1369,23 +1393,45 @@ export class GuitarMasterApp {
       threshold: 0.35
     });
 
+    // Observe slots for on-demand rendering immediately
     this.pdfPagesTrack.querySelectorAll(".pdf-page-slot").forEach(slot => {
       this._pdfObserver.observe(slot);
-      this._pdfActiveScrollObserver.observe(slot);
     });
 
-    // Immediately restore scroll position directly to targetPage slot
-    const targetSlot = document.getElementById(`pdf-page-slot-${targetPage}`);
-    if (targetSlot && this.pdfScrollerContainer) {
-      this.pdfScrollerContainer.scrollTop = targetSlot.offsetTop;
-      this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => s.classList.remove("is-active-page"));
-      targetSlot.classList.add("is-active-page");
-    }
-    this.renderPdfCanvasPage(pdfDoc, targetPage);
+    // Wait for DOM layout reflow before measuring slot offsets and setting scrollTop
+    requestAnimationFrame(() => {
+      if (seq !== this._pdfLoadSeq) return;
+      const targetSlot = document.getElementById(`pdf-page-slot-${targetPage}`);
+      const fallbackTop = (targetPage - 1) * (baseCssHeight + 16);
+      const targetTop = (targetSlot && targetSlot.offsetTop > 0) ? targetSlot.offsetTop : fallbackTop;
+      if (this.pdfScrollerContainer) {
+        this.pdfScrollerContainer.scrollTop = targetTop;
+      }
+      this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => {
+        if (s !== targetSlot) s.classList.remove("is-active-page");
+      });
+      if (targetSlot) targetSlot.classList.add("is-active-page");
+      if (this.pdfPageInput && document.activeElement !== this.pdfPageInput) {
+        this.pdfPageInput.value = targetPage;
+      }
+      if (this.pdfPageIndicator) {
+        this.pdfPageIndicator.textContent = `/ ${totalPages}`;
+      }
+      if (this.btnPdfPrev) this.btnPdfPrev.disabled = targetPage <= 1;
+      if (this.btnPdfNext) this.btnPdfNext.disabled = targetPage >= totalPages;
 
-    this._programmaticPdfScrollTimer = setTimeout(() => {
-      this._isProgrammaticPdfScroll = false;
-    }, 300);
+      this.renderPdfCanvasPage(pdfDoc, targetPage);
+
+      // Connect active page scroll observer only 400ms after layout and initial scroll settle firmly
+      this._programmaticPdfScrollTimer = setTimeout(() => {
+        this._isProgrammaticPdfScroll = false;
+        if (this._pdfActiveScrollObserver && this.pdfPagesTrack) {
+          this.pdfPagesTrack.querySelectorAll(".pdf-page-slot").forEach(slot => {
+            this._pdfActiveScrollObserver.observe(slot);
+          });
+        }
+      }, 400);
+    });
   }
 
   async renderPdfCanvasPage(pdfDoc, pageNum) {
@@ -1446,17 +1492,19 @@ export class GuitarMasterApp {
     if (this.btnPdfNext) this.btnPdfNext.disabled = p >= totalPages;
 
     const slot = document.getElementById(`pdf-page-slot-${p}`);
-    if (slot && this.pdfScrollerContainer) {
-      const targetTop = slot.offsetTop;
+    if (this.pdfScrollerContainer) {
+      const firstSlotH = parseFloat(this.pdfPagesTrack.firstElementChild ? this.pdfPagesTrack.firstElementChild.style.height : "600") || 600;
+      const fallbackTop = (p - 1) * (firstSlotH + 16);
+      const targetTop = (slot && slot.offsetTop > 0) ? slot.offsetTop : fallbackTop;
       if (smooth) {
         this.pdfScrollerContainer.scrollTo({ top: targetTop, behavior: "smooth" });
       } else {
         this.pdfScrollerContainer.scrollTop = targetTop;
       }
       this.pdfPagesTrack.querySelectorAll(".pdf-page-slot.is-active-page").forEach(s => {
-        s.classList.remove("is-active-page");
+        if (s !== slot) s.classList.remove("is-active-page");
       });
-      slot.classList.add("is-active-page");
+      if (slot) slot.classList.add("is-active-page");
       if (this._pdfCurrentDoc) {
         this.renderPdfCanvasPage(this._pdfCurrentDoc, p);
       }
@@ -1464,7 +1512,7 @@ export class GuitarMasterApp {
 
     this._programmaticPdfScrollTimer = setTimeout(() => {
       this._isProgrammaticPdfScroll = false;
-    }, 300);
+    }, 400);
   }
 
   setPdfZoom(multiplier, mode = "custom") {
@@ -1479,7 +1527,8 @@ export class GuitarMasterApp {
   pdfPageToBookPage(pdfPage, bookCategory = "lessonBook") {
     const raw = Math.max(1, parseInt(pdfPage, 10) || 1);
     if (this.customPdfUrls && this.customPdfUrls[bookCategory]) return raw;
-    const offset = bookCategory === "bonusWorkshop" ? 2 : 3;
+    if (bookCategory === "bonusWorkshop") return raw > 2 ? (raw - 2) : raw;
+    const offset = raw >= 34 ? 4 : 3;
     return raw > offset ? (raw - offset) : raw;
   }
 
@@ -3305,7 +3354,7 @@ export class GuitarMasterApp {
             <span class="acc-session-name" title="${this.escapeHtml(session.sessionTitle)}">${this.escapeHtml(session.sessionTitle)}</span>
             <span class="acc-session-count">${doneCount}/${totalExCount}</span>
           </button>
-          <div class="acc-session-body">
+          <div class="acc-session-body" ${isOpen ? '' : 'hidden style="display: none !important;"'}>
             ${topicsHtml}
           </div>
         </div>
@@ -3328,7 +3377,23 @@ export class GuitarMasterApp {
         } else {
           this.openGroupId = key;
         }
-        this.renderCourseBookCatalog(this.catalogSearchInput ? this.catalogSearchInput.value : "");
+        // Force-collapse every other session in the DOM immediately
+        this.sessionsAccordion.querySelectorAll(".acc-session").forEach(acc => {
+          const isThis = Boolean(this.openGroupId && acc.dataset.sessionKey === this.openGroupId);
+          acc.classList.toggle("is-open", isThis);
+          const trig = acc.querySelector(".acc-session-trigger");
+          if (trig) trig.setAttribute("aria-expanded", isThis ? "true" : "false");
+          const body = acc.querySelector(".acc-session-body");
+          if (body) {
+            if (isThis) {
+              body.removeAttribute("hidden");
+              body.style.removeProperty("display");
+            } else {
+              body.setAttribute("hidden", "");
+              body.style.display = "none";
+            }
+          }
+        });
       });
     });
 
@@ -3607,14 +3672,30 @@ export class GuitarMasterApp {
     this.loopMeasureIndex = 0;
 
     // Top bar breadcrumb & Guide drawer updates
+    const isFreeMet = Boolean(
+      this.appMode === "metronome" ||
+      found.bookCategory === "freeMetronome" ||
+      found.id === "free-metronome" ||
+      found.isMetronomeOnly
+    );
+
     if (this.navCrumbSession) {
-      const bookShort = found.bookCategory === "bonusWorkshop"
-        ? `Workshop ${found.sessionNumber || ''}`
-        : (found.bookCategory === "freeMetronome" ? "Free Studio" : `Session ${found.sessionNumber || ''}`);
-      this.navCrumbSession.textContent = bookShort.trim();
+      const sep = this.navCrumbSession.parentElement ? this.navCrumbSession.parentElement.querySelector(".crumb-sep") : null;
+      if (isFreeMet) {
+        this.navCrumbSession.textContent = "";
+        this.navCrumbSession.style.display = "none";
+        if (sep) sep.style.display = "none";
+      } else {
+        this.navCrumbSession.style.display = "";
+        if (sep) sep.style.display = "";
+        const bookShort = found.bookCategory === "bonusWorkshop"
+          ? `Workshop ${found.sessionNumber || ''}`
+          : `Session ${found.sessionNumber || ''}`;
+        this.navCrumbSession.textContent = bookShort.trim();
+      }
     }
     if (this.studioExerciseTitle) {
-      this.studioExerciseTitle.textContent = this.currentExercise.title;
+      this.studioExerciseTitle.textContent = isFreeMet ? "Practice Metronome" : this.currentExercise.title;
     }
     if (this.studioExerciseTopicBadge) {
       this.studioExerciseTopicBadge.textContent = `${found.bookName} \u00B7 ${found.sessionTitle || ''} \u00B7 ${found.topicTitle || ''}`;
@@ -5545,7 +5626,22 @@ export class GuitarMasterApp {
     this._lastIsNarrowDrawer = window.innerWidth <= 1024;
     this._lastPdfRenderWidth = window.innerWidth;
     let resizeSyncTimer = null;
+    let lockedTargetPageOnResize = null;
+
+    const preparePdfForViewportShift = () => {
+      // Disconnect observer synchronously so rotation cannot trigger observer on intermediate page
+      if (this._pdfActiveScrollObserver) {
+        this._pdfActiveScrollObserver.disconnect();
+      }
+      this._isProgrammaticPdfScroll = true;
+      clearTimeout(this._programmaticPdfScrollTimer);
+      if (!lockedTargetPageOnResize) {
+        lockedTargetPageOnResize = this.activePdfPageRef || this.pdfCurrentPage || 1;
+      }
+    };
+
     window.addEventListener("resize", () => {
+      preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
         const activeTag = document.activeElement ? document.activeElement.tagName : "";
@@ -5570,23 +5666,26 @@ export class GuitarMasterApp {
           this._pdfCurrentDoc
         ) {
           this._lastPdfRenderWidth = window.innerWidth;
-          this._isProgrammaticPdfScroll = true;
-          clearTimeout(this._programmaticPdfScrollTimer);
-          const restorePage = this.activePdfPageRef || this.pdfCurrentPage || 1;
+          const restorePage = lockedTargetPageOnResize || this.activePdfPageRef || this.pdfCurrentPage || 1;
+          lockedTargetPageOnResize = null;
           this.buildPdfPagesTrack(this._pdfCurrentDoc, restorePage, ++this._pdfLoadSeq);
+        } else {
+          lockedTargetPageOnResize = null;
         }
       }, 200);
     });
 
     window.addEventListener("orientationchange", () => {
+      preparePdfForViewportShift();
       clearTimeout(resizeSyncTimer);
       resizeSyncTimer = setTimeout(() => {
         if ((this.paneMode === "pdf" || this.paneMode === "split") && this._pdfCurrentDoc) {
           this._lastPdfRenderWidth = window.innerWidth;
-          this._isProgrammaticPdfScroll = true;
-          clearTimeout(this._programmaticPdfScrollTimer);
-          const restorePage = this.activePdfPageRef || this.pdfCurrentPage || 1;
+          const restorePage = lockedTargetPageOnResize || this.activePdfPageRef || this.pdfCurrentPage || 1;
+          lockedTargetPageOnResize = null;
           this.buildPdfPagesTrack(this._pdfCurrentDoc, restorePage, ++this._pdfLoadSeq);
+        } else {
+          lockedTargetPageOnResize = null;
         }
       }, 250);
     });

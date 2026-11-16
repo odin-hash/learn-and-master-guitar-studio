@@ -472,6 +472,11 @@ button, input, select {
   display: block;
 }
 
+.acc-session:not(.is-open) > .acc-session-body,
+.acc-session-body[hidden] {
+  display: none !important;
+}
+
 .acc-topic-label {
   display: flex;
   align-items: center;
@@ -1090,12 +1095,26 @@ button.acc-topic-btn.is-active-topic {
   padding: 2px 0 4px;
 }
 
-.fretboard-header-row {
-  display: grid;
-  align-items: center;
-  height: 22px;
-  margin-bottom: 4px;
+.fretboard-table {
   width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.fretboard-header-row th {
+  height: 22px;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-hairline);
   box-sizing: border-box;
 }
 
@@ -1103,8 +1122,8 @@ button.acc-topic-btn.is-active-topic {
   font-size: 10px;
   font-weight: 500;
   color: var(--text-muted);
-  text-align: left;
-  padding-left: 8px;
+  text-align: left !important;
+  padding-left: 8px !important;
 }
 
 .fret-col-title {
@@ -1113,9 +1132,6 @@ button.acc-topic-btn.is-active-topic {
   font-weight: 500;
   color: var(--text-muted);
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .fret-col-title.nut-title {
@@ -1143,33 +1159,10 @@ button.acc-topic-btn.is-active-topic {
 }
 
 .fret-string-row {
-  display: grid;
-  align-items: center;
   height: 28px;
   min-height: 28px;
   max-height: 28px;
-  width: 100%;
   box-sizing: border-box;
-  position: relative;
-}
-
-/* Realistic crisp acoustic string hairline vertically centered at 50% */
-.fret-string-row::before {
-  content: "";
-  position: absolute;
-  left: 92px;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 1px;
-  background: rgba(24, 24, 27, 0.2);
-  pointer-events: none;
-}
-
-.fret-string-row[data-string="5"]::before,
-.fret-string-row[data-string="6"]::before {
-  height: 1.5px;
-  background: rgba(24, 24, 27, 0.3);
 }
 
 .string-title {
@@ -1180,9 +1173,9 @@ button.acc-topic-btn.is-active-topic {
   padding-left: 8px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-hairline);
-  height: 100%;
-  display: flex;
-  align-items: center;
+  height: 28px;
+  vertical-align: middle;
+  text-align: left;
   z-index: 2;
   box-sizing: border-box;
 }
@@ -1191,13 +1184,34 @@ button.acc-topic-btn.is-active-topic {
   height: 28px;
   min-height: 28px;
   max-height: 28px;
+  padding: 0;
+  margin: 0;
   box-sizing: border-box;
   border-right: 1px solid var(--border-hairline);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  z-index: 3;
+  vertical-align: middle;
+  text-align: center;
+  z-index: 2;
+}
+
+/* Realistic crisp acoustic string hairline across every fret cell vertically centered at 50% */
+.fret-space::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+  background: rgba(24, 24, 27, 0.2);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fret-string-row[data-string="5"] .fret-space::before,
+.fret-string-row[data-string="6"] .fret-space::before {
+  height: 1.5px;
+  background: rgba(24, 24, 27, 0.3);
 }
 
 .fret-space.nut-space {
