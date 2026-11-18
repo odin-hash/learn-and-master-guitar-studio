@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "updatedAt": "2026-11-18T15:03:30.027Z",
+  "updatedAt": "2026-11-18T15:07:37.814Z",
   "repo": "odin-hash/learn-and-master-guitar-studio",
   "branch": "main",
   "modelPreference": "auto",
@@ -40473,7 +40473,7 @@
       "targetExerciseId": "bw-w2-song-london",
       "modelUsed": "manual-editor",
       "pageTitle": "Bonus Repertoire Songs - London Bridge & Skip to My Lou (Bonus Book p. 18-19)",
-      "extractedAt": "2026-11-18T15:03:15.646Z",
+      "extractedAt": "2026-11-18T15:07:24.809Z",
       "mathWarnings": [],
       "exercises": [
         {
@@ -41198,7 +41198,7 @@
                   "string": 2,
                   "fret": 1,
                   "finger": 1,
-                  "pick": "Up",
+                  "pick": "Down",
                   "duration": 2,
                   "isDotted": false,
                   "tieFromPrev": false,
@@ -41255,7 +41255,7 @@
           "topicTitle": "Bonus Repertoire Songs - London Bridge & Skip to My Lou (Bonus Book p. 18-19)",
           "pdfPage": 18,
           "exerciseNumberInTopic": 1,
-          "topicPdfPage": 19,
+          "topicPdfPage": 18,
           "bookCategory": "bonusWorkshop",
           "bookName": "Bonus Workshop",
           "sessionNumber": 2,
@@ -42061,7 +42061,7 @@
                   "string": 2,
                   "fret": 1,
                   "preferFlat": false,
-                  "pick": "Up",
+                  "pick": "Down",
                   "tieToNext": false,
                   "tieFromPrev": false,
                   "durationBeats": 2,
